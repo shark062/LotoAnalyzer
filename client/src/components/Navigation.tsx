@@ -99,7 +99,7 @@ export default function Navigation() {
         <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-center space-x-8">
             {/* Logo Central */}
-            <Link href="/" className="flex items-center space-x-4">
+            <Link href="/" className="flex items-center justify-center">
               <div className="w-16 h-16">
                 <img 
                   src={sharkLogo} 
@@ -112,7 +112,6 @@ export default function Navigation() {
                 />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">SHARK LOTERIAS</h1>
               </div>
             </Link>
 
