@@ -95,16 +95,16 @@ export default function Navigation() {
   return (
     <>
       {/* Header */}
-      <header className="relative z-50 bg-gradient-to-r from-purple-600 to-purple-800 text-white">
+      <header className="relative z-50 bg-transparent text-white">
         <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-center space-x-8">
             {/* Logo Central */}
             <Link href="/" className="flex items-center justify-center">
-              <div className="w-32 h-32 bg-white/10 rounded-full p-2 backdrop-blur-sm">
+              <div className="w-32 h-32">
                 <img 
                   src={sharkLogo} 
                   alt="Shark Loterias Logo" 
-                  className="w-full h-full object-contain filter drop-shadow-lg"
+                  className="w-full h-full object-contain"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     e.currentTarget.parentElement!.innerHTML = '<span class="text-4xl">🦈</span>';
