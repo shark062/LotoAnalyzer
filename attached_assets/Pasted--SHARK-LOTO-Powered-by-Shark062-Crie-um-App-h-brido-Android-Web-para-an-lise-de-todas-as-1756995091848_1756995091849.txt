@@ -1,0 +1,159 @@
+---
+
+SHARK LOTO 💵 – Powered by Shark062
+
+Crie um App híbrido (Android/Web) para análise de todas as modalidades da loteria federal (Mega-Sena, Lotofácil, Lotomania, Super Sete, +Milionária, Quina, Dupla Sena e etc.), puxando dados reais e oficiais do site da Loterias Caixa.
+
+O App deve ter dashboard inicial limpa e dinâmica, exibindo apenas:
+
+Os próximos sorteios (com data, horário, concurso e tempo restante).
+
+Valor da premiação acumulada.
+
+Título do app: SHARK LOTO 💵.
+
+Rodapé com assinatura: “Powered by Shark062” + frase motivacional explicando que o app é capaz de analisar, aprender e maximizar as chances de acerto.
+
+
+
+---
+
+Funcionalidades principais
+
+1. Menu principal (3 linhas no canto superior direito do cabeçalho)
+
+Exibir ícone + nome de cada função.
+
+Menu abre sobre a dashboard e ao selecionar leva para a função desejada.
+
+Layout adaptável para qualquer dispositivo (responsivo).
+
+
+
+2. Mapa de Calor (🔥❄️♨️)
+
+Mostrar frequência de cada dezena por modalidade.
+
+Destaque em cores:
+
+🔥 Números quentes (mais saem)
+
+❄️ Números frios (quase não saem)
+
+♨️ Números mornos (média frequência)
+
+
+Opção de análise dos últimos 20 concursos para aumentar precisão.
+
+Correção de erros de exibição (não pode dar “indisponível”).
+
+
+
+3. Gerador de Jogos
+
+Campo para escolher a modalidade (obrigatório).
+
+Campo para escolher quantidade de dezenas (0 a 60, ou digitável sem limite).
+
+Campo para quantidade de jogos a serem gerados simultaneamente (sem limite).
+
+Mistura automática de números quentes, frios e mistos 🔮 para aumentar assertividade.
+
+Correção do erro que impedia gerar jogos corretamente.
+
+
+
+4. Resultados
+
+Exibir jogos salvos e realizados.
+
+Mostrar quantidade de acertos, dezenas escolhidas, e destacar com cor as dezenas sorteadas.
+
+Exibir número do concurso, valor do prêmio, quantidade de ganhadores e valor ganho por faixa de acerto.
+
+Histórico de acertos de cada usuário.
+
+
+
+5. Análises Inteligentes
+
+IA integrada (API ChatGPT + N8n) para:
+
+Processar concursos do primeiro ao último já sorteado.
+
+Gerar estatísticas e probabilidades reais.
+
+Aprender continuamente com base nos jogos realizados pelo usuário.
+
+
+Exibir status de aprendizado do app em cada jogo.
+
+
+
+6. Informações
+
+Como jogar cada modalidade.
+
+Quantidade mínima e máxima de dezenas por aposta.
+
+Aviso de isenção de responsabilidade (“não nos responsabilizamos por perdas”).
+
+Função do app é maximizar chances, não garantir prêmios.
+
+
+
+7. Comemoração de Prêmios 🎉
+
+Quando usuário acertar:
+
+Efeito de balões e confetes descendo da tela.
+
+Mensagem de parabéns motivando a continuar jogando.
+
+
+
+
+8. Acesso rápido
+
+Atalho direto para gerar novos jogos.
+
+Acesso rápido para resultados anteriores.
+
+
+
+9. Segurança & Infraestrutura
+
+Sistema de criptografia de dados.
+
+Comunicação avançada via SSH.
+
+Servidor privado WebSocket para rodar o app 24h/dia, sem travar.
+
+Capacidade de funcionar online e offline.
+
+Tela de login individual para cada usuário.
+
+
+
+
+
+---
+
+Design e Estilo
+
+Tema futurista Cyberpunk 3050, com cores neon e contrastes modernos.
+
+Ícone do app deve ser a logo Shark enviada, harmonizando com o layout interno.
+
+Fundo interno com imagens estilizadas de dinheiro (cédulas, criptomoedas, fichas digitais).
+
+Experiência imersiva, intuitiva e interativa, melhorando a usabilidade.
+
+
+
+---
+
+Esse prompt final junta tudo: dados reais, dashboard limpa, mapas de calor corrigidos, gerador sem limite, IA integrada (GPT + N8n), aprendizado automático, tema Cyberpunk exclusivo, segurança de alto nível e celebração de prêmios.
+
+
+---
