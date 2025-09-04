@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useLotteryTypes, useUserStats, useRecentGames } from "@/hooks/useLotteryData";
+import { useLotteryTypes, useUserStats } from "@/hooks/useLotteryData";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -88,7 +88,6 @@ export default function AIAnalysis() {
   // Data queries
   const { data: lotteryTypes } = useLotteryTypes();
   const { data: userStats } = useUserStats();
-  const { data: recentGames, isLoading: gamesLoading } = useRecentGames();
 
   // AI Analysis queries
   const { data: patternAnalysis, isLoading: patternLoading, refetch: refetchPattern } = useQuery<AIAnalysisResult>({
