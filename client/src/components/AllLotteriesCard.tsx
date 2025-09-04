@@ -81,7 +81,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
   }
 
   return (
-    <Card className="border border-border/30 bg-card/20 backdrop-blur-sm hover:scale-105 transition-all duration-300 relative overflow-hidden group">
+    <Card className="border border-border/30 bg-black/20 backdrop-blur-sm hover:scale-105 transition-all duration-300 relative overflow-hidden group">
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:animate-scan"></div>
       <CardContent className="p-4 relative z-10">
         <div className="text-center mb-3">
