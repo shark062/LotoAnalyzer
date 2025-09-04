@@ -95,7 +95,7 @@ export default function Navigation() {
   return (
     <>
       {/* Header */}
-      <header className="relative z-50 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+      <header className="relative z-50 bg-gradient-to-r from-purple-600 to-purple-800 text-white">
         <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-center space-x-8">
             {/* Logo Central */}
