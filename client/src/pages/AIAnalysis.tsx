@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useLotteryTypes, useUserStats } from "@/hooks/useLotteryData";
+import { useLotteryTypes, useUserStats, useRecentGames } from "@/hooks/useLotteryData";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -23,7 +23,9 @@ import {
   Activity,
   Eye,
   Calculator,
-  Calendar
+  Calendar,
+  Trophy,
+  DollarSign
 } from "lucide-react";
 
 interface AIAnalysisResult {
@@ -67,6 +69,16 @@ interface StrategyRecommendation {
   expectedImprovement: string;
 }
 
+interface GameResult {
+  id: string;
+  lotteryId: string;
+  contestNumber: number;
+  numbersDrawn: number[];
+  prizeWon: string;
+  matches: number;
+  createdAt: string;
+}
+
 export default function AIAnalysis() {
   const [selectedLottery, setSelectedLottery] = useState<string>('megasena');
   const [activeTab, setActiveTab] = useState<'pattern' | 'prediction' | 'strategy'>('prediction');
@@ -76,6 +88,7 @@ export default function AIAnalysis() {
   // Data queries
   const { data: lotteryTypes } = useLotteryTypes();
   const { data: userStats } = useUserStats();
+  const { data: recentGames, isLoading: gamesLoading } = useRecentGames();
 
   // AI Analysis queries
   const { data: patternAnalysis, isLoading: patternLoading, refetch: refetchPattern } = useQuery<AIAnalysisResult>({
@@ -93,6 +106,10 @@ export default function AIAnalysis() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Mock AI analysis data for demonstration purposes if needed
+  const aiAnalysis = predictionAnalysis?.result || patternAnalysis?.result || strategyAnalysis?.result;
+
+
   // Generate new analysis mutation
   const analyzeWithAI = useMutation({
     mutationFn: async (analysisType: string) => {
@@ -107,7 +124,7 @@ export default function AIAnalysis() {
       if (analysisType === 'pattern') refetchPattern();
       else if (analysisType === 'prediction') refetchPrediction();
       else if (analysisType === 'strategy') refetchStrategy();
-      
+
       toast({
         title: "Análise Concluída",
         description: "A IA terminou a análise com sucesso.",
@@ -155,7 +172,7 @@ export default function AIAnalysis() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -178,7 +195,7 @@ export default function AIAnalysis() {
                 </div>
                 <div className="text-sm text-muted-foreground">Sistema IA</div>
               </div>
-              
+
               <div className="text-center">
                 <Activity className="h-12 w-12 mx-auto mb-3 text-primary" />
                 <div className="text-2xl font-bold text-primary neon-text" data-testid="learning-progress">
@@ -187,7 +204,7 @@ export default function AIAnalysis() {
                 <div className="text-sm text-muted-foreground">Aprendizado</div>
                 <Progress value={aiLearningProgress} className="mt-2 h-2" />
               </div>
-              
+
               <div className="text-center">
                 <Target className="h-12 w-12 mx-auto mb-3 text-accent" />
                 <div className="text-2xl font-bold text-accent neon-text" data-testid="accuracy-improvement">
@@ -274,11 +291,11 @@ export default function AIAnalysis() {
                               {pattern.frequency}% frequência
                             </Badge>
                           </div>
-                          
+
                           <div className="text-sm text-muted-foreground mb-3">
                             Última ocorrência: {pattern.lastOccurrence}
                           </div>
-                          
+
                           <div className="flex items-center justify-between">
                             <div className="flex flex-wrap gap-1">
                               <span className="text-xs text-muted-foreground mr-2">Próximos preditos:</span>
@@ -362,7 +379,7 @@ export default function AIAnalysis() {
                             <div className="text-xs text-muted-foreground">Confiança</div>
                           </div>
                         </div>
-                        
+
                         <div className="flex flex-wrap gap-2 mb-4">
                           {(predictionAnalysis.result.primaryPrediction || []).map((number: number, index: number) => (
                             <Badge
@@ -374,11 +391,11 @@ export default function AIAnalysis() {
                             </Badge>
                           ))}
                         </div>
-                        
+
                         <div className="text-sm text-muted-foreground mb-4">
                           <strong>Reasoning:</strong> {predictionAnalysis.result.reasoning}
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <Badge 
                             variant="outline" 
@@ -386,7 +403,7 @@ export default function AIAnalysis() {
                           >
                             Risco: {predictionAnalysis.result.riskLevel}
                           </Badge>
-                          
+
                           <Button
                             onClick={() => window.location.href = `/generator?lottery=${selectedLottery}&numbers=${(predictionAnalysis.result.primaryPrediction || []).join(',')}`}
                             className="bg-gradient-to-r from-secondary to-primary"
@@ -488,7 +505,7 @@ export default function AIAnalysis() {
                             {strategyAnalysis.result.riskLevel}
                           </Badge>
                         </div>
-                        
+
                         <p className="text-muted-foreground mb-6">
                           {strategyAnalysis.result.reasoning}
                         </p>
@@ -591,7 +608,7 @@ export default function AIAnalysis() {
               <Zap className="h-4 w-4 mr-2" />
               Ir para Gerador
             </Button>
-            
+
             <Button 
               onClick={() => window.location.href = '/heat-map'}
               variant="outline"
