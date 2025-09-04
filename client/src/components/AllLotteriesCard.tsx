@@ -209,7 +209,7 @@ export default function AllLotteriesCard() {
   }
 
   return (
-    <Card className="bg-card/20 backdrop-blur-sm">
+    <Card className="bg-black/20 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-primary flex items-center justify-between">
           <div className="flex items-center">
