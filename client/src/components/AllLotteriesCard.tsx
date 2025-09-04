@@ -235,22 +235,42 @@ export default function AllLotteriesCard() {
           <div className="flex items-center justify-between text-sm mb-2">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-accent" />
-              <span className="font-medium">Total em prêmios ativos:</span>
+              <span className="font-medium">Total em prêmios oficiais:</span>
             </div>
             <span className="text-lg font-bold text-accent animate-pulse">
-              R$ 150.000.000,00+
+              Dados da Caixa
             </span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Todas as modalidades disponíveis com análises em tempo real • Últimos dados atualizados
+          <p className="text-xs text-muted-foreground mb-3">
+            Todas as modalidades com dados oficiais da Caixa Econômica Federal • Atualizações automáticas
           </p>
-          <div className="flex items-center justify-center mt-3">
+          
+          {/* Action Buttons */}
+          <div className="flex items-center justify-between gap-3">
             <Button
               onClick={() => window.location.href = '/generator'}
-              className="bg-gradient-to-r from-primary to-secondary text-primary-foreground px-6 py-2 text-sm neon-border hover:animate-glow transition-all duration-300"
+              className="bg-gradient-to-r from-primary to-secondary text-primary-foreground px-4 py-2 text-sm neon-border hover:animate-glow transition-all duration-300"
             >
               <Zap className="h-4 w-4 mr-2" />
-              Gerar Jogos Inteligentes
+              Gerar Jogos
+            </Button>
+            
+            <Button
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/sync/latest-draws', { method: 'POST' });
+                  const data = await response.json();
+                  console.log('Sync completed:', data.message);
+                  window.location.reload();
+                } catch (error) {
+                  console.error('Sync error:', error);
+                }
+              }}
+              variant="outline"
+              size="sm"
+              className="text-xs border-accent/30 hover:bg-accent/10 transition-all duration-300"
+            >
+              🔄 Atualizar da Caixa
             </Button>
           </div>
         </div>

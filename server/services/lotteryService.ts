@@ -217,10 +217,54 @@ class LotteryService {
       
       const officialId = lotteryMapping[lotteryId];
       if (!officialId) return null;
+
+      // Fetch latest contest data from Loterias Caixa API
+      const response = await fetch(`https://servicebus2.caixa.gov.br/portaldeloterias/api/${officialId}/`);
       
-      // Note: Using a simplified approach since official API requires specific handling
-      // In production, you would use the official Caixa API endpoints
-      return null; // Fallback to calculated data for now
+      if (!response.ok) {
+        console.log(`Failed to fetch ${lotteryId} data from official API`);
+        return null;
+      }
+
+      const data = await response.json();
+      
+      if (data && data.numero) {
+        // Calculate next draw date based on draw days
+        const lottery = await storage.getLotteryType(lotteryId);
+        const nextDrawDate = lottery ? this.calculateNextDrawDate(lottery.drawDays || [], lottery.drawTime || '20:00') : new Date();
+        const now = new Date();
+        const timeDiff = nextDrawDate.getTime() - now.getTime();
+        
+        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+        // Store the latest draw in database for analysis
+        const drawData = {
+          lotteryId,
+          contestNumber: data.numero,
+          drawDate: new Date(data.dataApuracao || data.dataProximoConcurso),
+          drawnNumbers: data.listaDezenas || data.dezenas || [],
+          prizes: data.listaRateioPremio || []
+        };
+
+        try {
+          await storage.createLotteryDraw(drawData);
+        } catch (dbError) {
+          console.log('Could not save draw data to database:', dbError);
+        }
+
+        return {
+          contestNumber: data.numero + 1,
+          drawDate: nextDrawDate.toISOString(),
+          timeRemaining: { days: Math.max(0, days), hours: Math.max(0, hours), minutes: Math.max(0, minutes) },
+          estimatedPrize: data.valorEstimadoProximoConcurso ? 
+            `R$ ${parseFloat(data.valorEstimadoProximoConcurso).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` :
+            this.getEstimatedPrize(lotteryId)
+        };
+      }
+
+      return null;
     } catch (error) {
       console.error(`Error fetching real data for ${lotteryId}:`, error);
       return null;
@@ -295,8 +339,25 @@ class LotteryService {
 
   async syncLatestDraws(): Promise<void> {
     try {
-      // In a real implementation, this would sync with Caixa API
-      console.log('Syncing latest draws...');
+      console.log('Syncing latest draws from official Caixa API...');
+      
+      const lotteries = await storage.getLotteryTypes();
+      
+      for (const lottery of lotteries) {
+        try {
+          const realData = await this.fetchRealLotteryData(lottery.id);
+          if (realData) {
+            console.log(`✓ Synced ${lottery.displayName} - Contest #${realData.contestNumber - 1}`);
+          }
+          
+          // Small delay to avoid API rate limits
+          await new Promise(resolve => setTimeout(resolve, 500));
+        } catch (error) {
+          console.error(`Error syncing ${lottery.id}:`, error);
+        }
+      }
+      
+      console.log('Sync completed');
     } catch (error) {
       console.error('Error syncing latest draws:', error);
     }
@@ -304,11 +365,80 @@ class LotteryService {
 
   async updateNumberFrequencies(lotteryId: string): Promise<void> {
     try {
-      // In a real implementation, this would update frequencies based on latest draws
-      console.log(`Updating frequencies for ${lotteryId}...`);
+      console.log(`Updating frequencies for ${lotteryId} based on real data...`);
+      
+      // Get latest draws from database
+      const draws = await storage.getLatestDraws(lotteryId, 100); // Last 100 draws for good frequency analysis
+      
+      if (draws.length > 0) {
+        const lottery = await storage.getLotteryType(lotteryId);
+        if (!lottery) return;
+
+        // Calculate frequencies from real draw data
+        const frequencies: { [key: number]: number } = {};
+        
+        // Initialize all numbers with 0 frequency
+        for (let i = 1; i <= lottery.totalNumbers; i++) {
+          frequencies[i] = 0;
+        }
+        
+        // Count frequencies from actual draws
+        draws.forEach(draw => {
+          if (draw.drawnNumbers && draw.drawnNumbers.length > 0) {
+            draw.drawnNumbers.forEach(num => {
+              if (typeof num === 'number' && num >= 1 && num <= lottery.totalNumbers) {
+                frequencies[num]++;
+              }
+            });
+          }
+        });
+
+        // Store updated frequencies
+        const totalDraws = draws.length;
+        for (const [number, count] of Object.entries(frequencies)) {
+          const frequency = totalDraws > 0 ? (count / totalDraws) : 0;
+          
+          try {
+            await storage.updateNumberFrequency({
+              lotteryId,
+              number: parseInt(number),
+              frequency,
+              lastDrawn: this.findLastDrawnDate(parseInt(number), draws),
+              drawsSinceLastSeen: this.countDrawsSinceLastSeen(parseInt(number), draws)
+            });
+          } catch (dbError) {
+            // Continue with next number if database error
+            continue;
+          }
+        }
+        
+        console.log(`✓ Updated frequencies for ${lotteryId} based on ${totalDraws} real draws`);
+      } else {
+        console.log(`No draw data available for ${lotteryId} frequency calculation`);
+      }
     } catch (error) {
       console.error('Error updating frequencies:', error);
     }
+  }
+
+  private findLastDrawnDate(number: number, draws: any[]): Date | null {
+    for (const draw of draws) {
+      if (draw.drawnNumbers && draw.drawnNumbers.includes(number)) {
+        return new Date(draw.drawDate);
+      }
+    }
+    return null;
+  }
+
+  private countDrawsSinceLastSeen(number: number, draws: any[]): number {
+    let count = 0;
+    for (const draw of draws) {
+      if (draw.drawnNumbers && draw.drawnNumbers.includes(number)) {
+        return count;
+      }
+      count++;
+    }
+    return count;
   }
 }
 

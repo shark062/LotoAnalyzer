@@ -263,6 +263,95 @@ class Storage {
     }
   }
 
+  async createLotteryDraw(drawData: any): Promise<void> {
+    try {
+      if (!this.db) {
+        console.log('Database not available for storing draw data');
+        return;
+      }
+
+      // Check if draw already exists
+      const existing = await this.db
+        .select()
+        .from(schema.lotteryDraws)
+        .where(
+          and(
+            eq(schema.lotteryDraws.lotteryId, drawData.lotteryId),
+            eq(schema.lotteryDraws.contestNumber, drawData.contestNumber)
+          )
+        )
+        .limit(1);
+
+      if (existing.length > 0) {
+        console.log(`Draw ${drawData.lotteryId} #${drawData.contestNumber} already exists`);
+        return;
+      }
+
+      await this.db.insert(schema.lotteryDraws).values({
+        lotteryId: drawData.lotteryId,
+        contestNumber: drawData.contestNumber,
+        drawDate: drawData.drawDate,
+        drawnNumbers: drawData.drawnNumbers,
+        prizes: drawData.prizes || []
+      });
+
+      console.log(`✓ Stored draw ${drawData.lotteryId} #${drawData.contestNumber}`);
+    } catch (error) {
+      console.error('Error creating lottery draw:', error);
+    }
+  }
+
+  async updateNumberFrequency(data: {
+    lotteryId: string;
+    number: number;
+    frequency: number;
+    lastDrawn: Date | null;
+    drawsSinceLastSeen: number;
+  }): Promise<void> {
+    try {
+      if (!this.db) return;
+
+      // Try to update existing frequency record
+      const existing = await this.db
+        .select()
+        .from(schema.numberFrequencies)
+        .where(
+          and(
+            eq(schema.numberFrequencies.lotteryId, data.lotteryId),
+            eq(schema.numberFrequencies.number, data.number)
+          )
+        )
+        .limit(1);
+
+      if (existing.length > 0) {
+        await this.db
+          .update(schema.numberFrequencies)
+          .set({
+            frequency: data.frequency,
+            lastDrawn: data.lastDrawn,
+            drawsSinceLastSeen: data.drawsSinceLastSeen,
+            updatedAt: new Date()
+          })
+          .where(
+            and(
+              eq(schema.numberFrequencies.lotteryId, data.lotteryId),
+              eq(schema.numberFrequencies.number, data.number)
+            )
+          );
+      } else {
+        await this.db.insert(schema.numberFrequencies).values({
+          lotteryId: data.lotteryId,
+          number: data.number,
+          frequency: data.frequency,
+          lastDrawn: data.lastDrawn,
+          drawsSinceLastSeen: data.drawsSinceLastSeen
+        });
+      }
+    } catch (error) {
+      console.error('Error updating number frequency:', error);
+    }
+  }
+
   async createLotteryDraw(draw: InsertLotteryDraw): Promise<LotteryDraw> {
     try {
       if (!this.db) {

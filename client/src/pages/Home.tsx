@@ -126,9 +126,18 @@ export default function Home() {
           <h2 className="text-3xl font-bold neon-text text-primary mb-2" data-testid="dashboard-title">
             Dashboard Principal
           </h2>
-          <p className="text-muted-foreground">
-            Análise inteligente das loterias federais em tempo real
+          <p className="text-muted-foreground mb-2">
+            Análise inteligente das loterias federais com dados oficiais
           </p>
+          <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center gap-1 text-xs bg-neon-green/10 text-neon-green px-2 py-1 rounded-full border border-neon-green/30">
+              <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
+              Dados Oficiais Caixa
+            </div>
+            <div className="flex items-center gap-1 text-xs bg-secondary/10 text-secondary px-2 py-1 rounded-full border border-secondary/30">
+              🤖 IA Ativa
+            </div>
+          </div>
         </div>
 
         {/* Quick Actions */}

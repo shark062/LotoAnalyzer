@@ -230,10 +230,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/sync/latest-draws', async (req, res) => {
     try {
       await lotteryService.syncLatestDraws();
-      res.json({ message: "Latest draws synchronized successfully" });
+      
+      // Update frequencies for all lotteries after sync
+      const lotteries = await storage.getLotteryTypes();
+      for (const lottery of lotteries) {
+        try {
+          await lotteryService.updateNumberFrequencies(lottery.id);
+        } catch (error) {
+          console.error(`Error updating frequencies for ${lottery.id}:`, error);
+        }
+      }
+      
+      res.json({ message: "Latest draws and frequencies synchronized successfully from official sources" });
     } catch (error) {
       console.error("Error syncing latest draws:", error);
-      res.json({ message: "Synchronization completed" }); // Prevent UI errors
+      res.json({ message: "Synchronization completed with some errors" });
     }
   });
 
@@ -242,15 +253,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Simplified server without WebSocket complications
   console.log('HTTP server initialized without WebSocket to avoid connection issues');
 
-  // Background data updates without WebSocket
+  // Initial sync on server startup
+  setTimeout(async () => {
+    try {
+      console.log('🚀 Starting initial sync with official Caixa data...');
+      await lotteryService.syncLatestDraws();
+      console.log('✓ Initial sync completed');
+    } catch (error) {
+      console.error('Initial sync error:', error);
+    }
+  }, 5000); // Wait 5 seconds after server start
+
+  // Background data updates from official sources
   setInterval(async () => {
     try {
+      console.log('🔄 Syncing with official Caixa API...');
       await lotteryService.syncLatestDraws();
-      console.log('Background data update completed');
+      console.log('✓ Background sync completed');
     } catch (error) {
-      console.error('Background update error:', error);
+      console.error('Background sync error:', error);
     }
-  }, 10 * 60 * 1000); // Every 10 minutes
+  }, 30 * 60 * 1000); // Every 30 minutes
 
   return httpServer;
 }
