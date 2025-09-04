@@ -210,7 +210,7 @@ export default function AllLotteriesCard() {
   }
 
   return (
-    <Card className="neon-border bg-transparent backdrop-blur-sm">
+    <Card className="bg-transparent backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-primary flex items-center justify-between">
           <div className="flex items-center">
