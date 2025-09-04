@@ -148,6 +148,32 @@ class Storage {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
+      {
+        id: 'diadesore',
+        name: 'diadesore',
+        displayName: 'Dia de Sorte',
+        minNumbers: 7,
+        maxNumbers: 15,
+        totalNumbers: 31,
+        drawDays: ['Tuesday', 'Thursday', 'Saturday'],
+        drawTime: '20:00',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 'federal',
+        name: 'federal',
+        displayName: 'Loteria Federal',
+        minNumbers: 5,
+        maxNumbers: 5,
+        totalNumbers: 100000,
+        drawDays: ['Wednesday', 'Saturday'],
+        drawTime: '19:00',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ];
   }
 
@@ -217,6 +243,23 @@ class Storage {
     }
     
     return games;
+  }
+
+  async insertLotteryType(lottery: any): Promise<void> {
+    try {
+      if (!this.db) {
+        console.log('Database not available for storing lottery type');
+        return;
+      }
+
+      await this.db.insert(schema.lotteryTypes).values(lottery);
+    } catch (error) {
+      // Ignore duplicate key errors
+      if (error instanceof Error && error.message.includes('duplicate key')) {
+        return;
+      }
+      throw error;
+    }
   }
 
   async getLotteryTypes(): Promise<LotteryType[]> {

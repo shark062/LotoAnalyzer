@@ -29,11 +29,11 @@ class LotteryService {
     try {
       // Check if lottery types already exist
       const existingLotteries = await storage.getLotteryTypes();
-      if (existingLotteries.length > 0) {
+      if (existingLotteries.length > 6) {
         return;
       }
 
-      // Initialize default lottery types
+      // Complete list of all official Brazilian lottery types
       const defaultLotteries = [
         {
           id: 'megasena',
@@ -45,6 +45,8 @@ class LotteryService {
           drawDays: ['Wednesday', 'Saturday'],
           drawTime: '20:00',
           isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
         {
           id: 'lotofacil',
@@ -56,6 +58,8 @@ class LotteryService {
           drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
           drawTime: '20:00',
           isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
         {
           id: 'quina',
@@ -67,6 +71,8 @@ class LotteryService {
           drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
           drawTime: '20:00',
           isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
         {
           id: 'lotomania',
@@ -78,6 +84,8 @@ class LotteryService {
           drawDays: ['Tuesday', 'Thursday', 'Saturday'],
           drawTime: '20:00',
           isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
         {
           id: 'duplasena',
@@ -89,6 +97,8 @@ class LotteryService {
           drawDays: ['Tuesday', 'Thursday', 'Saturday'],
           drawTime: '20:00',
           isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
         {
           id: 'supersete',
@@ -100,6 +110,8 @@ class LotteryService {
           drawDays: ['Monday', 'Wednesday', 'Friday'],
           drawTime: '15:00',
           isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
         {
           id: 'milionaria',
@@ -111,6 +123,8 @@ class LotteryService {
           drawDays: ['Wednesday', 'Saturday'],
           drawTime: '20:00',
           isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
         {
           id: 'timemania',
@@ -122,11 +136,48 @@ class LotteryService {
           drawDays: ['Tuesday', 'Thursday', 'Saturday'],
           drawTime: '20:00',
           isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'diadesore',
+          name: 'diadesore',
+          displayName: 'Dia de Sorte',
+          minNumbers: 7,
+          maxNumbers: 15,
+          totalNumbers: 31,
+          drawDays: ['Tuesday', 'Thursday', 'Saturday'],
+          drawTime: '20:00',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'federal',
+          name: 'federal',
+          displayName: 'Loteria Federal',
+          minNumbers: 5,
+          maxNumbers: 5,
+          totalNumbers: 100000,
+          drawDays: ['Wednesday', 'Saturday'],
+          drawTime: '19:00',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ];
 
-      // Note: In a real implementation, you would insert these into the database
-      console.log('Lottery types would be initialized:', defaultLotteries);
+      // Insert lottery types into the database
+      for (const lottery of defaultLotteries) {
+        try {
+          await storage.insertLotteryType(lottery);
+          console.log(`✓ Inserted lottery type: ${lottery.displayName}`);
+        } catch (error) {
+          console.log(`Lottery type ${lottery.id} may already exist`);
+        }
+      }
+      
+      console.log('All lottery types initialized successfully');
     } catch (error) {
       console.error('Error initializing lottery types:', error);
     }
@@ -212,7 +263,9 @@ class LotteryService {
         'duplasena': 'duplasena',
         'supersete': 'supersete',
         'milionaria': 'milionaria',
-        'timemania': 'timemania'
+        'timemania': 'timemania',
+        'diadesore': 'diadesore',
+        'federal': 'federal'
       };
       
       const officialId = lotteryMapping[lotteryId];
@@ -281,7 +334,9 @@ class LotteryService {
       'duplasena': 'R$ 600.000,00',
       'supersete': 'R$ 3.000.000,00',
       'milionaria': 'R$ 10.000.000,00',
-      'timemania': 'R$ 2.000.000,00'
+      'timemania': 'R$ 2.000.000,00',
+      'diadesore': 'R$ 500.000,00',
+      'federal': 'R$ 500.000,00'
     };
     return prizesMap[lotteryId] || 'R$ 500.000,00';
   }

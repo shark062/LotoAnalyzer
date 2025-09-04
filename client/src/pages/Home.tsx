@@ -113,7 +113,9 @@ export default function Home() {
     { id: 'duplasena', name: 'Dupla Sena', icon: '👑', color: 'from-accent to-neon-gold' },
     { id: 'supersete', name: 'Super Sete', icon: '🚀', color: 'from-secondary to-neon-purple' },
     { id: 'milionaria', name: '+Milionária', icon: '➕', color: 'from-neon-gold to-accent' },
-    { id: 'timemania', name: 'Timemania', icon: '🎁', color: 'from-neon-pink to-destructive' },
+    { id: 'timemania', name: 'Timemania', icon: '🎁', color: 'from-destructive to-neon-pink' },
+    { id: 'diadesore', name: 'Dia de Sorte', icon: '🌟', color: 'from-neon-cyan to-primary' },
+    { id: 'federal', name: 'Federal', icon: '🏛️', color: 'from-primary to-accent-neon-pink to-destructive' },
   ];
 
   return (

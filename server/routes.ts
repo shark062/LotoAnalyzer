@@ -33,6 +33,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Lottery data routes
   app.get('/api/lotteries', async (req, res) => {
     try {
+      // Initialize lottery types if needed
+      await lotteryService.initializeLotteryTypes();
+      
       const lotteries = await storage.getLotteryTypes();
       res.json(lotteries);
     } catch (error) {

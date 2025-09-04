@@ -161,8 +161,19 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {lotteries.map((lottery, index) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {[
+              { name: 'Mega-Sena', icon: '💎', color: 'text-neon-green' },
+              { name: 'Lotofácil', icon: '⭐', color: 'text-neon-purple' },
+              { name: 'Quina', icon: '🪙', color: 'text-neon-pink' },
+              { name: 'Lotomania', icon: '♾️', color: 'text-neon-cyan' },
+              { name: 'Dupla Sena', icon: '👑', color: 'text-neon-gold' },
+              { name: 'Super Sete', icon: '🚀', color: 'text-secondary' },
+              { name: '+Milionária', icon: '➕', color: 'text-accent' },
+              { name: 'Timemania', icon: '🎁', color: 'text-destructive' },
+              { name: 'Dia de Sorte', icon: '🌟', color: 'text-primary' },
+              { name: 'Federal', icon: '🏛️', color: 'text-muted-foreground' },
+            ].map((lottery, index) => (
               <Card key={index} className="neon-border bg-card/30 hover:bg-card/50 transition-all duration-300 group">
                 <CardContent className="p-6 text-center">
                   <div className="text-4xl mb-3 group-hover:animate-pulse">
