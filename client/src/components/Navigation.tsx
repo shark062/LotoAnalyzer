@@ -95,69 +95,65 @@ export default function Navigation() {
   return (
     <>
       {/* Header */}
-      <header className="relative z-50 border-b border-border/50 bg-black/20 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-black/20">
+      <header className="relative z-50 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center justify-center space-x-8">
+            {/* Logo Central */}
+            <Link href="/" className="flex items-center space-x-4">
+              <div className="w-16 h-16">
                 <img 
                   src={sharkLogo} 
                   alt="Shark Loterias Logo" 
-                  className="w-10 h-10 object-contain"
+                  className="w-full h-full object-contain"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
-                    e.currentTarget.parentElement!.innerHTML = '<span class="text-2xl">🦈</span>';
+                    e.currentTarget.parentElement!.innerHTML = '<span class="text-4xl">🦈</span>';
                   }}
                 />
               </div>
               <div>
-                <h1 className="text-xl font-bold neon-text text-primary">SHARK LOTO 💵</h1>
-                <p className="text-xs text-muted-foreground font-mono">Powered by Shark062 ⚡</p>
+                <h1 className="text-2xl font-bold text-white">SHARK LOTERIAS</h1>
               </div>
             </Link>
 
+            {/* Navigation Buttons */}
+            <div className="hidden lg:flex items-center space-x-6">
+              <Button
+                variant="ghost"
+                className="text-white hover:bg-white/20 font-medium px-6 py-3 text-sm"
+                onClick={() => window.location.href = "/ai-analysis"}
+                data-testid="nav-analysis"
+              >
+                ANÁLISE
+              </Button>
+              <Button
+                variant="ghost"
+                className="text-white hover:bg-white/20 font-medium px-6 py-3 text-sm"
+                onClick={() => window.location.href = "/generator"}
+                data-testid="nav-play"
+              >
+                JOGAR
+              </Button>
+              <Button
+                variant="ghost"
+                className="text-white hover:bg-white/20 font-medium px-6 py-3 text-sm"
+                onClick={() => window.location.href = "/results"}
+                data-testid="nav-results"
+              >
+                RESULTADOS
+              </Button>
+            </div>
+
             {/* Mobile Menu Button */}
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="lg:hidden"
+              className="lg:hidden text-white hover:bg-white/20"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               data-testid="mobile-menu-toggle"
             >
-              <Menu className="h-4 w-4" />
-              <span className="ml-2 text-xs">Menu</span>
+              <Menu className="h-5 w-5" />
             </Button>
-
-            {/* Desktop Navigation Tabs */}
-            <div className="hidden lg:block">
-              <Tabs value={location === "/" ? "/" : location} className="w-auto">
-                <TabsList className="bg-black/20 backdrop-blur-sm border border-border/50 p-1">
-                  {navItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = location === item.href;
-                    
-                    return (
-                      <TabsTrigger 
-                        key={item.href}
-                        value={item.href}
-                        className={`flex items-center space-x-2 px-4 py-2 transition-all duration-300 ${
-                          isActive 
-                            ? "bg-black/20 text-primary-foreground shadow-lg neon-glow" 
-                            : "hover:bg-muted/50 hover:text-primary"
-                        }`}
-                        onClick={() => window.location.href = item.href}
-                        data-testid={`nav-tab-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span className="font-medium">{item.label}</span>
-                        <span className="text-xs opacity-70">{item.emoji}</span>
-                      </TabsTrigger>
-                    );
-                  })}
-                </TabsList>
-              </Tabs>
-            </div>
           </div>
 
           {/* Secondary Navigation Bar - Desktop Only */}
