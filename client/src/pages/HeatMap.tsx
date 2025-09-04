@@ -140,7 +140,7 @@ export default function HeatMap() {
 
         {/* Temperature Statistics */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <Card className="neon-border bg-gradient-to-br from-destructive/10 to-red-600/10">
+          <Card className="neon-border bg-black/20">
             <CardContent className="p-4 text-center">
               <div className="flex items-center justify-center mb-2">
                 <Flame className="h-6 w-6 text-destructive mr-2" />
@@ -153,7 +153,7 @@ export default function HeatMap() {
             </CardContent>
           </Card>
 
-          <Card className="neon-border bg-gradient-to-br from-amber-500/10 to-orange-500/10">
+          <Card className="neon-border bg-black/20">
             <CardContent className="p-4 text-center">
               <div className="flex items-center justify-center mb-2">
                 <Sun className="h-6 w-6 text-amber-500 mr-2" />
@@ -166,7 +166,7 @@ export default function HeatMap() {
             </CardContent>
           </Card>
 
-          <Card className="neon-border bg-gradient-to-br from-blue-600/10 to-primary/10">
+          <Card className="neon-border bg-black/20">
             <CardContent className="p-4 text-center">
               <div className="flex items-center justify-center mb-2">
                 <Snowflake className="h-6 w-6 text-primary mr-2" />
@@ -234,7 +234,7 @@ export default function HeatMap() {
               {leastFrequent.map((freq, index) => (
                 <div key={freq.number} className="flex items-center justify-between p-2 bg-black/20 rounded">
                   <div className="flex items-center space-x-3">
-                    <Badge variant="secondary" className="w-8 h-8 rounded-full flex items-center justify-center p-0 bg-primary text-primary-foreground">
+                    <Badge variant="secondary" className="w-8 h-8 rounded-full flex items-center justify-center p-0 bg-black/20 text-primary-foreground">
                       {freq.number}
                     </Badge>
                     <span className="font-mono">#{index + 1}</span>
@@ -269,7 +269,7 @@ export default function HeatMap() {
                       variant="secondary" 
                       className={`${
                         getNumberDetails(selectedNumber)?.temperature === 'hot' ? 'bg-destructive' :
-                        getNumberDetails(selectedNumber)?.temperature === 'warm' ? 'bg-amber-500' :
+                        getNumberDetails(selectedNumber)?.temperature === 'warm' ? 'bg-black/20' :
                         'bg-primary'
                       } text-white`}
                     >
@@ -299,7 +299,7 @@ export default function HeatMap() {
 
                   <Button 
                     onClick={() => window.location.href = `/generator?lottery=${selectedLottery}&number=${selectedNumber}`}
-                    className="w-full bg-gradient-to-r from-primary to-secondary"
+                    className="w-full bg-black/20"
                     data-testid="use-in-generator-button"
                   >
                     <Zap className="h-4 w-4 mr-2" />
@@ -321,7 +321,7 @@ export default function HeatMap() {
           <div className="inline-flex gap-4">
             <Button 
               onClick={() => window.location.href = '/generator'}
-              className="bg-gradient-to-r from-primary to-secondary text-primary-foreground px-6 py-3 hover:animate-glow"
+              className="bg-black/20"
               data-testid="go-to-generator-button"
             >
               <Zap className="h-4 w-4 mr-2" />
@@ -331,7 +331,7 @@ export default function HeatMap() {
             <Button 
               onClick={() => window.location.href = '/ai-analysis'}
               variant="outline"
-              className="border-secondary text-secondary hover:bg-secondary/10 px-6 py-3"
+              className="border-secondary text-secondary hover:bg-black/20 px-6 py-3"
               data-testid="ai-analysis-button"
             >
               <BarChart3 className="h-4 w-4 mr-2" />

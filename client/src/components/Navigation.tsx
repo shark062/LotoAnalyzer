@@ -100,7 +100,7 @@ export default function Navigation() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center animate-pulse overflow-hidden">
+              <div className="w-12 h-12 bg-black/20">
                 <img 
                   src={sharkLogo} 
                   alt="Shark Loterias Logo" 
@@ -143,7 +143,7 @@ export default function Navigation() {
                         value={item.href}
                         className={`flex items-center space-x-2 px-4 py-2 transition-all duration-300 ${
                           isActive 
-                            ? "bg-primary text-primary-foreground shadow-lg neon-glow" 
+                            ? "bg-black/20 text-primary-foreground shadow-lg neon-glow" 
                             : "hover:bg-muted/50 hover:text-primary"
                         }`}
                         onClick={() => window.location.href = item.href}
@@ -167,11 +167,11 @@ export default function Navigation() {
                 <div className="w-1.5 h-1.5 bg-neon-green rounded-full animate-pulse"></div>
                 <span className="font-mono">Dados Oficiais Caixa</span>
               </div>
-              <div className="flex items-center space-x-1 bg-secondary/10 text-secondary px-2 py-1 rounded-full border border-secondary/30">
+              <div className="flex items-center space-x-1 bg-black/20 text-secondary px-2 py-1 rounded-full border border-secondary/30">
                 <Brain className="w-3 h-3" />
                 <span className="font-mono">IA Ativa</span>
               </div>
-              <div className="flex items-center space-x-1 bg-accent/10 text-accent px-2 py-1 rounded-full border border-accent/30">
+              <div className="flex items-center space-x-1 bg-black/20 text-accent px-2 py-1 rounded-full border border-accent/30">
                 <BarChart3 className="w-3 h-3" />
                 <span className="font-mono">Análise em Tempo Real</span>
               </div>
@@ -196,7 +196,7 @@ export default function Navigation() {
             {/* Mobile Header */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-black/20">
                   <span className="text-xl">🦈</span>
                 </div>
                 <div>
@@ -226,7 +226,7 @@ export default function Navigation() {
                     href={item.href}
                     className={`flex items-center justify-between p-4 rounded-xl transition-all duration-300 group ${
                       isActive 
-                        ? "text-primary bg-primary/10 border border-primary/30" 
+                        ? "text-primary bg-black/20 border border-primary/30" 
                         : "text-muted-foreground hover:text-primary hover:bg-black/20 border border-transparent"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -234,7 +234,7 @@ export default function Navigation() {
                   >
                     <div className="flex items-center space-x-4">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        isActive ? 'bg-primary text-primary-foreground' : 'bg-muted/30 group-hover:bg-primary/20'
+                        isActive ? 'bg-black/20 text-primary-foreground' : 'bg-muted/30 group-hover:bg-black/20'
                       }`}>
                         <Icon className="h-5 w-5" />
                       </div>
@@ -268,7 +268,7 @@ export default function Navigation() {
                       variant={action.variant === "primary" ? "default" : action.variant as any}
                       className={`justify-start h-12 ${
                         action.variant === "primary" 
-                          ? "bg-gradient-to-r from-primary to-secondary" 
+                          ? "bg-black/20" 
                           : ""
                       }`}
                       data-testid={`mobile-quick-action-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
@@ -303,10 +303,10 @@ export default function Navigation() {
                 size="sm"
                 className={`w-full shadow-lg transition-all duration-300 group relative ${
                   action.variant === "primary" 
-                    ? "bg-gradient-to-r from-primary to-secondary hover:animate-glow" 
+                    ? "bg-black/20" 
                     : action.variant === "secondary"
-                    ? "bg-gradient-to-r from-accent to-neon-gold hover:animate-glow"
-                    : "border-2 border-dashed border-primary/30 hover:border-primary hover:bg-primary/10"
+                    ? "bg-black/20"
+                    : "border-2 border-dashed border-primary/30 hover:border-primary hover:bg-black/20"
                 }`}
                 data-testid={`quick-action-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
                 title={action.tooltip}

@@ -20,9 +20,9 @@ export default function HeatMapGrid({
     const temperature = freq?.temperature || 'cold';
     
     const styles = {
-      hot: "bg-gradient-to-br from-destructive to-red-600 text-white neon-text",
-      warm: "bg-gradient-to-br from-amber-500 to-orange-500 text-white",
-      cold: "bg-gradient-to-br from-blue-600 to-primary text-white"
+      hot: "bg-black/20",
+      warm: "bg-black/20",
+      cold: "bg-black/20"
     };
     
     return styles[temperature];
@@ -51,7 +51,7 @@ export default function HeatMapGrid({
             {[...Array(60)].map((_, i) => (
               <div 
                 key={i}
-                className="aspect-square bg-muted rounded-lg animate-pulse"
+                className="aspect-square bg-black/20 rounded-lg animate-pulse"
               />
             ))}
           </div>
@@ -94,7 +94,7 @@ export default function HeatMapGrid({
         {/* Legend */}
         <div className="flex justify-center space-x-6 text-sm">
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-gradient-to-br from-destructive to-red-600 rounded flex items-center justify-center text-xs">
+            <div className="w-4 h-4 bg-black/20">
               🔥
             </div>
             <span className="text-muted-foreground">
@@ -102,7 +102,7 @@ export default function HeatMapGrid({
             </span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-gradient-to-br from-amber-500 to-orange-500 rounded flex items-center justify-center text-xs">
+            <div className="w-4 h-4 bg-black/20">
               ♨️
             </div>
             <span className="text-muted-foreground">
@@ -110,7 +110,7 @@ export default function HeatMapGrid({
             </span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-gradient-to-br from-blue-600 to-primary rounded flex items-center justify-center text-xs">
+            <div className="w-4 h-4 bg-black/20">
               ❄️
             </div>
             <span className="text-muted-foreground">
@@ -122,19 +122,19 @@ export default function HeatMapGrid({
         {/* Statistics */}
         {frequencies.length > 0 && (
           <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-            <div className="bg-destructive/10 rounded-lg p-3">
+            <div className="bg-black/20 rounded-lg p-3">
               <div className="text-2xl font-bold text-destructive">
                 {frequencies.filter(f => f.temperature === 'hot').length}
               </div>
               <div className="text-xs text-muted-foreground">Números Quentes</div>
             </div>
-            <div className="bg-amber-500/10 rounded-lg p-3">
+            <div className="bg-black/20/10 rounded-lg p-3">
               <div className="text-2xl font-bold text-amber-500">
                 {frequencies.filter(f => f.temperature === 'warm').length}
               </div>
               <div className="text-xs text-muted-foreground">Números Mornos</div>
             </div>
-            <div className="bg-primary/10 rounded-lg p-3">
+            <div className="bg-black/20 rounded-lg p-3">
               <div className="text-2xl font-bold text-primary">
                 {frequencies.filter(f => f.temperature === 'cold').length}
               </div>

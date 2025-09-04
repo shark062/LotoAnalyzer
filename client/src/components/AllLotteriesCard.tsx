@@ -82,7 +82,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
 
   return (
     <Card className="border border-border/30 bg-black/20 backdrop-blur-sm hover:scale-105 transition-all duration-300 relative overflow-hidden group">
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:animate-scan"></div>
+      <div className="absolute inset-0 bg-black/20"></div>
       <CardContent className="p-4 relative z-10">
         <div className="text-center mb-3">
           <div className="text-3xl mb-2">{getEmojiForLottery(lottery.id)}</div>
@@ -127,7 +127,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
           <Button
             size="sm"
             variant="outline"
-            className="flex-1 text-xs hover:bg-primary/10"
+            className="flex-1 text-xs hover:bg-black/20"
             onClick={() => window.location.href = `/generator?lottery=${lottery.id}`}
             data-testid={`quick-generate-${lottery.id}`}
           >
@@ -137,7 +137,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
           <Button
             size="sm"
             variant="outline"
-            className="flex-1 text-xs hover:bg-accent/10"
+            className="flex-1 text-xs hover:bg-black/20"
             onClick={() => window.location.href = `/heat-map?lottery=${lottery.id}`}
             data-testid={`quick-heatmap-${lottery.id}`}
           >

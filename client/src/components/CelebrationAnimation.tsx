@@ -166,7 +166,7 @@ export default function CelebrationAnimation({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={onComplete}
-                  className="bg-gradient-to-r from-primary to-secondary text-primary-foreground px-6 py-3 rounded-lg hover:animate-glow transition-all duration-300 font-bold pointer-events-auto"
+                  className="bg-black/20"
                   data-testid="celebration-continue-button"
                 >
                   🎰 Gerar Novos Jogos
@@ -176,7 +176,7 @@ export default function CelebrationAnimation({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => window.location.href = '/results'}
-                  className="bg-gradient-to-r from-accent to-neon-gold text-accent-foreground px-6 py-3 rounded-lg hover:animate-glow transition-all duration-300 font-bold pointer-events-auto"
+                  className="bg-black/20"
                   data-testid="celebration-results-button"
                 >
                   📊 Ver Resultados

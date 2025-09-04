@@ -159,11 +159,11 @@ export default function Generator() {
     const mod = number % 3;
     
     if (strategy === 'hot' || (strategy === 'mixed' && mod === 0)) {
-      return "bg-gradient-to-br from-destructive to-red-600 text-white neon-text";
+      return "bg-black/20";
     } else if (strategy === 'cold' || (strategy === 'mixed' && mod === 2)) {
-      return "bg-gradient-to-br from-blue-600 to-primary text-white";
+      return "bg-black/20";
     } else {
-      return "bg-gradient-to-br from-amber-500 to-orange-500 text-white";
+      return "bg-black/20";
     }
   };
 
@@ -299,7 +299,7 @@ export default function Generator() {
                           key={strategy}
                           className={`cursor-pointer transition-all duration-200 ${
                             isSelected 
-                              ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary' 
+                              ? 'bg-black/20'
                               : 'bg-black/20 border-border hover:bg-black/20 hover:border-primary/50'
                           }`}
                           onClick={() => form.setValue('strategy', strategy)}
@@ -321,7 +321,7 @@ export default function Generator() {
                                 </div>
                               </div>
                               {isSelected && (
-                                <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                                <div className="w-4 h-4 rounded-full bg-black/20 flex items-center justify-center">
                                   <div className="w-2 h-2 rounded-full bg-white"></div>
                                 </div>
                               )}
@@ -335,7 +335,7 @@ export default function Generator() {
 
                 {/* Strategy Details */}
                 {form.watch('strategy') && (
-                  <Card className="bg-gradient-to-r from-accent/5 to-secondary/5 border-accent/30">
+                  <Card className="bg-black/20">
                     <CardContent className="p-4">
                       <h5 className="font-medium text-accent mb-3 flex items-center">
                         <Sparkles className="h-4 w-4 mr-2" />
@@ -375,7 +375,7 @@ export default function Generator() {
                               <span className="font-medium">Estratégia equilibrada</span>
                             </div>
                             <div className="grid grid-cols-3 gap-4 mb-3">
-                              <div className="text-center p-2 bg-destructive/10 rounded">
+                              <div className="text-center p-2 bg-black/20 rounded">
                                 <div className="font-bold text-destructive">40%</div>
                                 <div className="text-xs">🔥 Quentes</div>
                               </div>
@@ -383,7 +383,7 @@ export default function Generator() {
                                 <div className="font-bold text-amber-500">30%</div>
                                 <div className="text-xs">♨️ Mornos</div>
                               </div>
-                              <div className="text-center p-2 bg-primary/10 rounded">
+                              <div className="text-center p-2 bg-black/20 rounded">
                                 <div className="font-bold text-primary">30%</div>
                                 <div className="text-xs">❄️ Frios</div>
                               </div>
@@ -414,7 +414,7 @@ export default function Generator() {
                 <Button
                   type="submit"
                   disabled={isGenerating || !selectedLottery}
-                  className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground px-6 py-4 text-lg hover:animate-glow transition-all duration-300 font-bold"
+                  className="w-full bg-black/20"
                   data-testid="generate-games-button"
                 >
                   {isGenerating ? (
@@ -521,7 +521,7 @@ export default function Generator() {
               <Button 
                 onClick={() => window.location.href = '/heat-map'}
                 variant="outline"
-                className="border-primary text-primary hover:bg-primary/10"
+                className="border-primary text-primary hover:bg-black/20"
                 data-testid="view-heatmap-button"
               >
                 <Flame className="h-4 w-4 mr-2" />
@@ -530,7 +530,7 @@ export default function Generator() {
               
               <Button 
                 onClick={() => window.location.href = '/results'}
-                className="bg-gradient-to-r from-accent to-neon-gold"
+                className="bg-black/20"
                 data-testid="view-results-button"
               >
                 <Target className="h-4 w-4 mr-2" />

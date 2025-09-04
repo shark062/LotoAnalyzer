@@ -45,7 +45,7 @@ export default function Landing() {
         <div className="container mx-auto px-4 text-center relative z-10">
           {/* Logo and Title */}
           <div className="flex items-center justify-center space-x-4 mb-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center animate-float">
+            <div className="w-20 h-20 bg-black/20">
               <span className="text-4xl">🦈</span>
             </div>
             <div>
@@ -77,7 +77,7 @@ export default function Landing() {
             <Button
               onClick={() => window.location.href = '/api/login'}
               size="lg"
-              className="bg-gradient-to-r from-primary to-secondary text-primary-foreground px-8 py-4 text-xl hover:animate-glow transition-all duration-300 font-bold"
+              className="bg-black/20"
               data-testid="login-button"
             >
               <Zap className="h-6 w-6 mr-2" />
@@ -86,7 +86,7 @@ export default function Landing() {
             <Button
               variant="outline"
               size="lg"
-              className="border-secondary text-secondary hover:bg-secondary/10 px-8 py-4 text-xl"
+              className="border-secondary text-secondary hover:bg-black/20 px-8 py-4 text-xl"
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
               data-testid="learn-more-button"
             >
@@ -190,7 +190,7 @@ export default function Landing() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-r from-primary/10 to-secondary/10">
+      <section className="py-20 bg-black/20">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
             <h3 className="text-4xl font-bold text-foreground mb-6">
@@ -205,7 +205,7 @@ export default function Landing() {
             <Button
               onClick={() => window.location.href = '/api/login'}
               size="lg"
-              className="bg-gradient-to-r from-primary to-secondary text-primary-foreground px-12 py-6 text-2xl hover:animate-glow transition-all duration-300 font-bold"
+              className="bg-black/20"
               data-testid="cta-login-button"
             >
               <DollarSign className="h-8 w-8 mr-3" />
@@ -219,7 +219,7 @@ export default function Landing() {
       <footer className="border-t border-border/50 bg-black/20 backdrop-blur-sm py-12">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-black/20">
               <span className="text-sm">🦈</span>
             </div>
             <span className="font-bold text-primary neon-text">Powered by Shark062</span>

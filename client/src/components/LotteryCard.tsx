@@ -63,18 +63,18 @@ export default function LotteryCard({
       <Card className="bg-black/20 backdrop-blur-sm animate-pulse">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="h-6 bg-muted rounded w-32"></div>
-            <div className="w-8 h-8 bg-muted rounded-full"></div>
+            <div className="h-6 bg-black/20 rounded w-32"></div>
+            <div className="w-8 h-8 bg-black/20 rounded-full"></div>
           </div>
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="flex justify-between">
-                <div className="h-4 bg-muted rounded w-20"></div>
-                <div className="h-4 bg-muted rounded w-24"></div>
+                <div className="h-4 bg-black/20 rounded w-20"></div>
+                <div className="h-4 bg-black/20 rounded w-24"></div>
               </div>
             ))}
-            <div className="h-16 bg-muted rounded"></div>
-            <div className="h-16 bg-muted rounded"></div>
+            <div className="h-16 bg-black/20 rounded"></div>
+            <div className="h-16 bg-black/20 rounded"></div>
           </div>
         </CardContent>
       </Card>

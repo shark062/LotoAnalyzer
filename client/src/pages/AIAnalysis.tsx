@@ -184,7 +184,7 @@ export default function AIAnalysis() {
         </div>
 
         {/* AI Status Overview */}
-        <Card className="neon-border bg-gradient-to-r from-secondary/10 to-primary/10 backdrop-blur-sm mb-8">
+        <Card className="neon-border bg-black/20">
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
@@ -236,7 +236,7 @@ export default function AIAnalysis() {
                 key={tab}
                 variant={activeTab === tab ? "default" : "outline"}
                 onClick={() => setActiveTab(tab)}
-                className={activeTab === tab ? "bg-gradient-to-r from-primary to-secondary" : ""}
+                className={activeTab === tab ? "bg-black/20" : ""}
                 data-testid={`tab-${tab}`}
               >
                 {tab === 'pattern' && <Eye className="h-4 w-4 mr-2" />}
@@ -274,8 +274,8 @@ export default function AIAnalysis() {
                   <div className="space-y-4">
                     {[...Array(3)].map((_, i) => (
                       <div key={i} className="p-4 bg-black/20 rounded-lg animate-pulse">
-                        <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                        <div className="h-3 bg-muted rounded w-1/2"></div>
+                        <div className="h-4 bg-black/20 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-black/20 rounded w-1/2"></div>
                       </div>
                     ))}
                   </div>
@@ -352,19 +352,19 @@ export default function AIAnalysis() {
                 {predictionLoading ? (
                   <div className="space-y-4 animate-pulse">
                     <div className="p-6 bg-black/20 rounded-lg">
-                      <div className="h-6 bg-muted rounded w-1/2 mb-4"></div>
+                      <div className="h-6 bg-black/20 rounded w-1/2 mb-4"></div>
                       <div className="flex space-x-2 mb-4">
                         {[...Array(6)].map((_, i) => (
-                          <div key={i} className="w-12 h-12 bg-muted rounded-full"></div>
+                          <div key={i} className="w-12 h-12 bg-black/20 rounded-full"></div>
                         ))}
                       </div>
-                      <div className="h-4 bg-muted rounded w-3/4"></div>
+                      <div className="h-4 bg-black/20 rounded w-3/4"></div>
                     </div>
                   </div>
                 ) : predictionAnalysis?.result ? (
                   <div className="space-y-6">
                     {/* Primary Prediction */}
-                    <Card className="bg-gradient-to-r from-secondary/10 to-primary/10 border-secondary/30">
+                    <Card className="bg-black/20">
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <h4 className="text-xl font-bold text-secondary flex items-center">
@@ -383,7 +383,7 @@ export default function AIAnalysis() {
                           {(predictionAnalysis.result.primaryPrediction || []).map((number: number, index: number) => (
                             <Badge
                               key={index}
-                              className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold bg-gradient-to-br from-secondary to-primary text-white neon-text"
+                              className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold bg-black/20"
                               data-testid={`prediction-number-${number}`}
                             >
                               {number.toString().padStart(2, '0')}
@@ -405,7 +405,7 @@ export default function AIAnalysis() {
 
                           <Button
                             onClick={() => window.location.href = `/generator?lottery=${selectedLottery}&numbers=${(predictionAnalysis.result.primaryPrediction || []).join(',')}`}
-                            className="bg-gradient-to-r from-secondary to-primary"
+                            className="bg-black/20"
                             data-testid="use-prediction-button"
                           >
                             <Zap className="h-4 w-4 mr-2" />
@@ -482,15 +482,15 @@ export default function AIAnalysis() {
                 {strategyLoading ? (
                   <div className="space-y-4 animate-pulse">
                     <div className="p-4 bg-black/20 rounded-lg">
-                      <div className="h-6 bg-muted rounded w-1/3 mb-4"></div>
-                      <div className="h-4 bg-muted rounded w-full mb-2"></div>
-                      <div className="h-4 bg-muted rounded w-2/3"></div>
+                      <div className="h-6 bg-black/20 rounded w-1/3 mb-4"></div>
+                      <div className="h-4 bg-black/20 rounded w-full mb-2"></div>
+                      <div className="h-4 bg-black/20 rounded w-2/3"></div>
                     </div>
                   </div>
                 ) : strategyAnalysis?.result ? (
                   <div className="space-y-6">
                     {/* Strategy Overview */}
-                    <Card className="bg-gradient-to-r from-accent/10 to-neon-gold/10 border-accent/30">
+                    <Card className="bg-black/20">
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <h4 className="text-xl font-bold text-accent flex items-center">
@@ -533,7 +533,7 @@ export default function AIAnalysis() {
 
                         <Button
                           onClick={() => window.location.href = `/generator?lottery=${selectedLottery}&strategy=${strategyAnalysis.result.recommendedStrategy.toLowerCase()}`}
-                          className="w-full bg-gradient-to-r from-accent to-neon-gold"
+                          className="w-full bg-black/20"
                           data-testid="apply-strategy-button"
                         >
                           <Target className="h-4 w-4 mr-2" />
@@ -601,7 +601,7 @@ export default function AIAnalysis() {
           <div className="inline-flex gap-4">
             <Button 
               onClick={() => window.location.href = '/generator'}
-              className="bg-gradient-to-r from-primary to-secondary"
+              className="bg-black/20"
               data-testid="go-to-generator-button"
             >
               <Zap className="h-4 w-4 mr-2" />
@@ -611,7 +611,7 @@ export default function AIAnalysis() {
             <Button 
               onClick={() => window.location.href = '/heat-map'}
               variant="outline"
-              className="border-primary text-primary hover:bg-primary/10"
+              className="border-primary text-primary hover:bg-black/20"
               data-testid="view-heatmap-button"
             >
               <BarChart3 className="h-4 w-4 mr-2" />

@@ -126,7 +126,7 @@ export default function Home() {
         {/* Dashboard Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary via-secondary to-accent rounded-2xl flex items-center justify-center animate-float">
+            <div className="w-16 h-16 bg-black/20">
               <span className="text-3xl">🦈</span>
             </div>
             <div>
@@ -145,15 +145,15 @@ export default function Home() {
               <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
               <span className="font-mono font-semibold">Dados Oficiais Caixa</span>
             </div>
-            <div className="flex items-center gap-1 text-sm bg-secondary/10 text-secondary px-3 py-1.5 rounded-full border border-secondary/30">
+            <div className="flex items-center gap-1 text-sm bg-black/20 text-secondary px-3 py-1.5 rounded-full border border-secondary/30">
               <Brain className="w-4 h-4" />
               <span className="font-mono font-semibold">IA ChatGPT Ativa</span>
             </div>
-            <div className="flex items-center gap-1 text-sm bg-accent/10 text-accent px-3 py-1.5 rounded-full border border-accent/30">
+            <div className="flex items-center gap-1 text-sm bg-black/20 text-accent px-3 py-1.5 rounded-full border border-accent/30">
               <Activity className="w-4 h-4" />
               <span className="font-mono font-semibold">Análise Tempo Real</span>
             </div>
-            <div className="flex items-center gap-1 text-sm bg-primary/10 text-primary px-3 py-1.5 rounded-full border border-primary/30">
+            <div className="flex items-center gap-1 text-sm bg-black/20 text-primary px-3 py-1.5 rounded-full border border-primary/30">
               <Star className="w-4 h-4" />
               <span className="font-mono font-semibold">10 Modalidades</span>
             </div>
@@ -164,7 +164,7 @@ export default function Home() {
         <div className="mb-8 flex flex-wrap gap-4 justify-center lg:hidden">
           <Button 
             onClick={() => window.location.href = '/generator'}
-            className="bg-gradient-to-r from-primary to-secondary text-primary-foreground px-6 py-3 rounded-lg hover:animate-glow transition-all duration-300 font-semibold"
+            className="bg-black/20"
             data-testid="quick-generate-button"
           >
             <Zap className="h-4 w-4 mr-2" />
@@ -172,7 +172,7 @@ export default function Home() {
           </Button>
           <Button 
             onClick={() => window.location.href = '/results'}
-            className="bg-gradient-to-r from-accent to-neon-gold text-accent-foreground px-6 py-3 rounded-lg hover:animate-glow transition-all duration-300 font-semibold"
+            className="bg-black/20"
             data-testid="quick-results-button"
           >
             <History className="h-4 w-4 mr-2" />
@@ -292,9 +292,9 @@ export default function Home() {
                       {userStats ? Math.min(100, Math.floor((userStats.totalGames / 100) * 100)) : 0}%
                     </span>
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-2 bg-black/20 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-secondary to-primary rounded-full animate-pulse"
+                      className="h-full bg-black/20"
                       style={{ 
                         width: `${userStats ? Math.min(100, Math.floor((userStats.totalGames / 100) * 100)) : 0}%` 
                       }}
@@ -319,7 +319,7 @@ export default function Home() {
                 </div>
                 
                 {/* AI Recommendation */}
-                <Card className="bg-secondary/10 border border-secondary/30">
+                <Card className="bg-black/20 border border-secondary/30">
                   <CardContent className="p-3">
                     <div className="text-xs text-secondary mb-1">🤖 Recomendação IA</div>
                     <div className="text-sm text-foreground" data-testid="ai-recommendation">
@@ -344,15 +344,15 @@ export default function Home() {
                     {[...Array(3)].map((_, i) => (
                       <div key={i} className="flex items-center justify-between p-3 bg-black/20 rounded-lg animate-pulse">
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-muted rounded-full"></div>
+                          <div className="w-8 h-8 bg-black/20 rounded-full"></div>
                           <div className="space-y-1">
-                            <div className="h-4 bg-muted rounded w-24"></div>
-                            <div className="h-3 bg-muted rounded w-16"></div>
+                            <div className="h-4 bg-black/20 rounded w-24"></div>
+                            <div className="h-3 bg-black/20 rounded w-16"></div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="h-4 bg-muted rounded w-16 mb-1"></div>
-                          <div className="h-3 bg-muted rounded w-12"></div>
+                          <div className="h-4 bg-black/20 rounded w-16 mb-1"></div>
+                          <div className="h-3 bg-black/20 rounded w-12"></div>
                         </div>
                       </div>
                     ))}
@@ -370,7 +370,7 @@ export default function Home() {
                       >
                         <div className="flex items-center space-x-3">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                            hasWon ? 'bg-neon-green text-black' : 'bg-muted text-muted-foreground'
+                            hasWon ? 'bg-neon-green text-black' : 'bg-black/20 text-muted-foreground'
                           }`}>
                             {game.matches || 0}
                           </div>
@@ -425,9 +425,9 @@ export default function Home() {
               {recentWinners.map((winner, index) => (
                 <Card 
                   key={winner.id}
-                  className="neon-border bg-gradient-to-br from-neon-gold/10 to-accent/5 backdrop-blur-sm relative overflow-hidden"
+                  className="neon-border bg-black/20"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-neon-gold/5 to-transparent animate-scan"></div>
+                  <div className="absolute inset-0 bg-black/20"></div>
                   <CardContent className="p-4 relative z-10">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-sm font-medium text-neon-gold">🎉 PRÊMIO!</span>

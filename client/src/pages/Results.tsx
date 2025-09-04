@@ -118,7 +118,7 @@ export default function Results() {
 
         {/* Statistics Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-gradient-to-br from-primary/10 to-secondary/10">
+          <Card className="bg-black/20">
             <CardContent className="p-4 text-center">
               <Trophy className="h-8 w-8 mx-auto mb-2 text-primary" />
               <div className="text-2xl font-bold text-primary neon-text" data-testid="total-games-stat">
@@ -128,7 +128,7 @@ export default function Results() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-neon-green/10 to-accent/10">
+          <Card className="bg-black/20">
             <CardContent className="p-4 text-center">
               <Medal className="h-8 w-8 mx-auto mb-2 text-neon-green" />
               <div className="text-2xl font-bold text-neon-green neon-text" data-testid="total-wins-stat">
@@ -138,7 +138,7 @@ export default function Results() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-accent/10 to-neon-gold/10">
+          <Card className="bg-black/20">
             <CardContent className="p-4 text-center">
               <BarChart3 className="h-8 w-8 mx-auto mb-2 text-accent" />
               <div className="text-2xl font-bold text-accent neon-text" data-testid="accuracy-stat">
@@ -148,7 +148,7 @@ export default function Results() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-neon-gold/10 to-destructive/10">
+          <Card className="bg-black/20">
             <CardContent className="p-4 text-center">
               <DollarSign className="h-8 w-8 mx-auto mb-2 text-neon-gold" />
               <div className="text-2xl font-bold text-neon-gold neon-text" data-testid="total-prize-stat">
@@ -161,8 +161,8 @@ export default function Results() {
 
         {/* Best Result Highlight */}
         {bestResult && (
-          <Card className="bg-gradient-to-r from-neon-gold/20 to-accent/20 backdrop-blur-sm mb-8 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-neon-gold/10 to-transparent animate-scan"></div>
+          <Card className="bg-black/20">
+            <div className="absolute inset-0 bg-black/20"></div>
             <CardContent className="p-6 relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
@@ -267,17 +267,17 @@ export default function Results() {
                   <div key={i} className="p-4 bg-black/20 rounded-lg animate-pulse">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
-                        <div className="w-20 h-4 bg-muted rounded"></div>
-                        <div className="w-16 h-4 bg-muted rounded"></div>
+                        <div className="w-20 h-4 bg-black/20 rounded"></div>
+                        <div className="w-16 h-4 bg-black/20 rounded"></div>
                       </div>
-                      <div className="w-24 h-4 bg-muted rounded"></div>
+                      <div className="w-24 h-4 bg-black/20 rounded"></div>
                     </div>
                     <div className="flex space-x-2 mb-3">
                       {[...Array(6)].map((_, j) => (
-                        <div key={j} className="w-10 h-10 bg-muted rounded-full"></div>
+                        <div key={j} className="w-10 h-10 bg-black/20 rounded-full"></div>
                       ))}
                     </div>
-                    <div className="w-32 h-3 bg-muted rounded"></div>
+                    <div className="w-32 h-3 bg-black/20 rounded"></div>
                   </div>
                 ))}
               </div>
@@ -321,7 +321,7 @@ export default function Results() {
                                 key={number}
                                 variant="secondary"
                                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                                  hasWon ? 'bg-neon-green text-black' : 'bg-muted text-muted-foreground'
+                                  hasWon ? 'bg-neon-green text-black' : 'bg-black/20 text-muted-foreground'
                                 }`}
                                 data-testid={`game-${index}-number-${number}`}
                               >
@@ -357,7 +357,7 @@ export default function Results() {
                 </p>
                 <Button 
                   onClick={() => window.location.href = '/generator'}
-                  className="bg-gradient-to-r from-primary to-secondary"
+                  className="bg-black/20"
                   data-testid="generate-first-game-button"
                 >
                   <Zap className="h-4 w-4 mr-2" />
@@ -374,7 +374,7 @@ export default function Results() {
             <div className="inline-flex gap-4">
               <Button 
                 onClick={() => window.location.href = '/generator'}
-                className="bg-gradient-to-r from-primary to-secondary"
+                className="bg-black/20"
                 data-testid="generate-more-games-button"
               >
                 <Zap className="h-4 w-4 mr-2" />
@@ -384,7 +384,7 @@ export default function Results() {
               <Button 
                 onClick={() => window.location.href = '/ai-analysis'}
                 variant="outline"
-                className="border-secondary text-secondary hover:bg-secondary/10"
+                className="border-secondary text-secondary hover:bg-black/20"
                 data-testid="ai-analysis-button"
               >
                 <TrendingUp className="h-4 w-4 mr-2" />

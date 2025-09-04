@@ -214,7 +214,7 @@ export default function Information() {
         </div>
 
         {/* How SHARK LOTO Works */}
-        <Card className="neon-border bg-gradient-to-r from-secondary/10 to-primary/10 backdrop-blur-sm mb-8">
+        <Card className="neon-border bg-black/20">
           <CardHeader>
             <CardTitle className="text-primary flex items-center">
               <Brain className="h-6 w-6 mr-2" />
@@ -224,7 +224,7 @@ export default function Information() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-black/20">
                   <Target className="h-8 w-8 text-primary-foreground" />
                 </div>
                 <h4 className="font-bold text-foreground mb-2">1. Análise de Dados</h4>
@@ -234,7 +234,7 @@ export default function Information() {
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-secondary to-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-black/20">
                   <Brain className="h-8 w-8 text-primary-foreground" />
                 </div>
                 <h4 className="font-bold text-foreground mb-2">2. IA Inteligente</h4>
@@ -244,7 +244,7 @@ export default function Information() {
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-accent to-neon-gold rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-black/20">
                   <Zap className="h-8 w-8 text-primary-foreground" />
                 </div>
                 <h4 className="font-bold text-foreground mb-2">3. Geração Inteligente</h4>
@@ -349,7 +349,7 @@ export default function Information() {
                     <div className="text-center pt-2">
                       <Button
                         onClick={() => window.location.href = `/generator?lottery=${lottery.id}`}
-                        className="bg-gradient-to-r from-primary to-secondary"
+                        className="bg-black/20"
                         data-testid={`play-${lottery.id}-button`}
                       >
                         <Zap className="h-4 w-4 mr-2" />
@@ -471,7 +471,7 @@ export default function Information() {
         </div>
 
         {/* Legal Disclaimer */}
-        <Card className="neon-border bg-gradient-to-r from-destructive/10 to-amber-500/10 border-destructive/30">
+        <Card className="neon-border bg-black/20">
           <CardHeader>
             <CardTitle className="text-destructive flex items-center">
               <AlertTriangle className="h-6 w-6 mr-2" />
@@ -527,7 +527,7 @@ export default function Information() {
           <div className="inline-flex gap-4">
             <Button 
               onClick={() => window.location.href = '/generator'}
-              className="bg-gradient-to-r from-primary to-secondary"
+              className="bg-black/20"
               data-testid="start-playing-button"
             >
               <Zap className="h-4 w-4 mr-2" />
@@ -537,7 +537,7 @@ export default function Information() {
             <Button 
               onClick={() => window.location.href = '/heat-map'}
               variant="outline"
-              className="border-primary text-primary hover:bg-primary/10"
+              className="border-primary text-primary hover:bg-black/20"
               data-testid="view-analysis-button"
             >
               <BarChart3 className="h-4 w-4 mr-2" />
