@@ -157,7 +157,7 @@ export default function Generator() {
     // Simulate temperature based on strategy and number
     // In real app, this would use actual frequency data
     const mod = number % 3;
-    
+
     if (strategy === 'hot' || (strategy === 'mixed' && mod === 0)) {
       return "bg-black/20";
     } else if (strategy === 'cold' || (strategy === 'mixed' && mod === 2)) {
@@ -180,7 +180,7 @@ export default function Generator() {
     const content = generatedGames.map((game, index) => 
       `Jogo ${index + 1}: ${game.numbers.join(' - ')}`
     ).join('\n');
-    
+
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -193,7 +193,7 @@ export default function Generator() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -265,7 +265,7 @@ export default function Generator() {
                       </p>
                     )}
                   </div>
-                  
+
                   <div>
                     <Label className="flex items-center text-sm font-medium text-foreground mb-2">
                       <Copy className="h-4 w-4 mr-2 text-secondary" />
@@ -293,7 +293,7 @@ export default function Generator() {
                     {(['hot', 'cold', 'mixed', 'ai'] as const).map((strategy) => {
                       const info = getStrategyInfo(strategy);
                       const isSelected = form.watch('strategy') === strategy;
-                      
+
                       return (
                         <Card 
                           key={strategy}
@@ -458,7 +458,7 @@ export default function Generator() {
               {generatedGames.length > 0 ? (
                 generatedGames.map((game, index) => {
                   const strategyInfo = getStrategyInfo(game.strategy);
-                  
+
                   return (
                     <Card key={index} className="bg-black/20 border-border/50">
                       <CardContent className="p-4">
@@ -480,7 +480,7 @@ export default function Generator() {
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
-                        
+
                         <div className="flex flex-wrap gap-2 mb-3">
                           {game.numbers.map((number) => (
                             <Badge
@@ -494,7 +494,7 @@ export default function Generator() {
                             </Badge>
                           ))}
                         </div>
-                        
+
                         <div className="text-xs text-muted-foreground">
                           Estratégia: {strategyInfo.description}
                           {game.confidence && ` • Confiança: ${Math.round(game.confidence * 100)}%`}
@@ -527,7 +527,7 @@ export default function Generator() {
                 <Flame className="h-4 w-4 mr-2" />
                 Ver Mapa de Calor
               </Button>
-              
+
               <Button 
                 onClick={() => window.location.href = '/results'}
                 className="bg-black/20"
