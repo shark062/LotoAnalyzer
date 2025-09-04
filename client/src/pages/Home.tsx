@@ -125,19 +125,37 @@ export default function Home() {
       <main className="container mx-auto px-4 py-8">
         {/* Dashboard Header */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold neon-text text-primary mb-2" data-testid="dashboard-title">
-            Dashboard Principal
-          </h2>
-          <p className="text-muted-foreground mb-2">
-            Análise inteligente das loterias federais com dados oficiais
-          </p>
-          <div className="flex items-center justify-center gap-2">
-            <div className="flex items-center gap-1 text-xs bg-neon-green/10 text-neon-green px-2 py-1 rounded-full border border-neon-green/30">
-              <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
-              Dados Oficiais Caixa
+          <div className="flex items-center justify-center space-x-4 mb-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary via-secondary to-accent rounded-2xl flex items-center justify-center neon-border animate-float">
+              <span className="text-3xl">🦈</span>
             </div>
-            <div className="flex items-center gap-1 text-xs bg-secondary/10 text-secondary px-2 py-1 rounded-full border border-secondary/30">
-              🤖 IA Ativa
+            <div>
+              <h2 className="text-4xl font-bold neon-text text-primary mb-1" data-testid="dashboard-title">
+                Dashboard Principal
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Central de Comando • Análise Inteligente das Loterias Federais
+              </p>
+            </div>
+          </div>
+          
+          {/* Status Indicators */}
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <div className="flex items-center gap-1 text-sm bg-neon-green/10 text-neon-green px-3 py-1.5 rounded-full border border-neon-green/30 neon-border">
+              <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
+              <span className="font-mono font-semibold">Dados Oficiais Caixa</span>
+            </div>
+            <div className="flex items-center gap-1 text-sm bg-secondary/10 text-secondary px-3 py-1.5 rounded-full border border-secondary/30 neon-border">
+              <Brain className="w-4 h-4" />
+              <span className="font-mono font-semibold">IA ChatGPT Ativa</span>
+            </div>
+            <div className="flex items-center gap-1 text-sm bg-accent/10 text-accent px-3 py-1.5 rounded-full border border-accent/30 neon-border">
+              <Activity className="w-4 h-4" />
+              <span className="font-mono font-semibold">Análise Tempo Real</span>
+            </div>
+            <div className="flex items-center gap-1 text-sm bg-primary/10 text-primary px-3 py-1.5 rounded-full border border-primary/30 neon-border">
+              <Star className="w-4 h-4" />
+              <span className="font-mono font-semibold">10 Modalidades</span>
             </div>
           </div>
         </div>
