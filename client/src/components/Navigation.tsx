@@ -136,7 +136,7 @@ export default function Navigation() {
                   {navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = location === item.href;
-
+                    
                     return (
                       <TabsTrigger 
                         key={item.href}
@@ -219,7 +219,7 @@ export default function Navigation() {
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location === item.href;
-
+                
                 return (
                   <Link 
                     key={item.href}
@@ -313,7 +313,7 @@ export default function Navigation() {
               >
                 <Icon className="h-4 w-4 mr-2" />
                 {action.label}
-
+                
                 {/* Tooltip */}
                 <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-card border border-border/50 rounded-lg px-3 py-2 text-xs text-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap backdrop-blur-sm">
                   {action.tooltip}
@@ -322,7 +322,7 @@ export default function Navigation() {
               </Button>
             );
           })}
-
+          
           {/* Status Indicator */}
           <div className="mt-4 p-3 bg-card/50 border border-border/50 rounded-lg backdrop-blur-sm">
             <div className="text-xs text-center space-y-1">
