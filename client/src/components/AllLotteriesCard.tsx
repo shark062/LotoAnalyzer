@@ -67,7 +67,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
 
   if (isLoading) {
     return (
-      <Card className="neon-border bg-card/30 backdrop-blur-sm animate-pulse">
+      <Card className="border border-border/30 bg-card/20 backdrop-blur-sm animate-pulse">
         <CardContent className="p-4">
           <div className="h-24 bg-muted/20 rounded mb-3"></div>
           <div className="h-4 bg-muted/20 rounded mb-2"></div>
@@ -82,7 +82,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
   }
 
   return (
-    <Card className={`neon-border bg-gradient-to-br ${getGradientClass(lottery.id)} backdrop-blur-sm hover:scale-105 transition-all duration-300 relative overflow-hidden group opacity-80`}>
+    <Card className="border border-border/30 bg-card/20 backdrop-blur-sm hover:scale-105 transition-all duration-300 relative overflow-hidden group opacity-80">
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:animate-scan"></div>
       <CardContent className="p-4 relative z-10">
         <div className="text-center mb-3">
