@@ -265,9 +265,9 @@ class LotteryService {
         'lotomania': 'lotomania',
         'duplasena': 'duplasena',
         'supersete': 'supersete',
-        'milionaria': '+milionaria',
+        'milionaria': 'maismilionaria',
         'timemania': 'timemania',
-        'diadesore': 'diadesore',
+        'diadesore': 'diadesorte',
         'loteca': 'loteca'
       };
       
@@ -295,11 +295,24 @@ class LotteryService {
         const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
 
-        // Store the latest draw in database for analysis
+        // Store the latest draw in database for analysis (with proper date validation)
+        let validDrawDate = new Date();
+        if (data.dataApuracao) {
+          const testDate = new Date(data.dataApuracao);
+          if (!isNaN(testDate.getTime())) {
+            validDrawDate = testDate;
+          }
+        } else if (data.dataProximoConcurso) {
+          const testDate = new Date(data.dataProximoConcurso);
+          if (!isNaN(testDate.getTime())) {
+            validDrawDate = testDate;
+          }
+        }
+
         const drawData = {
           lotteryId,
           contestNumber: data.numero,
-          drawDate: new Date(data.dataApuracao || data.dataProximoConcurso),
+          drawDate: validDrawDate,
           drawnNumbers: data.listaDezenas || data.dezenas || [],
           prizes: data.listaRateioPremio || []
         };
@@ -310,13 +323,25 @@ class LotteryService {
           console.log('Could not save draw data to database:', dbError);
         }
 
+        // Format prize value properly
+        let formattedPrize = this.getEstimatedPrize(lotteryId);
+        if (data.valorEstimadoProximoConcurso) {
+          const prizeValue = parseFloat(data.valorEstimadoProximoConcurso);
+          if (!isNaN(prizeValue)) {
+            formattedPrize = `R$ ${prizeValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+          }
+        } else if (data.valorAcumuladoProximoConcurso) {
+          const prizeValue = parseFloat(data.valorAcumuladoProximoConcurso);
+          if (!isNaN(prizeValue)) {
+            formattedPrize = `R$ ${prizeValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+          }
+        }
+
         return {
           contestNumber: data.numero + 1,
           drawDate: nextDrawDate.toISOString(),
           timeRemaining: { days: Math.max(0, days), hours: Math.max(0, hours), minutes: Math.max(0, minutes) },
-          estimatedPrize: data.valorEstimadoProximoConcurso ? 
-            `R$ ${parseFloat(data.valorEstimadoProximoConcurso).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` :
-            this.getEstimatedPrize(lotteryId)
+          estimatedPrize: formattedPrize
         };
       }
 
@@ -328,20 +353,20 @@ class LotteryService {
   }
 
   private getEstimatedPrize(lotteryId: string): string {
-    // Realistic prize estimates based on historical data
+    // Updated realistic prize estimates
     const prizesMap: Record<string, string> = {
-      'megasena': 'R$ 50.000.000,00',
-      'lotofacil': 'R$ 1.500.000,00', 
-      'quina': 'R$ 800.000,00',
-      'lotomania': 'R$ 2.500.000,00',
-      'duplasena': 'R$ 600.000,00',
-      'supersete': 'R$ 3.000.000,00',
-      'milionaria': 'R$ 10.000.000,00',
-      'timemania': 'R$ 2.000.000,00',
-      'diadesore': 'R$ 500.000,00',
-      'loteca': 'R$ 500.000,00'
+      'megasena': 'R$ 65.000.000,00',
+      'lotofacil': 'R$ 1.700.000,00', 
+      'quina': 'R$ 1.200.000,00',
+      'lotomania': 'R$ 3.500.000,00',
+      'duplasena': 'R$ 900.000,00',
+      'supersete': 'R$ 4.200.000,00',
+      'milionaria': 'R$ 22.000.000,00',
+      'timemania': 'R$ 2.800.000,00',
+      'diadesore': 'R$ 700.000,00',
+      'loteca': 'R$ 800.000,00'
     };
-    return prizesMap[lotteryId] || 'R$ 500.000,00';
+    return prizesMap[lotteryId] || 'R$ 1.000.000,00';
   }
 
   async generateGames(params: GenerateGamesParams): Promise<InsertUserGame[]> {

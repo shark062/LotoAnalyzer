@@ -20,8 +20,8 @@ export function useNextDrawInfo(lotteryId?: string) {
   return useQuery<NextDrawInfo>({
     queryKey: ["/api/lotteries", lotteryId, "next-draw"],
     enabled: !!lotteryId,
-    refetchInterval: 60 * 1000, // Refetch every minute for countdown
-    staleTime: 30 * 1000, // 30 seconds
+    refetchInterval: 1000, // Refetch every second for real-time countdown
+    staleTime: 500, // 500ms for real-time updates
   });
 }
 
