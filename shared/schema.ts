@@ -151,3 +151,13 @@ export type InsertLotteryDraw = z.infer<typeof insertLotteryDrawSchema>;
 export type InsertUserGame = z.infer<typeof insertUserGameSchema>;
 export type InsertNumberFrequency = z.infer<typeof insertNumberFrequencySchema>;
 export type InsertAiAnalysis = z.infer<typeof insertAiAnalysisSchema>;
+
+// User Statistics interface for API responses
+export interface UserStats {
+  totalGames: number;
+  wins: number;
+  totalPrizeWon: string;
+  accuracy: number;
+  favoriteStrategy: string;
+  averageNumbers: number;
+}

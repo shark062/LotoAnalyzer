@@ -262,6 +262,27 @@ class Storage {
     }
   }
 
+  async upsertUser(user: any): Promise<void> {
+    try {
+      if (!this.db) {
+        console.log('Database not available for storing user');
+        return;
+      }
+
+      await this.db.insert(schema.users).values(user).onConflictDoUpdate({
+        target: schema.users.email,
+        set: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          profileImageUrl: user.profileImageUrl,
+          updatedAt: new Date(),
+        }
+      });
+    } catch (error) {
+      console.error('Error upserting user:', error);
+    }
+  }
+
   async getLotteryTypes(): Promise<LotteryType[]> {
     try {
       if (!this.db) {
