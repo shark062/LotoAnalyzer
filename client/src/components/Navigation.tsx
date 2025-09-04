@@ -113,7 +113,7 @@ export default function Navigation() {
         <div className="container mx-auto px-6 py-6 relative">
           <div className="flex items-center justify-between">
             {/* Logo Central */}
-            <div className="flex-1 flex justify-center">
+            <div className="flex-1 flex justify-center items-start -mt-4">
               <Link href="/" className="flex items-center justify-center">
                 <div className="w-32 h-32">
                   <img 
