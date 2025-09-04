@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,6 +23,19 @@ import sharkLogo from "@assets/Logo Futurista da Shark Loterias_1757013773517.pn
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location] = useLocation();
+
+  // Hide body scroll when menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
 
   const navItems = [
     { 
@@ -143,16 +157,18 @@ export default function Navigation() {
               </Button>
             </div>
 
-            {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="lg:hidden text-white hover:bg-white/20"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              data-testid="mobile-menu-toggle"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
+            {/* Menu Button - Top Right */}
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white/20"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                data-testid="menu-toggle"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
 
           {/* Secondary Navigation Bar - Desktop Only */}
@@ -180,18 +196,17 @@ export default function Navigation() {
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Full Screen Menu Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/95 z-40 lg:hidden backdrop-blur-sm"
-          onClick={() => setIsMobileMenuOpen(false)}
-          data-testid="mobile-menu-overlay"
+          className="fixed inset-0 bg-black/98 z-[60] backdrop-blur-sm"
+          data-testid="menu-overlay"
         >
-          <div className="container mx-auto px-4 py-8">
-            {/* Mobile Header */}
+          <div className="container mx-auto px-4 py-8 h-full overflow-y-auto">
+            {/* Menu Header */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-black/20">
+                <div className="w-10 h-10 bg-black/20 rounded-lg flex items-center justify-center">
                   <span className="text-xl">🦈</span>
                 </div>
                 <div>
@@ -203,13 +218,14 @@ export default function Navigation() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-muted-foreground hover:text-primary"
+                className="text-white hover:text-primary text-2xl font-bold"
+                data-testid="menu-close-button"
               >
                 ✕
               </Button>
             </div>
 
-            {/* Mobile Navigation */}
+            {/* Navigation Menu */}
             <nav className="space-y-4">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -225,7 +241,7 @@ export default function Navigation() {
                         : "text-muted-foreground hover:text-primary hover:bg-black/20 border border-transparent"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    data-testid={`mobile-nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                    data-testid={`nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     <div className="flex items-center space-x-4">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
@@ -247,7 +263,7 @@ export default function Navigation() {
               })}
             </nav>
 
-            {/* Mobile Quick Actions */}
+            {/* Quick Actions */}
             <div className="mt-8 pt-6 border-t border-border/50">
               <h3 className="text-sm font-medium text-muted-foreground mb-4">Ações Rápidas</h3>
               <div className="grid grid-cols-1 gap-3">
@@ -266,7 +282,7 @@ export default function Navigation() {
                           ? "bg-black/20" 
                           : ""
                       }`}
-                      data-testid={`mobile-quick-action-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
+                      data-testid={`quick-action-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       <Icon className="h-5 w-5 mr-3" />
                       <div className="text-left">

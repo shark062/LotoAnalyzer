@@ -28,6 +28,7 @@ export default function Home() {
   const { user } = useAuth();
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationPrize, setCelebrationPrize] = useState<string>();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Data queries
   const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
@@ -122,7 +123,7 @@ export default function Home() {
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className={`container mx-auto px-4 py-8 ${isMenuOpen ? 'hidden' : ''}`}>
         {/* Dashboard Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-4 mb-4">
