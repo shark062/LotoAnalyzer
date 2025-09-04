@@ -153,109 +153,6 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
 export default function AllLotteriesCard() {
   const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
 
-  const allLotteries = [
-    { 
-      id: 'megasena', 
-      name: 'Mega-Sena', 
-      icon: '💎', 
-      description: '6-15 números • 60 disponíveis',
-      nextPrize: '45.000.000,00',
-      nextDraw: '2d 0h 7m',
-      bgClass: 'from-emerald-500/20 via-green-600/20 to-teal-500/20',
-      borderClass: 'border-emerald-500/40'
-    },
-    { 
-      id: 'lotofacil', 
-      name: 'Lotofácil', 
-      icon: '⭐', 
-      description: '15-20 números • 25 disponíveis',
-      nextPrize: '1.500.000,00',
-      nextDraw: '1d 12h 30m',
-      bgClass: 'from-purple-500/20 via-violet-600/20 to-indigo-500/20',
-      borderClass: 'border-purple-500/40'
-    },
-    { 
-      id: 'quina', 
-      name: 'Quina', 
-      icon: '🪙', 
-      description: '5-15 números • 80 disponíveis',
-      nextPrize: '8.500.000,00',
-      nextDraw: '0d 18h 45m',
-      bgClass: 'from-pink-500/20 via-rose-600/20 to-red-500/20',
-      borderClass: 'border-pink-500/40'
-    },
-    { 
-      id: 'lotomania', 
-      name: 'Lotomania', 
-      icon: '♾️', 
-      description: '50-50 números • 100 disponíveis',
-      nextPrize: '500.000,00',
-      nextDraw: '2d 0h 7m',
-      bgClass: 'from-cyan-500/20 via-blue-600/20 to-indigo-500/20',
-      borderClass: 'border-cyan-500/40'
-    },
-    { 
-      id: 'duplasena', 
-      name: 'Dupla Sena', 
-      icon: '👑', 
-      description: '6-15 números • 50 disponíveis',
-      nextPrize: '7.000.000,00',
-      nextDraw: '2d 0h 7m',
-      bgClass: 'from-yellow-500/20 via-amber-600/20 to-orange-500/20',
-      borderClass: 'border-yellow-500/40'
-    },
-    { 
-      id: 'supersete', 
-      name: 'Super Sete', 
-      icon: '🚀', 
-      description: '7 colunas • 10 números cada',
-      nextPrize: '2.500.000,00',
-      nextDraw: '1d 6h 15m',
-      bgClass: 'from-violet-500/20 via-purple-600/20 to-fuchsia-500/20',
-      borderClass: 'border-violet-500/40'
-    },
-    { 
-      id: 'milionaria', 
-      name: '+Milionária', 
-      icon: '➕', 
-      description: '6+2 trevos • 50+6 disponíveis',
-      nextPrize: '100.000.000,00',
-      nextDraw: '3d 8h 20m',
-      bgClass: 'from-amber-500/20 via-yellow-600/20 to-lime-500/20',
-      borderClass: 'border-amber-500/40'
-    },
-    { 
-      id: 'timemania', 
-      name: 'Timemania', 
-      icon: '🎁', 
-      description: '10 números • 80 disponíveis',
-      nextPrize: '3.200.000,00',
-      nextDraw: '1d 14h 30m',
-      bgClass: 'from-red-500/20 via-pink-600/20 to-rose-500/20',
-      borderClass: 'border-red-500/40'
-    },
-    { 
-      id: 'diadesore', 
-      name: 'Dia de Sorte', 
-      icon: '🌟', 
-      description: '7 números • 31 disponíveis',
-      nextPrize: '800.000,00',
-      nextDraw: '0d 22h 10m',
-      bgClass: 'from-teal-500/20 via-cyan-600/20 to-blue-500/20',
-      borderClass: 'border-teal-500/40'
-    },
-    { 
-      id: 'loteca', 
-      name: 'Loteca', 
-      icon: '⚽', 
-      description: '14 jogos • 3 resultados',
-      nextPrize: '450.000,00',
-      nextDraw: '2d 10h 40m',
-      bgClass: 'from-green-500/20 via-emerald-600/20 to-teal-500/20',
-      borderClass: 'border-green-500/40'
-    }
-  ];
-
   if (lotteriesLoading) {
     return (
       <Card className="neon-border bg-card/30 backdrop-blur-sm">
@@ -312,80 +209,28 @@ export default function AllLotteriesCard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="text-center mb-6">
-        <h3 className="text-2xl font-bold text-cyan-400 flex items-center justify-center mb-2">
-          <TrendingUp className="h-6 w-6 mr-3" />
-          Todas as Modalidades
-        </h3>
-        <p className="text-gray-400">Próximos sorteios • Análise em tempo real • IA integrada</p>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 gap-6">
-        {allLotteries.map((lottery) => (
-          <Card
-            key={lottery.id}
-            className={`neon-border bg-gradient-to-br ${lottery.bgClass} backdrop-blur-sm border ${lottery.borderClass} rounded-3xl cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl group`}
-            onClick={() => window.location.href = `/generator?lottery=${lottery.id}`}
-            data-testid={`lottery-card-${lottery.id}`}
-          >
-            <CardContent className="p-8 text-center">
-              {/* Icon */}
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-white/20 to-white/10 flex items-center justify-center group-hover:animate-pulse">
-                <span className="text-3xl">{lottery.icon}</span>
-              </div>
-
-              {/* Lottery Name */}
-              <h4 className="text-xl font-bold text-white mb-2 group-hover:text-yellow-300 transition-colors">
-                {lottery.name}
-              </h4>
-
-              {/* Info */}
-              <div className="text-sm text-gray-300 mb-4">
-                {lottery.description}
-              </div>
-
-              {/* Prize Info */}
-              <div className="text-center mb-4">
-                <div className="text-sm text-gray-400 mb-1">Próximo concurso</div>
-                <div className="text-2xl font-bold text-yellow-400 mb-2">
-                  R$ {lottery.nextPrize}
-                </div>
-                <div className="text-xs text-gray-500 flex items-center justify-center">
-                  <Calendar className="h-3 w-3 mr-1" />
-                  {lottery.nextDraw}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-3 mt-6">
-                <Button
-                  className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-2xl border border-gray-600 hover:from-gray-700 hover:to-gray-800 transition-all duration-300"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.location.href = `/generator?lottery=${lottery.id}`;
-                  }}
-                >
-                  <Zap className="h-4 w-4 mr-1" />
-                  Gerar
-                </Button>
-                <Button
-                  className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-2xl border border-gray-600 hover:from-gray-700 hover:to-gray-800 transition-all duration-300"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.location.href = `/heat-map?lottery=${lottery.id}`;
-                  }}
-                >
-                  <Target className="h-4 w-4 mr-1" />
-                  Mapa
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+    <Card className="neon-border bg-card/30 backdrop-blur-sm">
+      <CardHeader>
+        <CardTitle className="text-primary flex items-center justify-between">
+          <div className="flex items-center">
+            <Trophy className="h-5 w-5 mr-2 text-accent" />
+            Todas as Modalidades
+          </div>
+          <Badge variant="secondary" className="text-xs">
+            {lotteryTypes.length} modalidades
+          </Badge>
+        </CardTitle>
+        <CardDescription>
+          Próximos sorteios • Análise em tempo real • IA integrada
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {lotteryTypes.map((lottery) => (
+            <SingleLotteryCard key={lottery.id} lottery={lottery} />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
