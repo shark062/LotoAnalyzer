@@ -96,7 +96,18 @@ export default function Navigation() {
     <>
       {/* Header */}
       <header className="relative z-50 bg-transparent text-white">
-        <div className="container mx-auto px-6 py-6">
+        <div className="container mx-auto px-6 py-6 relative">
+          {/* Mobile Menu Button - Canto Superior Direito */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="lg:hidden text-white hover:bg-white/20 absolute top-6 right-6 z-10"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            data-testid="mobile-menu-toggle"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+
           <div className="flex items-center justify-center space-x-8">
             {/* Logo Central */}
             <Link href="/" className="flex items-center justify-center">
@@ -140,17 +151,6 @@ export default function Navigation() {
                 RESULTADOS
               </Button>
             </div>
-
-            {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="lg:hidden text-white hover:bg-white/20"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              data-testid="mobile-menu-toggle"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
           </div>
 
           {/* Secondary Navigation Bar - Desktop Only */}
