@@ -82,7 +82,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
   }
 
   return (
-    <Card className={`neon-border bg-gradient-to-br ${getGradientClass(lottery.id)} backdrop-blur-sm hover:scale-105 transition-all duration-300 relative overflow-hidden group`}>
+    <Card className={`neon-border bg-gradient-to-br ${getGradientClass(lottery.id)} backdrop-blur-sm hover:scale-105 transition-all duration-300 relative overflow-hidden group opacity-80`}>
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:animate-scan"></div>
       <CardContent className="p-4 relative z-10">
         <div className="text-center mb-3">
@@ -210,7 +210,7 @@ export default function AllLotteriesCard() {
   }
 
   return (
-    <Card className="neon-border bg-card/30 backdrop-blur-sm">
+    <Card className="neon-border bg-transparent backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-primary flex items-center justify-between">
           <div className="flex items-center">

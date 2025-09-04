@@ -17,6 +17,7 @@ import {
   User,
   TrendingUp
 } from "lucide-react";
+import sharkLogo from "@assets/Logo Futurista da Shark Loterias_1757013773517.png";
 
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -99,8 +100,16 @@ export default function Navigation() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center neon-border animate-pulse">
-                <span className="text-2xl">🦈</span>
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center neon-border animate-pulse overflow-hidden">
+                <img 
+                  src={sharkLogo} 
+                  alt="Shark Loterias Logo" 
+                  className="w-10 h-10 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement!.innerHTML = '<span class="text-2xl">🦈</span>';
+                  }}
+                />
               </div>
               <div>
                 <h1 className="text-xl font-bold neon-text text-primary">SHARK LOTO 💵</h1>

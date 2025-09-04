@@ -10,6 +10,7 @@ import Generator from "@/pages/Generator";
 import Results from "@/pages/Results";
 import AIAnalysis from "@/pages/AIAnalysis";
 import Information from "@/pages/Information";
+import cyberpunkShark from "@assets/cyberpunk-shark-icon_1757013800834.png";
 
 function Router() {
   return (
@@ -30,8 +31,17 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <div className="min-h-screen bg-background text-foreground">
-          {/* Background Money Pattern */}
-          <div className="fixed inset-0 money-bg opacity-5 pointer-events-none"></div>
+          {/* Cyberpunk Shark Background */}
+          <div 
+            className="fixed inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: `url(${cyberpunkShark})`,
+              backgroundSize: 'contain',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              backgroundAttachment: 'fixed'
+            }}
+          ></div>
           
           <Toaster />
           <Router />
