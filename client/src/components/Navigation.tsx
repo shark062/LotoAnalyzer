@@ -97,38 +97,24 @@ export default function Navigation() {
       {/* Header */}
       <header className="relative z-50 bg-transparent text-white">
         <div className="container mx-auto px-6 py-6 relative">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center space-x-8">
             {/* Logo Central */}
-            <div className="flex-1 flex justify-center">
-              <Link href="/" className="flex items-center justify-center">
-                <div className="w-32 h-32">
-                  <img 
-                    src={sharkLogo} 
-                    alt="Shark Loterias Logo" 
-                    className="w-full h-full object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.parentElement!.innerHTML = '<span class="text-4xl">🦈</span>';
-                    }}
-                  />
-                </div>
-              </Link>
-            </div>
+            <Link href="/" className="flex items-center justify-center">
+              <div className="w-32 h-32">
+                <img 
+                  src={sharkLogo} 
+                  alt="Shark Loterias Logo" 
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement!.innerHTML = '<span class="text-4xl">🦈</span>';
+                  }}
+                />
+              </div>
+            </Link>
 
-            {/* Mobile Menu Button - Alinhado com a imagem */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="lg:hidden text-white hover:bg-white/20"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              data-testid="mobile-menu-toggle"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </div>
-
-          {/* Navigation Buttons - Desktop */}
-          <div className="hidden lg:flex items-center justify-center space-x-6 mt-4">
+            {/* Navigation Buttons - Desktop */}
+            <div className="hidden lg:flex items-center space-x-6">
               <Button
                 variant="ghost"
                 className="text-white hover:bg-white/20 font-medium px-6 py-3 text-sm"
@@ -154,6 +140,18 @@ export default function Navigation() {
                 RESULTADOS
               </Button>
             </div>
+
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="lg:hidden text-white hover:bg-white/20"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              data-testid="mobile-menu-toggle"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
 
           {/* Secondary Navigation Bar - Desktop Only */}
           <div className="hidden lg:flex items-center justify-between mt-4 pt-3 border-t border-border/30">
