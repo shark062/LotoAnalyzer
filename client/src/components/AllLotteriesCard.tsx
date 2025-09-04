@@ -40,12 +40,12 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
     const colors: Record<string, string> = {
       'megasena': 'text-emerald-400',
       'lotofacil': 'text-purple-400',
-      'quina': 'text-blue-400',
+      'quina': 'text-yellow-400',
       'lotomania': 'text-pink-400',
-      'duplasena': 'text-yellow-400',
-      'supersete': 'text-orange-400',
+      'duplasena': 'text-orange-400',
+      'supersete': 'text-red-400',
       'milionaria': 'text-green-400',
-      'timemania': 'text-red-400'
+      'timemania': 'text-rose-400'
     };
     return colors[id] || 'text-primary';
   };
@@ -54,12 +54,12 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
     const gradients: Record<string, string> = {
       'megasena': 'from-emerald-500/20 to-green-600/20',
       'lotofacil': 'from-purple-500/20 to-violet-600/20',
-      'quina': 'from-blue-500/20 to-cyan-600/20',
+      'quina': 'from-yellow-500/20 to-amber-600/20',
       'lotomania': 'from-pink-500/20 to-rose-600/20',
-      'duplasena': 'from-yellow-500/20 to-amber-600/20',
-      'supersete': 'from-orange-500/20 to-red-600/20',
+      'duplasena': 'from-orange-500/20 to-amber-600/20',
+      'supersete': 'from-red-500/20 to-pink-600/20',
       'milionaria': 'from-green-500/20 to-emerald-600/20',
-      'timemania': 'from-red-500/20 to-pink-600/20'
+      'timemania': 'from-rose-500/20 to-pink-600/20'
     };
     return gradients[id] || 'from-primary/20 to-secondary/20';
   };
@@ -81,7 +81,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
   }
 
   return (
-    <Card className="border border-border/30 bg-card/20 backdrop-blur-sm hover:scale-105 transition-all duration-300 relative overflow-hidden group opacity-80">
+    <Card className="border border-border/30 bg-card/20 backdrop-blur-sm hover:scale-105 transition-all duration-300 relative overflow-hidden group">
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:animate-scan"></div>
       <CardContent className="p-4 relative z-10">
         <div className="text-center mb-3">
