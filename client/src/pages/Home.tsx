@@ -124,23 +124,12 @@ export default function Home() {
       <Navigation />
       
       <main className={`container mx-auto px-4 py-8 ${isMenuOpen ? 'hidden' : ''}`}>
-        {/* Dashboard Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-4 mb-4">
-            <div className="w-16 h-16 bg-black/20">
-              <span className="text-3xl">🦈</span>
-            </div>
-            <div>
-              <h2 className="text-4xl font-bold neon-text text-primary mb-1" data-testid="dashboard-title">
-                Dashboard Principal
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Central de Comando • Análise Inteligente das Loterias Federais
-              </p>
-            </div>
-          </div>
+        {/* Status Indicators */}
+        <div className="text-center mb-6">
+          <p className="text-lg text-muted-foreground mb-4">
+            Central de Comando • Análise Inteligente das Loterias Federais
+          </p>
           
-          {/* Status Indicators */}
           <div className="flex items-center justify-center gap-3 flex-wrap">
             <div className="flex items-center gap-1 text-sm bg-neon-green/10 text-neon-green px-3 py-1.5 rounded-full border border-neon-green/30">
               <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
