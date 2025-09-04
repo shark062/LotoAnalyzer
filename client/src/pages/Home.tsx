@@ -189,7 +189,7 @@ export default function Home() {
                 key={lottery.id}
                 onClick={() => window.location.href = `/generator?lottery=${lottery.id}`}
                 variant="ghost"
-                className="neon-border h-auto p-4 bg-black/20 hover:bg-black/20 transition-all duration-300 group text-center flex-col space-y-3"
+                className="neon-border h-auto p-4 bg-transparent hover:bg-black/10 transition-all duration-300 group text-center flex-col space-y-3"
                 data-testid={`lottery-button-${lottery.id}`}
               >
                 <div className={`w-12 h-12 bg-gradient-to-br ${lottery.color} rounded-full flex items-center justify-center mx-auto group-hover:animate-pulse`}>

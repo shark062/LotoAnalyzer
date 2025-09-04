@@ -29,9 +29,12 @@ class LotteryService {
     try {
       // Check if lottery types already exist
       const existingLotteries = await storage.getLotteryTypes();
-      if (existingLotteries.length > 6) {
+      if (existingLotteries.length >= 10) {
+        console.log(`✓ Lottery types already initialized (${existingLotteries.length} types found)`);
         return;
       }
+      
+      console.log(`🔧 Initializing lottery types... (found ${existingLotteries.length}, need 10)`);
 
       // Complete list of all official Brazilian lottery types
       const defaultLotteries = [
