@@ -15,12 +15,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize lottery types if needed
   await lotteryService.initializeLotteryTypes();
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // Auth routes - Mock user for direct access (no login required)
+  app.get('/api/auth/user', async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
+      // Return mock user for direct dashboard access
+      const mockUser = {
+        id: "guest-user",
+        name: "SHARK User", 
+        email: "user@sharkloto.com"
+      };
+      res.json(mockUser);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -85,9 +89,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Game generation routes
-  app.post('/api/games/generate', isAuthenticated, async (req: any, res) => {
+  app.post('/api/games/generate', async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = 'guest-user'; // Default guest user for direct access
       const { lotteryId, numbersCount, gamesCount, strategy } = req.body;
       
       const generatedGames = await lotteryService.generateGames({
@@ -106,9 +110,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User games routes
-  app.get('/api/games', isAuthenticated, async (req: any, res) => {
+  app.get('/api/games', async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = 'guest-user'; // Default guest user for direct access
       const limit = parseInt(req.query.limit as string) || 20;
       const games = await storage.getUserGames(userId, limit);
       res.json(games);
@@ -118,9 +122,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/games', isAuthenticated, async (req: any, res) => {
+  app.post('/api/games', async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = 'guest-user'; // Default guest user for direct access
       const gameData = insertUserGameSchema.parse({ ...req.body, userId });
       const game = await storage.createUserGame(gameData);
       res.status(201).json(game);
@@ -143,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/ai/analyze', isAuthenticated, async (req: any, res) => {
+  app.post('/api/ai/analyze', async (req: any, res) => {
     try {
       const { lotteryId, analysisType } = req.body;
       const analysis = await aiService.performAnalysis(lotteryId, analysisType);
@@ -155,9 +159,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User statistics routes
-  app.get('/api/users/stats', isAuthenticated, async (req: any, res) => {
+  app.get('/api/users/stats', async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = 'guest-user'; // Default guest user for direct access
       const stats = await storage.getUserStats(userId);
       res.json(stats);
     } catch (error) {
