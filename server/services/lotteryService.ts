@@ -153,14 +153,14 @@ class LotteryService {
           updatedAt: new Date(),
         },
         {
-          id: 'federal',
-          name: 'federal',
-          displayName: 'Loteria Federal',
-          minNumbers: 5,
-          maxNumbers: 5,
-          totalNumbers: 100000,
-          drawDays: ['Wednesday', 'Saturday'],
-          drawTime: '19:00',
+          id: 'loteca',
+          name: 'loteca',
+          displayName: 'Loteca',
+          minNumbers: 14,
+          maxNumbers: 14,
+          totalNumbers: 3,
+          drawDays: ['Saturday'],
+          drawTime: '20:00',
           isActive: true,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -265,7 +265,7 @@ class LotteryService {
         'milionaria': 'milionaria',
         'timemania': 'timemania',
         'diadesore': 'diadesore',
-        'federal': 'federal'
+        'loteca': 'loteca'
       };
       
       const officialId = lotteryMapping[lotteryId];
@@ -336,7 +336,7 @@ class LotteryService {
       'milionaria': 'R$ 10.000.000,00',
       'timemania': 'R$ 2.000.000,00',
       'diadesore': 'R$ 500.000,00',
-      'federal': 'R$ 500.000,00'
+      'loteca': 'R$ 500.000,00'
     };
     return prizesMap[lotteryId] || 'R$ 500.000,00';
   }

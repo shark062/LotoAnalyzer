@@ -172,7 +172,7 @@ export default function Landing() {
               { name: '+Milionária', icon: '➕', color: 'text-accent' },
               { name: 'Timemania', icon: '🎁', color: 'text-destructive' },
               { name: 'Dia de Sorte', icon: '🌟', color: 'text-primary' },
-              { name: 'Federal', icon: '🏛️', color: 'text-muted-foreground' },
+              { name: 'Loteca', icon: '⚽', color: 'text-muted-foreground' },
             ].map((lottery, index) => (
               <Card key={index} className="neon-border bg-card/30 hover:bg-card/50 transition-all duration-300 group">
                 <CardContent className="p-6 text-center">

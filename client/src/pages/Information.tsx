@@ -129,7 +129,27 @@ export default function Information() {
         { tier: '19 acertos', matches: 19, probability: '1 em 352.551', avgPrize: 'R$ 25.000' },
         { tier: '18 acertos', matches: 18, probability: '1 em 24.235', avgPrize: 'R$ 1.000' },
       ]
-    }
+    },
+    {
+        id: 'loteca',
+        name: 'Loteca',
+        displayName: 'LOTECA',
+        icon: '⚽',
+        color: 'primary',
+        minNumbers: 14,
+        maxNumbers: 14,
+        totalNumbers: 3,
+        drawDays: ['Sábado'],
+        drawTime: '20:00',
+        description: 'A loteria dos palpites esportivos! Faça seus palpites em 14 jogos de futebol.',
+        minBet: 'R$ 3,00',
+        maxBet: 'R$ 3,00',
+        prizes: [
+          { tier: '14 acertos', matches: 14, probability: '1 em 4.782.969', avgPrize: 'R$ 500.000+' },
+          { tier: '13 acertos', matches: 13, probability: '1 em 68.328', avgPrize: 'R$ 1.000' },
+          { tier: '12 acertos', matches: 12, probability: '1 em 2.187', avgPrize: 'R$ 50' },
+        ]
+      },
   ];
 
   const getColorClass = (color: string) => {
@@ -146,7 +166,7 @@ export default function Information() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -273,21 +293,21 @@ export default function Information() {
                           {lottery.minNumbers} - {lottery.maxNumbers}
                         </div>
                       </div>
-                      
+
                       <div className="text-center p-3 bg-muted/20 rounded-lg">
                         <div className="text-sm text-muted-foreground mb-1">Total</div>
                         <div className="font-bold text-foreground">
                           1 a {lottery.totalNumbers}
                         </div>
                       </div>
-                      
+
                       <div className="text-center p-3 bg-muted/20 rounded-lg">
                         <div className="text-sm text-muted-foreground mb-1">Aposta Mín.</div>
                         <div className="font-bold text-neon-green">
                           {lottery.minBet}
                         </div>
                       </div>
-                      
+
                       <div className="text-center p-3 bg-muted/20 rounded-lg">
                         <div className="text-sm text-muted-foreground mb-1">Sorteios</div>
                         <div className="font-bold text-foreground">
@@ -513,7 +533,7 @@ export default function Information() {
               <Zap className="h-4 w-4 mr-2" />
               Começar a Jogar
             </Button>
-            
+
             <Button 
               onClick={() => window.location.href = '/heat-map'}
               variant="outline"
