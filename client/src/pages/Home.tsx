@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
-import LotteryCard from "@/components/LotteryCard";
+import AllLotteriesCard from "@/components/AllLotteriesCard";
 import HeatMapGrid from "@/components/HeatMapGrid";
 import CelebrationAnimation from "@/components/CelebrationAnimation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,9 @@ import {
   Zap,
   Target,
   DollarSign,
-  BarChart3
+  BarChart3,
+  Activity,
+  Star
 } from "lucide-react";
 import type { UserGame } from "@/types/lottery";
 
@@ -149,26 +151,9 @@ export default function Home() {
           </Button>
         </div>
 
-        {/* Upcoming Draws Grid */}
+        {/* All Lotteries - Complete Dashboard */}
         <section className="mb-12">
-          <h3 className="text-xl font-bold text-primary mb-6 flex items-center">
-            <Calendar className="h-5 w-5 mr-3 text-neon-green" />
-            Próximos Sorteios
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mainLotteries.map((lottery) => (
-              <LotteryCard
-                key={lottery.id}
-                lotteryName={lottery.name}
-                displayName={lottery.displayName}
-                color={lottery.color}
-                icon={lottery.icon}
-                nextDraw={lottery.nextDraw}
-                isLoading={megasenaNextDraw.isLoading || lotofacilNextDraw.isLoading || quinaNextDraw.isLoading}
-              />
-            ))}
-          </div>
+          <AllLotteriesCard />
         </section>
 
         {/* Stats Overview */}
