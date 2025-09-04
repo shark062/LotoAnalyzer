@@ -39,10 +39,3 @@ export function useUserStats() {
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
-
-export function useRecentGames(limit = 10) {
-  return useQuery({
-    queryKey: ["/api/games", `limit=${limit}`],
-    staleTime: 2 * 60 * 1000, // 2 minutes
-  });
-}
