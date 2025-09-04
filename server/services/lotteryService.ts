@@ -265,9 +265,9 @@ class LotteryService {
         'lotomania': 'lotomania',
         'duplasena': 'duplasena',
         'supersete': 'supersete',
-        'milionaria': 'milionaria',
+        'milionaria': '+milionaria',
         'timemania': 'timemania',
-        'diadesore': 'diadesore',
+        'diadesore': 'diadesorte',
         'loteca': 'loteca'
       };
       
