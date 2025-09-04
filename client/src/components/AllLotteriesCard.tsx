@@ -112,7 +112,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
                 <div className="flex items-center justify-center space-x-1">
                   <Clock className="h-3 w-3 text-yellow-400 animate-pulse" />
                   <span className="text-xs font-mono text-yellow-400 font-bold">
-                    {String(nextDraw.timeRemaining.days).padStart(2, '0')}d {String(nextDraw.timeRemaining.hours).padStart(2, '0')}h {String(nextDraw.timeRemaining.minutes).padStart(2, '0')}m
+                    {String(nextDraw.timeRemaining.days).padStart(2, '0')}d {String(nextDraw.timeRemaining.hours).padStart(2, '0')}h {String(nextDraw.timeRemaining.minutes).padStart(2, '0')}m {String(nextDraw.timeRemaining.seconds || 0).padStart(2, '0')}s
                   </span>
                 </div>
               )}

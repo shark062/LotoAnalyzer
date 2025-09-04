@@ -82,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         contestNumber: 2850,
         drawDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-        timeRemaining: { days: 2, hours: 5, minutes: 30 },
+        timeRemaining: { days: 2, hours: 5, minutes: 30, seconds: 45 },
         estimatedPrize: 'R$ 50.000.000,00',
       });
     }

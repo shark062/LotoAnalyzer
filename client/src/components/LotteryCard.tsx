@@ -18,10 +18,10 @@ export default function LotteryCard({
   nextDraw,
   isLoading 
 }: LotteryCardProps) {
-  const formatTimeRemaining = (timeRemaining?: { days: number; hours: number; minutes: number }) => {
+  const formatTimeRemaining = (timeRemaining?: { days: number; hours: number; minutes: number; seconds?: number }) => {
     if (!timeRemaining) return "Carregando...";
-    const { days, hours, minutes } = timeRemaining;
-    return `${days.toString().padStart(2, '0')}d ${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m`;
+    const { days, hours, minutes, seconds } = timeRemaining;
+    return `${days.toString().padStart(2, '0')}d ${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${(seconds || 0).toString().padStart(2, '0')}s`;
   };
 
   const getColorClasses = (color: string) => {

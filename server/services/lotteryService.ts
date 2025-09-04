@@ -17,6 +17,7 @@ interface NextDrawInfo {
     days: number;
     hours: number;
     minutes: number;
+    seconds: number;
   };
   estimatedPrize: string;
 }
@@ -212,10 +213,11 @@ class LotteryService {
       const latestDraws = await storage.getLatestDraws(lotteryId, 1);
       const nextContestNumber = latestDraws.length > 0 ? latestDraws[0].contestNumber + 1 : 1;
 
+      const seconds = Math.floor((nextDrawDate.getTime() - now.getTime()) % (1000 * 60) / 1000);
       return {
         contestNumber: nextContestNumber,
         drawDate: nextDrawDate.toISOString(),
-        timeRemaining: { days, hours, minutes },
+        timeRemaining: { days, hours, minutes, seconds },
         estimatedPrize: this.getEstimatedPrize(lotteryId),
       };
     } catch (error) {
@@ -294,6 +296,7 @@ class LotteryService {
         const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
 
         // Store the latest draw in database for analysis (with proper date validation)
         let validDrawDate = new Date();
@@ -340,7 +343,7 @@ class LotteryService {
         return {
           contestNumber: data.numero + 1,
           drawDate: nextDrawDate.toISOString(),
-          timeRemaining: { days: Math.max(0, days), hours: Math.max(0, hours), minutes: Math.max(0, minutes) },
+          timeRemaining: { days: Math.max(0, days), hours: Math.max(0, hours), minutes: Math.max(0, minutes), seconds: Math.max(0, seconds) },
           estimatedPrize: formattedPrize
         };
       }
@@ -363,7 +366,7 @@ class LotteryService {
       'supersete': 'R$ 4.200.000,00',
       'milionaria': 'R$ 22.000.000,00',
       'timemania': 'R$ 2.800.000,00',
-      'diadesore': 'R$ 700.000,00',
+      'diadesore': 'R$ 1.500.000,00',
       'loteca': 'R$ 800.000,00'
     };
     return prizesMap[lotteryId] || 'R$ 1.000.000,00';
