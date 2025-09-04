@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLotteryTypes, useNextDrawInfo } from "@/hooks/useLotteryData";
-import { 
-  Trophy, 
-  TrendingUp, 
+import {
+  Trophy,
+  TrendingUp,
   Sparkles,
   Calendar,
   DollarSign,
@@ -187,7 +187,7 @@ export default function AllLotteriesCard() {
 
   if (!lotteryTypes || lotteryTypes.length === 0) {
     return (
-      <Card className="neon-border bg-card/30 backdrop-blur-sm">
+      <Card className="bg-card/30 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="text-primary flex items-center justify-between">
             <div className="flex items-center">
