@@ -155,7 +155,7 @@ export default function AllLotteriesCard() {
 
   if (lotteriesLoading) {
     return (
-      <Card className="bg-card/30 backdrop-blur-sm">
+      <Card className="bg-card/10 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="text-primary flex items-center justify-between">
             <div className="flex items-center">
@@ -187,7 +187,7 @@ export default function AllLotteriesCard() {
 
   if (!lotteryTypes || lotteryTypes.length === 0) {
     return (
-      <Card className="bg-card/30 backdrop-blur-sm">
+      <Card className="bg-card/10 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="text-primary flex items-center justify-between">
             <div className="flex items-center">
@@ -209,7 +209,7 @@ export default function AllLotteriesCard() {
   }
 
   return (
-    <Card className="bg-card/30 backdrop-blur-sm">
+    <Card className="bg-card/10 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-primary flex items-center justify-between">
           <div className="flex items-center">
