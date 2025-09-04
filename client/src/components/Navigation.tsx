@@ -97,35 +97,38 @@ export default function Navigation() {
       {/* Header */}
       <header className="relative z-50 bg-transparent text-white">
         <div className="container mx-auto px-6 py-6 relative">
-          {/* Mobile Menu Button - Canto Superior Direito */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="lg:hidden text-white hover:bg-white/20 absolute top-6 right-6 z-10"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            data-testid="mobile-menu-toggle"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-
-          <div className="flex items-center justify-center space-x-8">
+          <div className="flex items-center justify-between">
             {/* Logo Central */}
-            <Link href="/" className="flex items-center justify-center">
-              <div className="w-32 h-32">
-                <img 
-                  src={sharkLogo} 
-                  alt="Shark Loterias Logo" 
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.parentElement!.innerHTML = '<span class="text-4xl">🦈</span>';
-                  }}
-                />
-              </div>
-            </Link>
+            <div className="flex-1 flex justify-center">
+              <Link href="/" className="flex items-center justify-center">
+                <div className="w-32 h-32">
+                  <img 
+                    src={sharkLogo} 
+                    alt="Shark Loterias Logo" 
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement!.innerHTML = '<span class="text-4xl">🦈</span>';
+                    }}
+                  />
+                </div>
+              </Link>
+            </div>
 
-            {/* Navigation Buttons */}
-            <div className="hidden lg:flex items-center space-x-6">
+            {/* Mobile Menu Button - Alinhado com a imagem */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="lg:hidden text-white hover:bg-white/20"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              data-testid="mobile-menu-toggle"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Navigation Buttons - Desktop */}
+          <div className="hidden lg:flex items-center justify-center space-x-6 mt-4">
               <Button
                 variant="ghost"
                 className="text-white hover:bg-white/20 font-medium px-6 py-3 text-sm"
