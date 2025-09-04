@@ -96,15 +96,15 @@ export default function Navigation() {
     <>
       {/* Header */}
       <header className="relative z-50 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-        <div className="container mx-auto px-6 py-3">
+        <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-center space-x-8">
             {/* Logo Central */}
             <Link href="/" className="flex items-center justify-center">
-              <div className="w-24 h-24">
+              <div className="w-32 h-32 bg-white/10 rounded-full p-2 backdrop-blur-sm">
                 <img 
                   src={sharkLogo} 
                   alt="Shark Loterias Logo" 
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain filter drop-shadow-lg"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     e.currentTarget.parentElement!.innerHTML = '<span class="text-4xl">🦈</span>';
@@ -154,7 +154,7 @@ export default function Navigation() {
           </div>
 
           {/* Secondary Navigation Bar - Desktop Only */}
-          <div className="hidden lg:flex items-center justify-between mt-2 pt-2 border-t border-border/30">
+          <div className="hidden lg:flex items-center justify-between mt-4 pt-3 border-t border-border/30">
             <div className="flex items-center space-x-2 text-xs text-muted-foreground">
               <div className="flex items-center space-x-1 bg-neon-green/10 text-neon-green px-2 py-1 rounded-full border border-neon-green/30">
                 <div className="w-1.5 h-1.5 bg-neon-green rounded-full animate-pulse"></div>
