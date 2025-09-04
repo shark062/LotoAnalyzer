@@ -4,9 +4,9 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(240, 10%, 4%);
+  --background: hsl(240, 15%, 3%);
   --foreground: hsl(0, 0%, 95%);
-  --card: hsl(240, 10%, 7%);
+  --card: hsl(240, 15%, 8%);
   --card-foreground: hsl(0, 0%, 95%);
   --popover: hsl(240, 10%, 7%);
   --popover-foreground: hsl(0, 0%, 95%);
@@ -64,9 +64,9 @@
 }
 
 .dark {
-  --background: hsl(240, 10%, 4%);
+  --background: hsl(240, 15%, 3%);
   --foreground: hsl(0, 0%, 95%);
-  --card: hsl(240, 10%, 7%);
+  --card: hsl(240, 15%, 8%);
   --card-foreground: hsl(0, 0%, 95%);
   --popover: hsl(240, 10%, 7%);
   --popover-foreground: hsl(0, 0%, 95%);
@@ -101,6 +101,12 @@
 }
 
 @layer components {
+  .dark-card {
+    background: hsl(240, 15%, 8%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+  }
+
   .neon-border {
     border: 1px solid transparent;
     background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(139, 92, 246, 0.1)) padding-box,
