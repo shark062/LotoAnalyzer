@@ -20,9 +20,9 @@ export default function HeatMapGrid({
     const temperature = freq?.temperature || 'cold';
     
     const styles = {
-      hot: "bg-black/20",
-      warm: "bg-black/20",
-      cold: "bg-black/20"
+      hot: "bg-red-500/80 text-white border-red-400 hover:bg-red-600/90",
+      warm: "bg-yellow-500/80 text-white border-yellow-400 hover:bg-yellow-600/90", 
+      cold: "bg-blue-500/80 text-white border-blue-400 hover:bg-blue-600/90"
     };
     
     return styles[temperature];
@@ -80,7 +80,7 @@ export default function HeatMapGrid({
               <button
                 key={number}
                 onClick={() => onNumberClick?.(number)}
-                className={`aspect-square ${style} rounded-lg flex items-center justify-center font-bold shadow-lg hover:scale-110 transition-transform duration-200 cursor-pointer`}
+                className={`aspect-square ${style} rounded-lg flex items-center justify-center font-bold shadow-lg hover:scale-110 transition-all duration-200 cursor-pointer border-2`}
                 title={`Número ${number} - ${freq?.frequency || 0} vezes - ${freq?.temperature || 'cold'}`}
                 data-testid={`number-${number}`}
                 data-temperature={freq?.temperature || 'cold'}
@@ -94,7 +94,7 @@ export default function HeatMapGrid({
         {/* Legend */}
         <div className="flex justify-center space-x-6 text-sm">
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-black/20">
+            <div className="w-4 h-4 bg-red-500 rounded border border-red-400 flex items-center justify-center text-xs">
               🔥
             </div>
             <span className="text-muted-foreground">
@@ -102,7 +102,7 @@ export default function HeatMapGrid({
             </span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-black/20">
+            <div className="w-4 h-4 bg-yellow-500 rounded border border-yellow-400 flex items-center justify-center text-xs">
               ♨️
             </div>
             <span className="text-muted-foreground">
@@ -110,7 +110,7 @@ export default function HeatMapGrid({
             </span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-black/20">
+            <div className="w-4 h-4 bg-blue-500 rounded border border-blue-400 flex items-center justify-center text-xs">
               ❄️
             </div>
             <span className="text-muted-foreground">

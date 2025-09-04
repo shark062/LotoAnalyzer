@@ -24,7 +24,7 @@ import {
 import type { NumberFrequency } from "@/types/lottery";
 
 export default function HeatMap() {
-  const [selectedLottery, setSelectedLottery] = useState<string>('megasena');
+  const [selectedLottery, setSelectedLottery] = useState<string>('');
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
