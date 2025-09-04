@@ -213,12 +213,12 @@ export default function Information() {
           </Card>
         </div>
 
-        {/* How SHARK LOTO Works */}
+        {/* How Shark Loterias Works */}
         <Card className="neon-border bg-black/20">
           <CardHeader>
             <CardTitle className="text-primary flex items-center">
               <Brain className="h-6 w-6 mr-2" />
-              Como o SHARK LOTO Funciona
+              Como o Shark Loterias Funciona
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -407,7 +407,7 @@ export default function Information() {
               <div className="flex items-start space-x-3">
                 <CheckCircle className="h-5 w-5 text-neon-green mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="font-medium text-foreground mb-1">Use a IA do SHARK LOTO</h4>
+                  <h4 className="font-medium text-foreground mb-1">Use a IA do Shark Loterias</h4>
                   <p className="text-sm text-muted-foreground">
                     Nossa inteligência artificial aprende continuamente para otimizar suas chances.
                   </p>
@@ -461,7 +461,7 @@ export default function Information() {
                     Posso jogar offline?
                   </AccordionTrigger>
                   <AccordionContent className="text-sm text-muted-foreground">
-                    O SHARK LOTO funciona online e offline. Você pode gerar jogos offline, 
+                    O Shark Loterias funciona online e offline. Você pode gerar jogos offline, 
                     mas precisa estar online para sincronizar dados e verificar resultados.
                   </AccordionContent>
                 </AccordionItem>
@@ -484,7 +484,7 @@ export default function Information() {
               <div>
                 <h4 className="font-medium text-foreground mb-1">Não Garantimos Prêmios</h4>
                 <p className="text-sm text-muted-foreground">
-                  O SHARK LOTO é uma ferramenta de análise estatística. Não garantimos vitórias ou prêmios em qualquer modalidade de loteria.
+                  O Shark Loterias é uma ferramenta de análise estatística. Não garantimos vitórias ou prêmios em qualquer modalidade de loteria.
                 </p>
               </div>
             </div>
@@ -512,7 +512,7 @@ export default function Information() {
             <div className="bg-black/20 rounded-lg p-4 mt-4">
               <div className="flex items-center space-x-2 mb-2">
                 <Shield className="h-5 w-5 text-primary" />
-                <span className="font-medium text-foreground">Objetivo do SHARK LOTO</span>
+                <span className="font-medium text-foreground">Objetivo do Shark Loterias</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 Nossa missão é fornecer ferramentas de análise estatística avançada para ajudar usuários a tomar 

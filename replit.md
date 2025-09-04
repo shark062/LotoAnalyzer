@@ -1,8 +1,8 @@
-# SHARK LOTO 💵
+# Shark Loterias 💵
 
 ## Overview
 
-SHARK LOTO is a hybrid lottery analysis application that provides intelligent analysis for all Brazilian federal lottery games (Mega-Sena, Lotofácil, Lotomania, Super Sete, +Milionária, Quina, Dupla Sena, etc.). The application features AI-powered analysis using OpenAI's GPT models, real-time data from official lottery sources, and advanced pattern recognition to help users make informed decisions about their lottery game strategies.
+Shark Loterias is a hybrid lottery analysis application that provides intelligent analysis for all Brazilian federal lottery games (Mega-Sena, Lotofácil, Lotomania, Super Sete, +Milionária, Quina, Dupla Sena, etc.). The application features AI-powered analysis using OpenAI's GPT models, real-time data from official lottery sources, and advanced pattern recognition to help users make informed decisions about their lottery game strategies.
 
 ## User Preferences
 
@@ -88,7 +88,7 @@ Preferred communication style: Simple, everyday language.
 
 ### September 04, 2025 - Dashboard Complete Overhaul ✅
 
-**SHARK LOTO Dashboard Completed Successfully!**
+**Shark Loterias Dashboard Completed Successfully!**
 
 - ✅ **All Lottery Modalities**: Complete dashboard with all 8 Brazilian federal lottery types
 - ✅ **Real-Time Data**: Integration with Caixa Econômica Federal API for live information

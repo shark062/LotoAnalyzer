@@ -50,7 +50,7 @@ export default function Landing() {
             </div>
             <div>
               <h1 className="text-6xl md:text-8xl font-bold neon-text text-primary mb-2">
-                SHARK LOTO 💵
+                Shark Loterias 💵
               </h1>
               <p className="text-xl text-muted-foreground font-mono">
                 Powered by Shark062
@@ -227,7 +227,7 @@ export default function Landing() {
           
           <div className="max-w-2xl mx-auto mb-6">
             <p className="text-sm text-muted-foreground mb-2">
-              🤖 <span className="text-secondary">SHARK LOTO</span> utiliza inteligência artificial avançada para analisar padrões, 
+              🤖 <span className="text-secondary">Shark Loterias</span> utiliza inteligência artificial avançada para analisar padrões, 
               aprender continuamente e maximizar suas chances de acerto nas loterias federais.
             </p>
             <p className="text-xs text-muted-foreground opacity-75">

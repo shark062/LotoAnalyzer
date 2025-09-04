@@ -21,7 +21,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const mockUser = {
         id: "guest-user",
         name: "SHARK User", 
-        email: "user@sharkloto.com"
+        email: "user@sharkloterias.com"
       };
       res.json(mockUser);
     } catch (error) {

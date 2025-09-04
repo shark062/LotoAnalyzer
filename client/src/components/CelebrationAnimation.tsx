@@ -153,7 +153,7 @@ export default function CelebrationAnimation({
                 transition={{ delay: 0.9 }}
                 className="text-lg text-primary mb-6"
               >
-                Continue jogando com SHARK LOTO!
+                Continue jogando com Shark Loterias!
               </motion.p>
               
               <motion.div

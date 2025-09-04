@@ -210,7 +210,7 @@ export default function Navigation() {
                   <span className="text-xl">🦈</span>
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold neon-text text-primary">SHARK LOTO</h2>
+                  <h2 className="text-lg font-bold neon-text text-primary">Shark Loterias</h2>
                   <p className="text-xs text-muted-foreground">Menu Principal</p>
                 </div>
               </div>
