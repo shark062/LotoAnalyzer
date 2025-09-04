@@ -39,7 +39,7 @@ export default function HeatMapGrid({
 
   if (isLoading) {
     return (
-      <Card className="bg-card/30 backdrop-blur-sm">
+      <Card className="bg-black/20 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="text-primary flex items-center">
             <Flame className="h-5 w-5 mr-2 text-destructive" />
@@ -61,7 +61,7 @@ export default function HeatMapGrid({
   }
 
   return (
-    <Card className="bg-card/30 backdrop-blur-sm" data-testid="heat-map-grid">
+    <Card className="bg-black/20 backdrop-blur-sm" data-testid="heat-map-grid">
       <CardHeader>
         <CardTitle className="text-primary flex items-center">
           <Flame className="h-5 w-5 mr-2 text-destructive" />

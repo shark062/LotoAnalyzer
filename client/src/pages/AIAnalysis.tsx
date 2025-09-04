@@ -252,7 +252,7 @@ export default function AIAnalysis() {
         <div className="space-y-6">
           {/* Pattern Analysis */}
           {activeTab === 'pattern' && (
-            <Card className="neon-border bg-card/30 backdrop-blur-sm">
+            <Card className="neon-border bg-black/20 backdrop-blur-sm">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-primary flex items-center">
                   <Eye className="h-5 w-5 mr-2" />
@@ -273,7 +273,7 @@ export default function AIAnalysis() {
                 {patternLoading ? (
                   <div className="space-y-4">
                     {[...Array(3)].map((_, i) => (
-                      <div key={i} className="p-4 bg-muted/20 rounded-lg animate-pulse">
+                      <div key={i} className="p-4 bg-black/20 rounded-lg animate-pulse">
                         <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
                         <div className="h-3 bg-muted rounded w-1/2"></div>
                       </div>
@@ -282,7 +282,7 @@ export default function AIAnalysis() {
                 ) : patternAnalysis?.result?.patterns ? (
                   <div className="space-y-4">
                     {(patternAnalysis.result.patterns as PatternAnalysis[]).map((pattern, index) => (
-                      <Card key={index} className="bg-muted/20 border-border/50">
+                      <Card key={index} className="bg-black/20 border-border/50">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-3">
                             <h4 className="font-semibold text-foreground">{pattern.pattern}</h4>
@@ -331,7 +331,7 @@ export default function AIAnalysis() {
 
           {/* Prediction Analysis */}
           {activeTab === 'prediction' && (
-            <Card className="neon-border bg-card/30 backdrop-blur-sm">
+            <Card className="neon-border bg-black/20 backdrop-blur-sm">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-secondary flex items-center">
                   <Brain className="h-5 w-5 mr-2" />
@@ -351,7 +351,7 @@ export default function AIAnalysis() {
               <CardContent>
                 {predictionLoading ? (
                   <div className="space-y-4 animate-pulse">
-                    <div className="p-6 bg-muted/20 rounded-lg">
+                    <div className="p-6 bg-black/20 rounded-lg">
                       <div className="h-6 bg-muted rounded w-1/2 mb-4"></div>
                       <div className="flex space-x-2 mb-4">
                         {[...Array(6)].map((_, i) => (
@@ -421,7 +421,7 @@ export default function AIAnalysis() {
                         <h5 className="text-lg font-semibold text-foreground mb-4">Alternativas</h5>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {predictionAnalysis.result.alternatives.slice(0, 4).map((alt: any, index: number) => (
-                            <Card key={index} className="bg-muted/20 border-border/50">
+                            <Card key={index} className="bg-black/20 border-border/50">
                               <CardContent className="p-4">
                                 <div className="flex items-center justify-between mb-3">
                                   <h6 className="font-medium text-foreground">{alt.strategy}</h6>
@@ -461,7 +461,7 @@ export default function AIAnalysis() {
 
           {/* Strategy Analysis */}
           {activeTab === 'strategy' && (
-            <Card className="neon-border bg-card/30 backdrop-blur-sm">
+            <Card className="neon-border bg-black/20 backdrop-blur-sm">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-accent flex items-center">
                   <Target className="h-5 w-5 mr-2" />
@@ -481,7 +481,7 @@ export default function AIAnalysis() {
               <CardContent>
                 {strategyLoading ? (
                   <div className="space-y-4 animate-pulse">
-                    <div className="p-4 bg-muted/20 rounded-lg">
+                    <div className="p-4 bg-black/20 rounded-lg">
                       <div className="h-6 bg-muted rounded w-1/3 mb-4"></div>
                       <div className="h-4 bg-muted rounded w-full mb-2"></div>
                       <div className="h-4 bg-muted rounded w-2/3"></div>
@@ -544,7 +544,7 @@ export default function AIAnalysis() {
 
                     {/* Additional Recommendations */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card className="bg-muted/20 border-border/50">
+                      <Card className="bg-black/20 border-border/50">
                         <CardContent className="p-4">
                           <div className="flex items-center mb-3">
                             <Calendar className="h-5 w-5 mr-2 text-primary" />
@@ -556,7 +556,7 @@ export default function AIAnalysis() {
                         </CardContent>
                       </Card>
 
-                      <Card className="bg-muted/20 border-border/50">
+                      <Card className="bg-black/20 border-border/50">
                         <CardContent className="p-4">
                           <div className="flex items-center mb-3">
                             <Calculator className="h-5 w-5 mr-2 text-neon-green" />

@@ -193,7 +193,7 @@ export default function Home() {
           </h3>
           
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="neon-border bg-card/30 text-center">
+            <Card className="neon-border bg-black/20 text-center">
               <CardContent className="p-4">
                 <div className="text-2xl font-bold text-primary neon-text" data-testid="stat-total-games">
                   {statsLoading ? "..." : userStats?.totalGames || 0}
@@ -202,7 +202,7 @@ export default function Home() {
               </CardContent>
             </Card>
             
-            <Card className="neon-border bg-card/30 text-center">
+            <Card className="neon-border bg-black/20 text-center">
               <CardContent className="p-4">
                 <div className="text-2xl font-bold text-neon-green neon-text" data-testid="stat-wins">
                   {statsLoading ? "..." : userStats?.wins || 0}
@@ -211,7 +211,7 @@ export default function Home() {
               </CardContent>
             </Card>
             
-            <Card className="neon-border bg-card/30 text-center">
+            <Card className="neon-border bg-black/20 text-center">
               <CardContent className="p-4">
                 <div className="text-2xl font-bold text-accent neon-text" data-testid="stat-accuracy">
                   {statsLoading ? "..." : `${userStats?.accuracy || 0}%`}
@@ -220,7 +220,7 @@ export default function Home() {
               </CardContent>
             </Card>
             
-            <Card className="neon-border bg-card/30 text-center">
+            <Card className="neon-border bg-black/20 text-center">
               <CardContent className="p-4">
                 <div className="text-2xl font-bold text-secondary neon-text" data-testid="stat-ai-level">
                   Nível {Math.min(10, Math.floor((userStats?.totalGames || 0) / 10) + 1)}
@@ -257,7 +257,7 @@ export default function Home() {
               onNumberClick={(number) => console.log(`Selected number: ${number}`)}
             />
           ) : (
-            <Card className="neon-border bg-card/30 backdrop-blur-sm">
+            <Card className="neon-border bg-black/20 backdrop-blur-sm">
               <CardContent className="p-6 text-center">
                 <div className="text-muted-foreground">
                   {frequenciesLoading ? "Carregando dados do mapa de calor..." : "Dados não disponíveis"}
@@ -276,7 +276,7 @@ export default function Home() {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* AI Status */}
-            <Card className="neon-border bg-card/30 backdrop-blur-sm">
+            <Card className="neon-border bg-black/20 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="text-secondary flex items-center">
                   <Sparkles className="h-5 w-5 mr-2" />
@@ -331,7 +331,7 @@ export default function Home() {
             </Card>
 
             {/* Recent Results */}
-            <Card className="neon-border bg-card/30 backdrop-blur-sm">
+            <Card className="neon-border bg-black/20 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="text-accent flex items-center">
                   <Trophy className="h-5 w-5 mr-2" />
@@ -342,7 +342,7 @@ export default function Home() {
                 {gamesLoading ? (
                   <div className="space-y-3">
                     {[...Array(3)].map((_, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg animate-pulse">
+                      <div key={i} className="flex items-center justify-between p-3 bg-black/20 rounded-lg animate-pulse">
                         <div className="flex items-center space-x-3">
                           <div className="w-8 h-8 bg-muted rounded-full"></div>
                           <div className="space-y-1">
@@ -365,7 +365,7 @@ export default function Home() {
                     return (
                       <div 
                         key={game.id}
-                        className={`flex items-center justify-between p-3 bg-muted/20 rounded-lg ${!hasWon ? 'opacity-50' : ''}`}
+                        className={`flex items-center justify-between p-3 bg-black/20 rounded-lg ${!hasWon ? 'opacity-50' : ''}`}
                         data-testid={`recent-result-${index}`}
                       >
                         <div className="flex items-center space-x-3">
@@ -464,7 +464,7 @@ export default function Home() {
                 key={lottery.id}
                 onClick={() => window.location.href = `/generator?lottery=${lottery.id}`}
                 variant="ghost"
-                className="neon-border h-auto p-4 bg-card/20 hover:bg-card/40 transition-all duration-300 group text-center flex-col space-y-3"
+                className="neon-border h-auto p-4 bg-black/20 hover:bg-black/20 transition-all duration-300 group text-center flex-col space-y-3"
                 data-testid={`lottery-button-${lottery.id}`}
               >
                 <div className={`w-12 h-12 bg-gradient-to-br ${lottery.color} rounded-full flex items-center justify-center mx-auto group-hover:animate-pulse`}>

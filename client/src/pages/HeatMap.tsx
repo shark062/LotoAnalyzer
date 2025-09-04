@@ -195,7 +195,7 @@ export default function HeatMap() {
         {/* Analysis Panels */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Most Frequent Numbers */}
-          <Card className="neon-border bg-card/30">
+          <Card className="neon-border bg-black/20">
             <CardHeader>
               <CardTitle className="text-destructive flex items-center">
                 <TrendingUp className="h-5 w-5 mr-2" />
@@ -204,7 +204,7 @@ export default function HeatMap() {
             </CardHeader>
             <CardContent className="space-y-3">
               {mostFrequent.map((freq, index) => (
-                <div key={freq.number} className="flex items-center justify-between p-2 bg-muted/20 rounded">
+                <div key={freq.number} className="flex items-center justify-between p-2 bg-black/20 rounded">
                   <div className="flex items-center space-x-3">
                     <Badge variant="destructive" className="w-8 h-8 rounded-full flex items-center justify-center p-0">
                       {freq.number}
@@ -223,7 +223,7 @@ export default function HeatMap() {
           </Card>
 
           {/* Least Frequent Numbers */}
-          <Card className="neon-border bg-card/30">
+          <Card className="neon-border bg-black/20">
             <CardHeader>
               <CardTitle className="text-primary flex items-center">
                 <TrendingDown className="h-5 w-5 mr-2" />
@@ -232,7 +232,7 @@ export default function HeatMap() {
             </CardHeader>
             <CardContent className="space-y-3">
               {leastFrequent.map((freq, index) => (
-                <div key={freq.number} className="flex items-center justify-between p-2 bg-muted/20 rounded">
+                <div key={freq.number} className="flex items-center justify-between p-2 bg-black/20 rounded">
                   <div className="flex items-center space-x-3">
                     <Badge variant="secondary" className="w-8 h-8 rounded-full flex items-center justify-center p-0 bg-primary text-primary-foreground">
                       {freq.number}
@@ -251,7 +251,7 @@ export default function HeatMap() {
           </Card>
 
           {/* Selected Number Details */}
-          <Card className="neon-border bg-card/30">
+          <Card className="neon-border bg-black/20">
             <CardHeader>
               <CardTitle className="text-accent flex items-center">
                 <Target className="h-5 w-5 mr-2" />

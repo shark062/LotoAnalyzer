@@ -118,7 +118,7 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-card/30">
+      <section id="features" className="py-20 bg-black/20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-primary neon-text mb-4">
@@ -131,7 +131,7 @@ export default function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="neon-border bg-card/50 backdrop-blur-sm hover:animate-float transition-all duration-300">
+              <Card key={index} className="neon-border bg-black/20 backdrop-blur-sm hover:animate-float transition-all duration-300">
                 <CardContent className="p-6 text-center">
                   <div className="mb-4 flex justify-center">
                     {feature.icon}
@@ -174,7 +174,7 @@ export default function Landing() {
               { name: 'Dia de Sorte', icon: '🌟', color: 'text-primary' },
               { name: 'Loteca', icon: '⚽', color: 'text-muted-foreground' },
             ].map((lottery, index) => (
-              <Card key={index} className="neon-border bg-card/30 hover:bg-card/50 transition-all duration-300 group">
+              <Card key={index} className="neon-border bg-black/20 hover:bg-black/20 transition-all duration-300 group">
                 <CardContent className="p-6 text-center">
                   <div className="text-4xl mb-3 group-hover:animate-pulse">
                     {lottery.icon}
@@ -216,7 +216,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 bg-card/30 backdrop-blur-sm py-12">
+      <footer className="border-t border-border/50 bg-black/20 backdrop-blur-sm py-12">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">

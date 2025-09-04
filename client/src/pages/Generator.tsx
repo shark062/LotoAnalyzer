@@ -207,7 +207,7 @@ export default function Generator() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Generator Form */}
-          <Card className="neon-border bg-card/30 backdrop-blur-sm">
+          <Card className="neon-border bg-black/20 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-primary flex items-center">
                 <Settings className="h-5 w-5 mr-2" />
@@ -300,7 +300,7 @@ export default function Generator() {
                           className={`cursor-pointer transition-all duration-200 ${
                             isSelected 
                               ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary' 
-                              : 'bg-muted/10 border-border hover:bg-muted/20 hover:border-primary/50'
+                              : 'bg-black/20 border-border hover:bg-black/20 hover:border-primary/50'
                           }`}
                           onClick={() => form.setValue('strategy', strategy)}
                         >
@@ -434,7 +434,7 @@ export default function Generator() {
           </Card>
 
           {/* Generated Games */}
-          <Card className="neon-border bg-card/30 backdrop-blur-sm">
+          <Card className="neon-border bg-black/20 backdrop-blur-sm">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-accent flex items-center">
                 <Dice6 className="h-5 w-5 mr-2" />
@@ -460,7 +460,7 @@ export default function Generator() {
                   const strategyInfo = getStrategyInfo(game.strategy);
                   
                   return (
-                    <Card key={index} className="bg-muted/20 border-border/50">
+                    <Card key={index} className="bg-black/20 border-border/50">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center space-x-2">

@@ -212,7 +212,7 @@ export default function Results() {
         )}
 
         {/* Filters */}
-        <Card className="bg-card/30 mb-6">
+        <Card className="bg-black/20 mb-6">
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="flex items-center space-x-2">
@@ -253,7 +253,7 @@ export default function Results() {
         </Card>
 
         {/* Games List */}
-        <Card className="bg-card/30 backdrop-blur-sm">
+        <Card className="bg-black/20 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-primary flex items-center">
               <Target className="h-5 w-5 mr-2" />
@@ -264,7 +264,7 @@ export default function Results() {
             {gamesLoading ? (
               <div className="space-y-4">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="p-4 bg-muted/20 rounded-lg animate-pulse">
+                  <div key={i} className="p-4 bg-black/20 rounded-lg animate-pulse">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <div className="w-20 h-4 bg-muted rounded"></div>
@@ -288,7 +288,7 @@ export default function Results() {
                   const hasWon = prizeWon > 0;
                   
                   return (
-                    <Card key={game.id} className={`bg-muted/10 border-border/50 ${hasWon ? 'ring-1 ring-neon-green/30' : ''}`}>
+                    <Card key={game.id} className={`bg-black/20 border-border/50 ${hasWon ? 'ring-1 ring-neon-green/30' : ''}`}>
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center space-x-3">

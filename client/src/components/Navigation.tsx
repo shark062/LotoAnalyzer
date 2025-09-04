@@ -95,7 +95,7 @@ export default function Navigation() {
   return (
     <>
       {/* Header */}
-      <header className="relative z-50 border-b border-border/50 bg-card/80 backdrop-blur-sm">
+      <header className="relative z-50 border-b border-border/50 bg-black/20 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
@@ -132,7 +132,7 @@ export default function Navigation() {
             {/* Desktop Navigation Tabs */}
             <div className="hidden lg:block">
               <Tabs value={location === "/" ? "/" : location} className="w-auto">
-                <TabsList className="bg-card/50 backdrop-blur-sm border border-border/50 p-1">
+                <TabsList className="bg-black/20 backdrop-blur-sm border border-border/50 p-1">
                   {navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = location === item.href;
@@ -227,7 +227,7 @@ export default function Navigation() {
                     className={`flex items-center justify-between p-4 rounded-xl transition-all duration-300 group ${
                       isActive 
                         ? "text-primary bg-primary/10 border border-primary/30" 
-                        : "text-muted-foreground hover:text-primary hover:bg-card/40 border border-transparent"
+                        : "text-muted-foreground hover:text-primary hover:bg-black/20 border border-transparent"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                     data-testid={`mobile-nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
@@ -324,7 +324,7 @@ export default function Navigation() {
           })}
           
           {/* Status Indicator */}
-          <div className="mt-4 p-3 bg-card/50 border border-border/50 rounded-lg backdrop-blur-sm">
+          <div className="mt-4 p-3 bg-black/20 border border-border/50 rounded-lg backdrop-blur-sm">
             <div className="text-xs text-center space-y-1">
               <div className="flex items-center justify-center space-x-1 text-neon-green">
                 <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>

@@ -180,7 +180,7 @@ export default function Information() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="neon-border bg-card/30 text-center">
+          <Card className="neon-border bg-black/20 text-center">
             <CardContent className="p-4">
               <Target className="h-8 w-8 mx-auto mb-2 text-primary" />
               <div className="text-2xl font-bold text-primary neon-text">8</div>
@@ -188,7 +188,7 @@ export default function Information() {
             </CardContent>
           </Card>
 
-          <Card className="neon-border bg-card/30 text-center">
+          <Card className="neon-border bg-black/20 text-center">
             <CardContent className="p-4">
               <Clock className="h-8 w-8 mx-auto mb-2 text-accent" />
               <div className="text-2xl font-bold text-accent neon-text">6x</div>
@@ -196,7 +196,7 @@ export default function Information() {
             </CardContent>
           </Card>
 
-          <Card className="neon-border bg-card/30 text-center">
+          <Card className="neon-border bg-black/20 text-center">
             <CardContent className="p-4">
               <DollarSign className="h-8 w-8 mx-auto mb-2 text-neon-green" />
               <div className="text-2xl font-bold text-neon-green neon-text">R$ 2,50</div>
@@ -204,7 +204,7 @@ export default function Information() {
             </CardContent>
           </Card>
 
-          <Card className="neon-border bg-card/30 text-center">
+          <Card className="neon-border bg-black/20 text-center">
             <CardContent className="p-4">
               <Users className="h-8 w-8 mx-auto mb-2 text-secondary" />
               <div className="text-2xl font-bold text-secondary neon-text">Milhões</div>
@@ -257,7 +257,7 @@ export default function Information() {
         </Card>
 
         {/* Lottery Information */}
-        <Card className="neon-border bg-card/30 backdrop-blur-sm mb-8">
+        <Card className="neon-border bg-black/20 backdrop-blur-sm mb-8">
           <CardHeader>
             <CardTitle className="text-accent flex items-center">
               <BookOpen className="h-6 w-6 mr-2" />
@@ -287,28 +287,28 @@ export default function Information() {
 
                     {/* Basic Info */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center p-3 bg-muted/20 rounded-lg">
+                      <div className="text-center p-3 bg-black/20 rounded-lg">
                         <div className="text-sm text-muted-foreground mb-1">Números</div>
                         <div className="font-bold text-foreground">
                           {lottery.minNumbers} - {lottery.maxNumbers}
                         </div>
                       </div>
 
-                      <div className="text-center p-3 bg-muted/20 rounded-lg">
+                      <div className="text-center p-3 bg-black/20 rounded-lg">
                         <div className="text-sm text-muted-foreground mb-1">Total</div>
                         <div className="font-bold text-foreground">
                           1 a {lottery.totalNumbers}
                         </div>
                       </div>
 
-                      <div className="text-center p-3 bg-muted/20 rounded-lg">
+                      <div className="text-center p-3 bg-black/20 rounded-lg">
                         <div className="text-sm text-muted-foreground mb-1">Aposta Mín.</div>
                         <div className="font-bold text-neon-green">
                           {lottery.minBet}
                         </div>
                       </div>
 
-                      <div className="text-center p-3 bg-muted/20 rounded-lg">
+                      <div className="text-center p-3 bg-black/20 rounded-lg">
                         <div className="text-sm text-muted-foreground mb-1">Sorteios</div>
                         <div className="font-bold text-foreground">
                           {lottery.drawTime}
@@ -324,7 +324,7 @@ export default function Information() {
                       </h4>
                       <div className="space-y-2">
                         {lottery.prizes.map((prize, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                          <div key={index} className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
                             <div className="flex items-center space-x-3">
                               <Badge variant="secondary" className="w-8 h-8 rounded-full flex items-center justify-center p-0">
                                 {prize.matches}
@@ -366,7 +366,7 @@ export default function Information() {
         {/* Tips and Strategies */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Tips */}
-          <Card className="neon-border bg-card/30">
+          <Card className="neon-border bg-black/20">
             <CardHeader>
               <CardTitle className="text-secondary flex items-center">
                 <Lightbulb className="h-5 w-5 mr-2" />
@@ -417,7 +417,7 @@ export default function Information() {
           </Card>
 
           {/* FAQ */}
-          <Card className="neon-border bg-card/30">
+          <Card className="neon-border bg-black/20">
             <CardHeader>
               <CardTitle className="text-accent flex items-center">
                 <HelpCircle className="h-5 w-5 mr-2" />
@@ -509,7 +509,7 @@ export default function Information() {
               </div>
             </div>
 
-            <div className="bg-muted/20 rounded-lg p-4 mt-4">
+            <div className="bg-black/20 rounded-lg p-4 mt-4">
               <div className="flex items-center space-x-2 mb-2">
                 <Shield className="h-5 w-5 text-primary" />
                 <span className="font-medium text-foreground">Objetivo do SHARK LOTO</span>
