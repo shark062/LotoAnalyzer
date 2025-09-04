@@ -42,12 +42,12 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
       'lotofacil': 'text-purple-400',
       'quina': 'text-yellow-400',
       'lotomania': 'text-pink-400',
-      'duplasena': 'text-orange-400',
+      'duplasena': 'text-yellow-400',
       'supersete': 'text-red-400',
       'milionaria': 'text-green-400',
       'timemania': 'text-rose-400'
     };
-    return colors[id] || 'text-primary';
+    return colors[id] || 'text-pink-400';
   };
 
   const getGradientClass = (id: string) => {
@@ -110,8 +110,8 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
 
               {nextDraw.timeRemaining && (
                 <div className="flex items-center justify-center space-x-1">
-                  <Clock className="h-3 w-3 text-accent" />
-                  <span className="text-xs font-mono text-accent">
+                  <Clock className="h-3 w-3 text-yellow-400" />
+                  <span className="text-xs font-mono text-yellow-400">
                     {nextDraw.timeRemaining.days}d {nextDraw.timeRemaining.hours}h {nextDraw.timeRemaining.minutes}m
                   </span>
                 </div>
@@ -209,7 +209,7 @@ export default function AllLotteriesCard() {
   }
 
   return (
-    <Card className="bg-card/10 backdrop-blur-sm">
+    <Card className="bg-card/20 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-primary flex items-center justify-between">
           <div className="flex items-center">
