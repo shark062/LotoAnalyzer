@@ -154,7 +154,6 @@ export default function Navigation() {
                 RESULTADOS
               </Button>
             </div>
-          </div>
 
           {/* Secondary Navigation Bar - Desktop Only */}
           <div className="hidden lg:flex items-center justify-between mt-4 pt-3 border-t border-border/30">
