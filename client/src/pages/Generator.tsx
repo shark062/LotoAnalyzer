@@ -67,8 +67,8 @@ export default function Generator() {
     resolver: zodResolver(generateGameSchema),
     defaultValues: {
       lotteryId: preselectedLottery || '',
-      numbersCount: 6,
-      gamesCount: 1,
+      numbersCount: undefined,
+      gamesCount: undefined,
       strategy: 'mixed',
     },
   });
@@ -254,6 +254,7 @@ export default function Generator() {
                       type="number"
                       min={selectedLottery?.minNumbers || 1}
                       max={selectedLottery?.maxNumbers || 60}
+                      placeholder="Ex: 6"
                       {...form.register('numbersCount', { valueAsNumber: true })}
                       className="bg-input border-border"
                       data-testid="numbers-count-input"
@@ -274,6 +275,7 @@ export default function Generator() {
                       type="number"
                       min={1}
                       max={100}
+                      placeholder="Ex: 3"
                       {...form.register('gamesCount', { valueAsNumber: true })}
                       className="bg-input border-border"
                       data-testid="games-count-input"
@@ -283,50 +285,126 @@ export default function Generator() {
 
                 {/* Strategy Selection */}
                 <div>
-                  <Label className="flex items-center text-sm font-medium text-foreground mb-3">
+                  <Label className="flex items-center text-sm font-medium text-foreground mb-4">
                     <Brain className="h-4 w-4 mr-2 text-secondary" />
-                    Estratégia
+                    Estratégia de Números
                   </Label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-3">
                     {(['hot', 'cold', 'mixed', 'ai'] as const).map((strategy) => {
                       const info = getStrategyInfo(strategy);
                       const isSelected = form.watch('strategy') === strategy;
                       
                       return (
-                        <Button
+                        <Card 
                           key={strategy}
-                          type="button"
-                          variant={isSelected ? "default" : "outline"}
-                          className={`h-auto p-3 text-left ${
-                            isSelected ? 'bg-gradient-to-r from-primary to-secondary neon-border' : ''
+                          className={`cursor-pointer transition-all duration-200 ${
+                            isSelected 
+                              ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary neon-border' 
+                              : 'bg-muted/10 border-border hover:bg-muted/20 hover:border-primary/50'
                           }`}
                           onClick={() => form.setValue('strategy', strategy)}
-                          data-testid={`strategy-${strategy}-button`}
                         >
-                          <div className="flex items-center space-x-2 mb-1">
-                            {info.icon}
-                            <span className="font-medium">{info.name}</span>
-                            <span>{info.emoji}</span>
-                          </div>
-                          <div className="text-xs opacity-75">{info.description}</div>
-                        </Button>
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center space-x-3">
+                                <div className="p-2 rounded-full bg-background">
+                                  {info.icon}
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-foreground flex items-center">
+                                    {info.name}
+                                    <span className="ml-2 text-lg">{info.emoji}</span>
+                                  </h4>
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    {info.description}
+                                  </p>
+                                </div>
+                              </div>
+                              {isSelected && (
+                                <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                                  <div className="w-2 h-2 rounded-full bg-white"></div>
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Strategy Info */}
-                {form.watch('strategy') === 'mixed' && (
-                  <Card className="bg-secondary/10 border border-secondary/30">
+                {/* Strategy Details */}
+                {form.watch('strategy') && (
+                  <Card className="bg-gradient-to-r from-accent/5 to-secondary/5 border-accent/30">
                     <CardContent className="p-4">
-                      <h5 className="font-medium text-secondary mb-2 flex items-center">
+                      <h5 className="font-medium text-accent mb-3 flex items-center">
                         <Sparkles className="h-4 w-4 mr-2" />
-                        Estratégia IA Balanceada
+                        Como Funciona: {getStrategyInfo(form.watch('strategy')).name}
                       </h5>
-                      <div className="text-sm text-muted-foreground space-y-1">
-                        <div>• 40% números quentes 🔥</div>
-                        <div>• 30% números mornos ♨️</div>
-                        <div>• 30% números frios ❄️</div>
+                      <div className="space-y-2">
+                        {form.watch('strategy') === 'hot' && (
+                          <div className="text-sm text-muted-foreground">
+                            <div className="flex items-center mb-2">
+                              <Flame className="h-4 w-4 mr-2 text-destructive" />
+                              <span className="font-medium">Foco em números frequentes</span>
+                            </div>
+                            <ul className="space-y-1 ml-6">
+                              <li>• Seleciona números que saíram mais vezes recentemente</li>
+                              <li>• Baseado na tendência de repetição</li>
+                              <li>• Ideal para quem acredita em "sequências quentes"</li>
+                            </ul>
+                          </div>
+                        )}
+                        {form.watch('strategy') === 'cold' && (
+                          <div className="text-sm text-muted-foreground">
+                            <div className="flex items-center mb-2">
+                              <Snowflake className="h-4 w-4 mr-2 text-primary" />
+                              <span className="font-medium">Foco em números atrasados</span>
+                            </div>
+                            <ul className="space-y-1 ml-6">
+                              <li>• Seleciona números que não saem há mais tempo</li>
+                              <li>• Baseado na teoria de compensação</li>
+                              <li>• Ideal para quem acredita que "tudo se equilibra"</li>
+                            </ul>
+                          </div>
+                        )}
+                        {form.watch('strategy') === 'mixed' && (
+                          <div className="text-sm text-muted-foreground">
+                            <div className="flex items-center mb-2">
+                              <Sun className="h-4 w-4 mr-2 text-amber-500" />
+                              <span className="font-medium">Estratégia equilibrada</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 mb-3">
+                              <div className="text-center p-2 bg-destructive/10 rounded">
+                                <div className="font-bold text-destructive">40%</div>
+                                <div className="text-xs">🔥 Quentes</div>
+                              </div>
+                              <div className="text-center p-2 bg-amber-500/10 rounded">
+                                <div className="font-bold text-amber-500">30%</div>
+                                <div className="text-xs">♨️ Mornos</div>
+                              </div>
+                              <div className="text-center p-2 bg-primary/10 rounded">
+                                <div className="font-bold text-primary">30%</div>
+                                <div className="text-xs">❄️ Frios</div>
+                              </div>
+                            </div>
+                            <p className="text-xs">Combina diferentes temperaturas para balancear riscos e oportunidades</p>
+                          </div>
+                        )}
+                        {form.watch('strategy') === 'ai' && (
+                          <div className="text-sm text-muted-foreground">
+                            <div className="flex items-center mb-2">
+                              <Brain className="h-4 w-4 mr-2 text-secondary" />
+                              <span className="font-medium">Inteligência artificial avançada</span>
+                            </div>
+                            <ul className="space-y-1 ml-6">
+                              <li>• Analisa padrões complexos nos dados históricos</li>
+                              <li>• Considera múltiplas variáveis simultâneas</li>
+                              <li>• Algoritmo de machine learning otimizado</li>
+                              <li>• Recomendado para jogadores experientes</li>
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
