@@ -224,7 +224,7 @@ export default function Information() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4 neon-border">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4">
                   <Target className="h-8 w-8 text-primary-foreground" />
                 </div>
                 <h4 className="font-bold text-foreground mb-2">1. Análise de Dados</h4>
@@ -234,7 +234,7 @@ export default function Information() {
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-secondary to-accent rounded-full flex items-center justify-center mx-auto mb-4 neon-border">
+                <div className="w-16 h-16 bg-gradient-to-br from-secondary to-accent rounded-full flex items-center justify-center mx-auto mb-4">
                   <Brain className="h-8 w-8 text-primary-foreground" />
                 </div>
                 <h4 className="font-bold text-foreground mb-2">2. IA Inteligente</h4>
@@ -244,7 +244,7 @@ export default function Information() {
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-accent to-neon-gold rounded-full flex items-center justify-center mx-auto mb-4 neon-border">
+                <div className="w-16 h-16 bg-gradient-to-br from-accent to-neon-gold rounded-full flex items-center justify-center mx-auto mb-4">
                   <Zap className="h-8 w-8 text-primary-foreground" />
                 </div>
                 <h4 className="font-bold text-foreground mb-2">3. Geração Inteligente</h4>

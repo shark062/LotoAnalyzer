@@ -126,7 +126,7 @@ export default function Home() {
         {/* Dashboard Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary via-secondary to-accent rounded-2xl flex items-center justify-center neon-border animate-float">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary via-secondary to-accent rounded-2xl flex items-center justify-center animate-float">
               <span className="text-3xl">🦈</span>
             </div>
             <div>
@@ -141,19 +141,19 @@ export default function Home() {
           
           {/* Status Indicators */}
           <div className="flex items-center justify-center gap-3 flex-wrap">
-            <div className="flex items-center gap-1 text-sm bg-neon-green/10 text-neon-green px-3 py-1.5 rounded-full border border-neon-green/30 neon-border">
+            <div className="flex items-center gap-1 text-sm bg-neon-green/10 text-neon-green px-3 py-1.5 rounded-full border border-neon-green/30">
               <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
               <span className="font-mono font-semibold">Dados Oficiais Caixa</span>
             </div>
-            <div className="flex items-center gap-1 text-sm bg-secondary/10 text-secondary px-3 py-1.5 rounded-full border border-secondary/30 neon-border">
+            <div className="flex items-center gap-1 text-sm bg-secondary/10 text-secondary px-3 py-1.5 rounded-full border border-secondary/30">
               <Brain className="w-4 h-4" />
               <span className="font-mono font-semibold">IA ChatGPT Ativa</span>
             </div>
-            <div className="flex items-center gap-1 text-sm bg-accent/10 text-accent px-3 py-1.5 rounded-full border border-accent/30 neon-border">
+            <div className="flex items-center gap-1 text-sm bg-accent/10 text-accent px-3 py-1.5 rounded-full border border-accent/30">
               <Activity className="w-4 h-4" />
               <span className="font-mono font-semibold">Análise Tempo Real</span>
             </div>
-            <div className="flex items-center gap-1 text-sm bg-primary/10 text-primary px-3 py-1.5 rounded-full border border-primary/30 neon-border">
+            <div className="flex items-center gap-1 text-sm bg-primary/10 text-primary px-3 py-1.5 rounded-full border border-primary/30">
               <Star className="w-4 h-4" />
               <span className="font-mono font-semibold">10 Modalidades</span>
             </div>
@@ -164,7 +164,7 @@ export default function Home() {
         <div className="mb-8 flex flex-wrap gap-4 justify-center lg:hidden">
           <Button 
             onClick={() => window.location.href = '/generator'}
-            className="bg-gradient-to-r from-primary to-secondary text-primary-foreground px-6 py-3 rounded-lg neon-border hover:animate-glow transition-all duration-300 font-semibold"
+            className="bg-gradient-to-r from-primary to-secondary text-primary-foreground px-6 py-3 rounded-lg hover:animate-glow transition-all duration-300 font-semibold"
             data-testid="quick-generate-button"
           >
             <Zap className="h-4 w-4 mr-2" />
@@ -172,7 +172,7 @@ export default function Home() {
           </Button>
           <Button 
             onClick={() => window.location.href = '/results'}
-            className="bg-gradient-to-r from-accent to-neon-gold text-accent-foreground px-6 py-3 rounded-lg neon-border hover:animate-glow transition-all duration-300 font-semibold"
+            className="bg-gradient-to-r from-accent to-neon-gold text-accent-foreground px-6 py-3 rounded-lg hover:animate-glow transition-all duration-300 font-semibold"
             data-testid="quick-results-button"
           >
             <History className="h-4 w-4 mr-2" />

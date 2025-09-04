@@ -249,7 +249,7 @@ export default function AllLotteriesCard() {
           <div className="flex items-center justify-between gap-3">
             <Button
               onClick={() => window.location.href = '/generator'}
-              className="bg-gradient-to-r from-primary to-secondary text-primary-foreground px-4 py-2 text-sm neon-border hover:animate-glow transition-all duration-300"
+              className="bg-gradient-to-r from-primary to-secondary text-primary-foreground px-4 py-2 text-sm hover:animate-glow transition-all duration-300"
             >
               <Zap className="h-4 w-4 mr-2" />
               Gerar Jogos

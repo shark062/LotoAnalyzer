@@ -100,7 +100,7 @@ export default function Navigation() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center neon-border animate-pulse overflow-hidden">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center animate-pulse overflow-hidden">
                 <img 
                   src={sharkLogo} 
                   alt="Shark Loterias Logo" 
@@ -121,7 +121,7 @@ export default function Navigation() {
             <Button
               variant="outline"
               size="sm"
-              className="lg:hidden neon-border"
+              className="lg:hidden"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               data-testid="mobile-menu-toggle"
             >
@@ -196,7 +196,7 @@ export default function Navigation() {
             {/* Mobile Header */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center neon-border">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
                   <span className="text-xl">🦈</span>
                 </div>
                 <div>
@@ -226,7 +226,7 @@ export default function Navigation() {
                     href={item.href}
                     className={`flex items-center justify-between p-4 rounded-xl transition-all duration-300 group ${
                       isActive 
-                        ? "text-primary bg-primary/10 border border-primary/30 neon-border" 
+                        ? "text-primary bg-primary/10 border border-primary/30" 
                         : "text-muted-foreground hover:text-primary hover:bg-card/40 border border-transparent"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -268,7 +268,7 @@ export default function Navigation() {
                       variant={action.variant === "primary" ? "default" : action.variant as any}
                       className={`justify-start h-12 ${
                         action.variant === "primary" 
-                          ? "bg-gradient-to-r from-primary to-secondary neon-border" 
+                          ? "bg-gradient-to-r from-primary to-secondary" 
                           : ""
                       }`}
                       data-testid={`mobile-quick-action-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
@@ -303,10 +303,10 @@ export default function Navigation() {
                 size="sm"
                 className={`w-full shadow-lg transition-all duration-300 group relative ${
                   action.variant === "primary" 
-                    ? "bg-gradient-to-r from-primary to-secondary hover:animate-glow neon-border" 
+                    ? "bg-gradient-to-r from-primary to-secondary hover:animate-glow" 
                     : action.variant === "secondary"
-                    ? "bg-gradient-to-r from-accent to-neon-gold hover:animate-glow neon-border"
-                    : "border-2 border-dashed border-primary/30 hover:border-primary hover:bg-primary/10 neon-border"
+                    ? "bg-gradient-to-r from-accent to-neon-gold hover:animate-glow"
+                    : "border-2 border-dashed border-primary/30 hover:border-primary hover:bg-primary/10"
                 }`}
                 data-testid={`quick-action-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
                 title={action.tooltip}

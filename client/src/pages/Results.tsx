@@ -118,7 +118,7 @@ export default function Results() {
 
         {/* Statistics Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="neon-border bg-gradient-to-br from-primary/10 to-secondary/10">
+          <Card className="bg-gradient-to-br from-primary/10 to-secondary/10">
             <CardContent className="p-4 text-center">
               <Trophy className="h-8 w-8 mx-auto mb-2 text-primary" />
               <div className="text-2xl font-bold text-primary neon-text" data-testid="total-games-stat">
@@ -128,7 +128,7 @@ export default function Results() {
             </CardContent>
           </Card>
 
-          <Card className="neon-border bg-gradient-to-br from-neon-green/10 to-accent/10">
+          <Card className="bg-gradient-to-br from-neon-green/10 to-accent/10">
             <CardContent className="p-4 text-center">
               <Medal className="h-8 w-8 mx-auto mb-2 text-neon-green" />
               <div className="text-2xl font-bold text-neon-green neon-text" data-testid="total-wins-stat">
@@ -138,7 +138,7 @@ export default function Results() {
             </CardContent>
           </Card>
 
-          <Card className="neon-border bg-gradient-to-br from-accent/10 to-neon-gold/10">
+          <Card className="bg-gradient-to-br from-accent/10 to-neon-gold/10">
             <CardContent className="p-4 text-center">
               <BarChart3 className="h-8 w-8 mx-auto mb-2 text-accent" />
               <div className="text-2xl font-bold text-accent neon-text" data-testid="accuracy-stat">
@@ -148,7 +148,7 @@ export default function Results() {
             </CardContent>
           </Card>
 
-          <Card className="neon-border bg-gradient-to-br from-neon-gold/10 to-destructive/10">
+          <Card className="bg-gradient-to-br from-neon-gold/10 to-destructive/10">
             <CardContent className="p-4 text-center">
               <DollarSign className="h-8 w-8 mx-auto mb-2 text-neon-gold" />
               <div className="text-2xl font-bold text-neon-gold neon-text" data-testid="total-prize-stat">
@@ -161,7 +161,7 @@ export default function Results() {
 
         {/* Best Result Highlight */}
         {bestResult && (
-          <Card className="neon-border bg-gradient-to-r from-neon-gold/20 to-accent/20 backdrop-blur-sm mb-8 relative overflow-hidden">
+          <Card className="bg-gradient-to-r from-neon-gold/20 to-accent/20 backdrop-blur-sm mb-8 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-neon-gold/10 to-transparent animate-scan"></div>
             <CardContent className="p-6 relative z-10">
               <div className="flex items-center justify-between mb-4">
@@ -212,7 +212,7 @@ export default function Results() {
         )}
 
         {/* Filters */}
-        <Card className="neon-border bg-card/30 mb-6">
+        <Card className="bg-card/30 mb-6">
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="flex items-center space-x-2">
@@ -253,7 +253,7 @@ export default function Results() {
         </Card>
 
         {/* Games List */}
-        <Card className="neon-border bg-card/30 backdrop-blur-sm">
+        <Card className="bg-card/30 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-primary flex items-center">
               <Target className="h-5 w-5 mr-2" />

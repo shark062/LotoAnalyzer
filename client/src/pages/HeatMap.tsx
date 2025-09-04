@@ -321,7 +321,7 @@ export default function HeatMap() {
           <div className="inline-flex gap-4">
             <Button 
               onClick={() => window.location.href = '/generator'}
-              className="bg-gradient-to-r from-primary to-secondary text-primary-foreground px-6 py-3 neon-border hover:animate-glow"
+              className="bg-gradient-to-r from-primary to-secondary text-primary-foreground px-6 py-3 hover:animate-glow"
               data-testid="go-to-generator-button"
             >
               <Zap className="h-4 w-4 mr-2" />

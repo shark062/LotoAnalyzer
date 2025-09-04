@@ -299,7 +299,7 @@ export default function Generator() {
                           key={strategy}
                           className={`cursor-pointer transition-all duration-200 ${
                             isSelected 
-                              ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary neon-border' 
+                              ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary' 
                               : 'bg-muted/10 border-border hover:bg-muted/20 hover:border-primary/50'
                           }`}
                           onClick={() => form.setValue('strategy', strategy)}
@@ -414,7 +414,7 @@ export default function Generator() {
                 <Button
                   type="submit"
                   disabled={isGenerating || !selectedLottery}
-                  className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground px-6 py-4 text-lg neon-border hover:animate-glow transition-all duration-300 font-bold"
+                  className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground px-6 py-4 text-lg hover:animate-glow transition-all duration-300 font-bold"
                   data-testid="generate-games-button"
                 >
                   {isGenerating ? (

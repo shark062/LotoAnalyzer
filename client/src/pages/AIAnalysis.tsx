@@ -220,7 +220,7 @@ export default function AIAnalysis() {
                 key={tab}
                 variant={activeTab === tab ? "default" : "outline"}
                 onClick={() => setActiveTab(tab)}
-                className={activeTab === tab ? "bg-gradient-to-r from-primary to-secondary neon-border" : ""}
+                className={activeTab === tab ? "bg-gradient-to-r from-primary to-secondary" : ""}
                 data-testid={`tab-${tab}`}
               >
                 {tab === 'pattern' && <Eye className="h-4 w-4 mr-2" />}
