@@ -685,7 +685,8 @@ class LotteryService {
       const latestDraws = await storage.getLatestDraws(lotteryId, 20);
 
       if (frequencies.length === 0 || latestDraws.length === 0) {
-        throw new Error('Insufficient data for AI number generation');
+        console.log('Insufficient data for AI, falling back to random generation');
+        return this.generateRandomNumbers(count, maxNumber);
       }
 
       // AI logic: analyze patterns, frequencies, and recent trends
@@ -694,20 +695,29 @@ class LotteryService {
         draw.drawnNumbers.forEach(num => recentNumbers.add(num));
       });
 
-      // Avoid recently drawn numbers and focus on high-frequency numbers
-      const candidates = frequencies
+      // Get all available candidates (avoid recently drawn numbers when possible)
+      const preferredCandidates = frequencies
         .filter(f => !recentNumbers.has(f.number))
         .sort((a, b) => b.frequency - a.frequency);
 
+      // If not enough preferred candidates, include all numbers
+      const allCandidates = frequencies.sort((a, b) => b.frequency - a.frequency);
+
       const numbers: number[] = [];
-      for (let i = 0; i < count && i < candidates.length; i++) {
-        numbers.push(candidates[i].number);
+      
+      // First, try to select from preferred candidates (non-recent)
+      const candidatePool = preferredCandidates.length >= count ? preferredCandidates : allCandidates;
+      
+      // Select exactly the requested count
+      while (numbers.length < count && candidatePool.length > 0) {
+        const randomIndex = Math.floor(Math.random() * candidatePool.length);
+        numbers.push(candidatePool.splice(randomIndex, 1)[0].number);
       }
 
-      // Fill remaining with balanced selection if needed
+      // If still need more numbers, fill with remaining numbers from the total range
       if (numbers.length < count) {
         const remaining = Array.from({ length: maxNumber }, (_, i) => i + 1)
-          .filter(n => !numbers.includes(n) && !recentNumbers.has(n));
+          .filter(n => !numbers.includes(n));
 
         while (numbers.length < count && remaining.length > 0) {
           const randomIndex = Math.floor(Math.random() * remaining.length);
@@ -715,10 +725,12 @@ class LotteryService {
         }
       }
 
-      return numbers;
+      console.log(`Generated ${numbers.length} AI numbers (requested: ${count}, max: ${maxNumber})`);
+      return numbers.sort((a, b) => a - b);
     } catch (error) {
       console.error('Error generating AI numbers:', error);
-      throw new Error('Failed to generate AI-based numbers');
+      console.log('Falling back to random number generation');
+      return this.generateRandomNumbers(count, maxNumber);
     }
   }
 
