@@ -66,7 +66,7 @@ export default function Generator() {
   const form = useForm<GenerateGameForm>({
     resolver: zodResolver(generateGameSchema),
     defaultValues: {
-      lotteryId: preselectedLottery || '',
+      lotteryId: preselectedLottery || undefined,
       numbersCount: undefined,
       gamesCount: undefined,
       strategy: 'mixed',

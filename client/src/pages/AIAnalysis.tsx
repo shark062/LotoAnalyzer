@@ -80,7 +80,7 @@ interface GameResult {
 }
 
 export default function AIAnalysis() {
-  const [selectedLottery, setSelectedLottery] = useState<string>('megasena');
+  const [selectedLottery, setSelectedLottery] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'pattern' | 'prediction' | 'strategy'>('prediction');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { toast } = useToast();
@@ -91,17 +91,23 @@ export default function AIAnalysis() {
 
   // AI Analysis queries
   const { data: patternAnalysis, isLoading: patternLoading, refetch: refetchPattern } = useQuery<AIAnalysisResult>({
-    queryKey: ["/api/ai/analysis", selectedLottery, "type=pattern"],
+    queryKey: [`/api/ai/analysis/${selectedLottery}`, { type: 'pattern' }],
+    queryFn: () => fetch(`/api/ai/analysis/${selectedLottery}?type=pattern`).then(res => res.json()),
+    enabled: !!selectedLottery,
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: predictionAnalysis, isLoading: predictionLoading, refetch: refetchPrediction } = useQuery<AIAnalysisResult>({
-    queryKey: ["/api/ai/analysis", selectedLottery, "type=prediction"],
+    queryKey: [`/api/ai/analysis/${selectedLottery}`, { type: 'prediction' }],
+    queryFn: () => fetch(`/api/ai/analysis/${selectedLottery}?type=prediction`).then(res => res.json()),
+    enabled: !!selectedLottery,
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: strategyAnalysis, isLoading: strategyLoading, refetch: refetchStrategy } = useQuery<AIAnalysisResult>({
-    queryKey: ["/api/ai/analysis", selectedLottery, "type=strategy"],
+    queryKey: [`/api/ai/analysis/${selectedLottery}`, { type: 'strategy' }],
+    queryFn: () => fetch(`/api/ai/analysis/${selectedLottery}?type=strategy`).then(res => res.json()),
+    enabled: !!selectedLottery,
     staleTime: 5 * 60 * 1000,
   });
 
