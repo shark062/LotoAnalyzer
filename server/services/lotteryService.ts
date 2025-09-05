@@ -721,8 +721,31 @@ class LotteryService {
     try {
       console.log(`Updating frequencies for ${lotteryId} based on real data...`);
 
+      // Get lottery type info
+      const lottery = await storage.getLotteryType(lotteryId);
+      if (!lottery) return;
+
       // Get latest draws from database
       const draws = await storage.getLatestDraws(lotteryId, 100); // Last 100 draws for good frequency analysis
+
+      // Initialize all numbers with 0 frequency if no draws exist
+      if (draws.length === 0) {
+        console.log(`No draws found for ${lotteryId}, initializing with zero frequencies...`);
+        for (let i = 1; i <= lottery.totalNumbers; i++) {
+          try {
+            await storage.updateNumberFrequency({
+              lotteryId,
+              number: i,
+              frequency: 0,
+              lastDrawn: null,
+              drawsSinceLastSeen: 0
+            });
+          } catch (dbError) {
+            continue;
+          }
+        }
+        return;
+      }
 
       if (draws.length > 0) {
         const lottery = await storage.getLotteryType(lotteryId);
@@ -750,7 +773,7 @@ class LotteryService {
         // Store updated frequencies
         const totalDraws = draws.length;
         for (const [number, count] of Object.entries(frequencies)) {
-          const frequency = totalDraws > 0 ? (count / totalDraws) : 0;
+          const frequency = count; // Use raw count instead of percentage
 
           try {
             await storage.updateNumberFrequency({

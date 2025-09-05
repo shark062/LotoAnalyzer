@@ -394,16 +394,40 @@ class Storage {
         return [];
       }
 
-      const result = await this.db
+      const frequencies = await this.db
         .select()
         .from(schema.numberFrequencies)
         .where(eq(schema.numberFrequencies.lotteryId, lotteryId))
         .orderBy(desc(schema.numberFrequencies.frequency));
 
-      return result;
+      if (frequencies.length === 0) {
+        return [];
+      }
+
+      // Calculate temperatures based on frequency distribution
+      const sortedFreqs = frequencies.map(f => f.frequency).sort((a, b) => b - a);
+      const total = frequencies.length;
+
+      const hotThreshold = Math.ceil(total * 0.3); // Top 30%
+      const coldThreshold = Math.floor(total * 0.3); // Bottom 30%
+
+      return frequencies.map(f => {
+        const rank = sortedFreqs.indexOf(f.frequency);
+        let temperature: 'hot' | 'warm' | 'cold' = 'warm';
+
+        if (rank < hotThreshold) {
+          temperature = 'hot';
+        } else if (rank >= total - coldThreshold) {
+          temperature = 'cold';
+        }
+
+        return {
+          ...f,
+          temperature
+        };
+      });
     } catch (error) {
-      console.error('Error fetching number frequencies:', error);
-      console.log('Returning empty array due to database error');
+      console.error('Error getting number frequencies:', error);
       return [];
     }
   }
