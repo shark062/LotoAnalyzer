@@ -669,10 +669,11 @@ class LotteryService {
     const numbers: number[] = [];
     const pool = Array.from({ length: maxNumber }, (_, i) => i + 1);
 
-    // Ensure we don't try to select more numbers than available
+    // For lotteries like Lotofácil that need exactly 15 numbers from 25 total
+    // We must generate exactly the requested count
     const actualCount = Math.min(count, maxNumber);
     
-    while (numbers.length < actualCount) {
+    while (numbers.length < actualCount && pool.length > 0) {
       const randomIndex = Math.floor(Math.random() * pool.length);
       numbers.push(pool.splice(randomIndex, 1)[0]);
     }
