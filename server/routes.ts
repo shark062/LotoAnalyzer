@@ -160,6 +160,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = 'guest-user'; // Default guest user for direct access
       const { lotteryId, numbersCount, gamesCount, strategy } = req.body;
 
+      // Ensure guest user exists before generating games
+      try {
+        await storage.upsertUser({
+          email: 'guest@sharkloterias.com',
+          firstName: 'Guest',
+          lastName: 'User',
+          profileImageUrl: null,
+        });
+      } catch (userError) {
+        console.log('Guest user already exists or could not be created');
+      }
+
       const generatedGames = await lotteryService.generateGames({
         lotteryId,
         numbersCount: parseInt(numbersCount),

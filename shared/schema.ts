@@ -130,6 +130,7 @@ export const insertUserGameSchema = createInsertSchema(userGames).omit({
 
 export const insertNumberFrequencySchema = createInsertSchema(numberFrequency).omit({
   id: true,
+  createdAt: true,
   updatedAt: true,
 });
 

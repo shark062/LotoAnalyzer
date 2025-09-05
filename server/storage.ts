@@ -23,6 +23,33 @@ class Storage {
     this.initializeConnection();
   }
 
+  private async ensureGuestUser(): Promise<void> {
+    try {
+      if (!this.db) return;
+
+      // Check if guest user exists
+      const existingUser = await this.db
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.id, 'guest-user'))
+        .limit(1);
+
+      if (existingUser.length === 0) {
+        // Create guest user
+        await this.db.insert(schema.users).values({
+          id: 'guest-user',
+          email: 'guest@sharkloterias.com',
+          firstName: 'Guest',
+          lastName: 'User',
+          profileImageUrl: null,
+        });
+        console.log('✓ Guest user created successfully');
+      }
+    } catch (error) {
+      console.error('Error ensuring guest user exists:', error);
+    }
+  }
+
   private async initializeConnection() {
     try {
       const client = postgres(this.connectionUrl, {
@@ -34,6 +61,9 @@ class Storage {
 
       this.db = drizzle(client, { schema });
       console.log('Database connection established successfully');
+      
+      // Ensure guest user exists
+      await this.ensureGuestUser();
     } catch (error) {
       console.error('Failed to connect to database:', error);
       this.db = null;
@@ -232,12 +262,21 @@ class Storage {
         return;
       }
 
-      await this.db.insert(schema.users).values(user).onConflictDoUpdate({
+      // Use the provided ID or generate a new one
+      const userData = {
+        id: user.id || 'guest-user',
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
+      };
+
+      await this.db.insert(schema.users).values(userData).onConflictDoUpdate({
         target: schema.users.email,
         set: {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          profileImageUrl: user.profileImageUrl,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          profileImageUrl: userData.profileImageUrl,
           updatedAt: new Date(),
         }
       });
