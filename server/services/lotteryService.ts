@@ -38,6 +38,7 @@ class LotteryService {
       console.log(`🔧 Initializing lottery types... (found ${existingLotteries.length}, need 10)`);
 
       // Complete list of all official Brazilian lottery types
+      // Official draw schedules from Caixa Econômica Federal
       const defaultLotteries = [
         {
           id: 'megasena',
@@ -46,7 +47,7 @@ class LotteryService {
           minNumbers: 6,
           maxNumbers: 15,
           totalNumbers: 60,
-          drawDays: ['Wednesday', 'Saturday'],
+          drawDays: ['Wednesday', 'Saturday'], // Quartas e Sábados
           drawTime: '20:00',
           isActive: true,
           createdAt: new Date(),
@@ -59,7 +60,7 @@ class LotteryService {
           minNumbers: 15,
           maxNumbers: 20,
           totalNumbers: 25,
-          drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+          drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], // Segunda a Sexta
           drawTime: '20:00',
           isActive: true,
           createdAt: new Date(),
@@ -72,7 +73,7 @@ class LotteryService {
           minNumbers: 5,
           maxNumbers: 15,
           totalNumbers: 80,
-          drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+          drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], // Segunda a Sábado
           drawTime: '20:00',
           isActive: true,
           createdAt: new Date(),
@@ -85,7 +86,7 @@ class LotteryService {
           minNumbers: 50,
           maxNumbers: 50,
           totalNumbers: 100,
-          drawDays: ['Tuesday', 'Thursday', 'Saturday'],
+          drawDays: ['Tuesday', 'Friday'], // Terças e Sextas
           drawTime: '20:00',
           isActive: true,
           createdAt: new Date(),
@@ -98,7 +99,7 @@ class LotteryService {
           minNumbers: 6,
           maxNumbers: 15,
           totalNumbers: 50,
-          drawDays: ['Tuesday', 'Thursday', 'Saturday'],
+          drawDays: ['Tuesday', 'Thursday', 'Saturday'], // Terças, Quintas e Sábados
           drawTime: '20:00',
           isActive: true,
           createdAt: new Date(),
@@ -111,7 +112,7 @@ class LotteryService {
           minNumbers: 7,
           maxNumbers: 21,
           totalNumbers: 10,
-          drawDays: ['Monday', 'Wednesday', 'Friday'],
+          drawDays: ['Monday', 'Wednesday', 'Friday'], // Segundas, Quartas e Sextas
           drawTime: '20:00',
           isActive: true,
           createdAt: new Date(),
@@ -124,7 +125,7 @@ class LotteryService {
           minNumbers: 6,
           maxNumbers: 12,
           totalNumbers: 50,
-          drawDays: ['Wednesday', 'Saturday'],
+          drawDays: ['Wednesday', 'Saturday'], // Quartas e Sábados
           drawTime: '20:00',
           isActive: true,
           createdAt: new Date(),
@@ -137,7 +138,7 @@ class LotteryService {
           minNumbers: 10,
           maxNumbers: 10,
           totalNumbers: 80,
-          drawDays: ['Tuesday', 'Thursday', 'Saturday'],
+          drawDays: ['Tuesday', 'Thursday', 'Saturday'], // Terças, Quintas e Sábados
           drawTime: '20:00',
           isActive: true,
           createdAt: new Date(),
@@ -150,7 +151,7 @@ class LotteryService {
           minNumbers: 7,
           maxNumbers: 15,
           totalNumbers: 31,
-          drawDays: ['Tuesday', 'Thursday', 'Saturday'],
+          drawDays: ['Tuesday', 'Thursday', 'Saturday'], // Terças, Quintas e Sábados
           drawTime: '20:00',
           isActive: true,
           createdAt: new Date(),
@@ -163,7 +164,7 @@ class LotteryService {
           minNumbers: 14,
           maxNumbers: 14,
           totalNumbers: 3,
-          drawDays: ['Saturday'],
+          drawDays: ['Saturday'], // Sábados
           drawTime: '20:00',
           isActive: true,
           createdAt: new Date(),
@@ -373,11 +374,28 @@ class LotteryService {
       }
 
       if (data && data.numero) {
-        // Calculate next draw date based on draw days - sempre às 20:00 Brasília
+        // Get official draw schedule from Caixa data
         const lottery = await storage.getLotteryType(lotteryId);
-        const nextDrawDate = lottery ? this.calculateNextDrawDate(lottery.drawDays || [], '20:00') : new Date();
+        
+        // Use official next draw date from API if available
+        let nextDrawDate: Date;
+        if (data.dataProximoConcurso) {
+          nextDrawDate = new Date(data.dataProximoConcurso + 'T20:00:00-03:00'); // Always 20:00 Brasília time
+          console.log(`✓ Using official next draw date for ${lotteryId}: ${nextDrawDate.toISOString()}`);
+        } else {
+          // Fallback to calculated date
+          nextDrawDate = lottery ? this.calculateNextDrawDate(lottery.drawDays || [], '20:00') : new Date();
+        }
+
+        // Calculate real-time countdown in Brasília timezone
         const now = new Date();
-        const timeDiff = nextDrawDate.getTime() - now.getTime();
+        const brasiliaOffset = -3 * 60; // UTC-3 in minutes
+        const localOffset = now.getTimezoneOffset();
+        const brasiliaTime = new Date(now.getTime() + (localOffset - brasiliaOffset) * 60000);
+        
+        // Ensure nextDrawDate is in UTC for proper calculation
+        const nextDrawUTC = new Date(nextDrawDate.getTime());
+        const timeDiff = nextDrawUTC.getTime() - now.getTime();
 
         // Ensure positive time difference
         const positiveTimeDiff = Math.max(0, timeDiff);
@@ -444,10 +462,18 @@ class LotteryService {
           }
         }
 
+        // Use official contest number from API
+        const nextContestNumber = data.proximoConcurso || (data.numero + 1);
+
         return {
-          contestNumber: data.numero + 1,
+          contestNumber: nextContestNumber,
           drawDate: nextDrawDate.toISOString(),
-          timeRemaining: { days: Math.max(0, days), hours: Math.max(0, hours), minutes: Math.max(0, minutes), seconds: Math.max(0, seconds) },
+          timeRemaining: { 
+            days: Math.max(0, days), 
+            hours: Math.max(0, hours), 
+            minutes: Math.max(0, minutes), 
+            seconds: Math.max(0, seconds) 
+          },
           estimatedPrize: formattedPrize
         };
       }
