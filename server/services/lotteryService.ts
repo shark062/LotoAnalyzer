@@ -366,14 +366,11 @@ class LotteryService {
         }
       }
 
-      // If no API worked, continue with fallback
-
-      if (!response.ok) {
+      // If no API worked, return null
+      if (!data || !data.numero) {
         console.log(`Failed to fetch ${lotteryId} data from official API`);
         return null;
       }
-
-      const data = await response.json();
 
       if (data && data.numero) {
         // Calculate next draw date based on draw days - sempre às 20:00 Brasília
