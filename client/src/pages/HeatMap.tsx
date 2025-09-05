@@ -340,6 +340,13 @@ export default function HeatMap() {
           </div>
         </div>
       </main>
+      
+      {/* Developer Footer */}
+      <footer className="text-center py-4 mt-8 border-t border-border/20">
+        <p className="text-xs text-muted-foreground">
+          powered by <span className="text-accent font-semibold">Shark062</span>
+        </p>
+      </footer>
     </div>
   );
 }

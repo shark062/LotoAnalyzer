@@ -386,15 +386,22 @@ export default function AIAnalysis() {
                         </div>
 
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {(predictionAnalysis.result.primaryPrediction || []).map((number: number, index: number) => (
-                            <Badge
-                              key={index}
-                              className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold bg-black/20"
-                              data-testid={`prediction-number-${number}`}
-                            >
-                              {number.toString().padStart(2, '0')}
-                            </Badge>
-                          ))}
+                          {(predictionAnalysis.result.primaryPrediction || []).map((number: number, index: number) => {
+                            const colors = [
+                              'bg-neon-green', 'bg-secondary', 'bg-primary', 
+                              'bg-accent', 'bg-destructive', 'bg-purple-500'
+                            ];
+                            const colorClass = colors[index % colors.length];
+                            return (
+                              <Badge
+                                key={index}
+                                className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white ${colorClass}`}
+                                data-testid={`prediction-number-${number}`}
+                              >
+                                {number.toString().padStart(2, '0')}
+                              </Badge>
+                            );
+                          })}
                         </div>
 
                         <div className="text-sm text-muted-foreground mb-4">
@@ -626,6 +633,13 @@ export default function AIAnalysis() {
           </div>
         </div>
       </main>
+      
+      {/* Developer Footer */}
+      <footer className="text-center py-4 mt-8 border-t border-border/20">
+        <p className="text-xs text-muted-foreground">
+          powered by <span className="text-accent font-semibold">Shark062</span>
+        </p>
+      </footer>
     </div>
   );
 }
