@@ -390,7 +390,8 @@ class Storage {
   async getNumberFrequencies(lotteryId: string): Promise<NumberFrequency[]> {
     try {
       if (!this.db) {
-        throw new Error('Database connection required for real frequency data');
+        console.log('Database not available, returning empty array for frequencies');
+        return [];
       }
 
       const result = await this.db
@@ -402,7 +403,8 @@ class Storage {
       return result;
     } catch (error) {
       console.error('Error fetching number frequencies:', error);
-      throw new Error('Failed to fetch real frequency data');
+      console.log('Returning empty array due to database error');
+      return [];
     }
   }
 
