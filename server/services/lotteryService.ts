@@ -202,22 +202,29 @@ class LotteryService {
       }
 
       const now = new Date();
-      const nextDrawDate = this.calculateNextDrawDate(lottery.drawDays, lottery.drawTime || '20:00');
+      const nextDrawDate = this.calculateNextDrawDate(lottery.drawDays, '20:00'); // Always 20:00
       const timeDiff = nextDrawDate.getTime() - now.getTime();
 
-      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      // Ensure time difference is never negative
+      const positiveTimeDiff = Math.max(0, timeDiff);
+
+      const days = Math.floor(positiveTimeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((positiveTimeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((positiveTimeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((positiveTimeDiff % (1000 * 60)) / 1000);
 
       // Estimate contest number and prize (in real app, fetch from API)
       const latestDraws = await storage.getLatestDraws(lotteryId, 1);
       const nextContestNumber = latestDraws.length > 0 ? latestDraws[0].contestNumber + 1 : 1;
-
-      const seconds = Math.floor((nextDrawDate.getTime() - now.getTime()) % (1000 * 60) / 1000);
       return {
         contestNumber: nextContestNumber,
         drawDate: nextDrawDate.toISOString(),
-        timeRemaining: { days, hours, minutes, seconds },
+        timeRemaining: { 
+          days: Math.max(0, days), 
+          hours: Math.max(0, hours), 
+          minutes: Math.max(0, minutes), 
+          seconds: Math.max(0, seconds) 
+        },
         estimatedPrize: this.getEstimatedPrize(lotteryId),
       };
     } catch (error) {
@@ -227,7 +234,7 @@ class LotteryService {
   }
 
   private calculateNextDrawDate(drawDays: string[], drawTime: string): Date {
-    // Create date in Brasília timezone (UTC-3)
+    // Always use Brasília timezone (UTC-3)
     const now = new Date();
     const brasiliaOffset = -3 * 60; // UTC-3 in minutes
     const localOffset = now.getTimezoneOffset();
@@ -235,15 +242,24 @@ class LotteryService {
 
     const today = brasiliaTime.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
 
-    // Map day names to numbers (Portuguese)
+    // Map day names to numbers - support both English and Portuguese
     const dayMap: Record<string, number> = {
+      // Portuguese
       'domingo': 0,
       'segunda': 1, 'segunda-feira': 1,
       'terça': 2, 'terca': 2, 'terça-feira': 2, 'terca-feira': 2,
       'quarta': 3, 'quarta-feira': 3,
       'quinta': 4, 'quinta-feira': 4,
       'sexta': 5, 'sexta-feira': 5,
-      'sábado': 6, 'sabado': 6
+      'sábado': 6, 'sabado': 6,
+      // English (for compatibility)
+      'sunday': 0,
+      'monday': 1,
+      'tuesday': 2,
+      'wednesday': 3,
+      'thursday': 4,
+      'friday': 5,
+      'saturday': 6
     };
 
     // Convert draw days to numbers
@@ -254,18 +270,19 @@ class LotteryService {
       const nextDay = new Date(brasiliaTime);
       nextDay.setDate(nextDay.getDate() + 1);
       nextDay.setHours(20, 0, 0, 0);
-      return nextDay;
+      // Convert to UTC for return
+      return new Date(nextDay.getTime() - (localOffset - brasiliaOffset) * 60000);
     }
 
-    // Sort draw days to find the next one
+    // Sort draw days
     const sortedDrawDays = [...drawDayNumbers].sort((a, b) => a - b);
-    let nextDrawDay: number | undefined;
+    let nextDrawDay: number;
     let daysToAdd = 0;
 
-    // Check if today is a draw day and if we're before 20:00
+    // Check if today is a draw day and if we're before 20:00 Brasília time
     const currentHour = brasiliaTime.getHours();
     const currentMinute = brasiliaTime.getMinutes();
-    const isBeforeDrawTime = currentHour < 20 || (currentHour === 20 && currentMinute === 0);
+    const isBeforeDrawTime = currentHour < 20;
 
     if (sortedDrawDays.includes(today) && isBeforeDrawTime) {
       // Today is a draw day and we're before 20:00
@@ -284,12 +301,12 @@ class LotteryService {
       }
     }
 
-    // Create the next draw date
+    // Create the next draw date in Brasília timezone
     const nextDraw = new Date(brasiliaTime);
     nextDraw.setDate(brasiliaTime.getDate() + daysToAdd);
     nextDraw.setHours(20, 0, 0, 0); // Always 20:00 Brasília time
 
-    // Convert back to UTC for storage
+    // Convert to UTC for return
     const utcNextDraw = new Date(nextDraw.getTime() - (localOffset - brasiliaOffset) * 60000);
 
     return utcNextDraw;
@@ -325,16 +342,19 @@ class LotteryService {
       const data = await response.json();
 
       if (data && data.numero) {
-        // Calculate next draw date based on draw days
+        // Calculate next draw date based on draw days - sempre às 20:00 Brasília
         const lottery = await storage.getLotteryType(lotteryId);
-        const nextDrawDate = lottery ? this.calculateNextDrawDate(lottery.drawDays || [], lottery.drawTime || '20:00') : new Date();
+        const nextDrawDate = lottery ? this.calculateNextDrawDate(lottery.drawDays || [], '20:00') : new Date();
         const now = new Date();
         const timeDiff = nextDrawDate.getTime() - now.getTime();
 
-        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+        // Ensure positive time difference
+        const positiveTimeDiff = Math.max(0, timeDiff);
+
+        const days = Math.floor(positiveTimeDiff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((positiveTimeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((positiveTimeDiff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((positiveTimeDiff % (1000 * 60)) / 1000);
 
         // Store the latest draw in database for analysis (with proper date validation)
         let validDrawDate = new Date();
