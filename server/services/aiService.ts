@@ -16,29 +16,25 @@ class AiService {
     try {
       const lottery = await storage.getLotteryType(lotteryId);
       if (!lottery) {
-        // Return fallback lottery data
-        const fallbackLottery = {
-          id: lotteryId,
-          name: lotteryId,
-          displayName: lotteryId.charAt(0).toUpperCase() + lotteryId.slice(1),
-          minNumbers: 6,
-          maxNumbers: 15,
-          totalNumbers: 60,
-          drawDays: ['Wednesday', 'Saturday'],
-          drawTime: '20:00',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        
-        return this.performAnalysisWithLottery(lotteryId, analysisType, fallbackLottery);
+        throw new Error('Lottery type not found');
+      }
+
+      // Ensure we have real data before analysis
+      const frequencies = await storage.getNumberFrequencies(lotteryId);
+      const latestDraws = await storage.getLatestDraws(lotteryId, 50);
+      
+      if (frequencies.length === 0) {
+        throw new Error('No frequency data available for analysis');
+      }
+      
+      if (latestDraws.length < 10) {
+        throw new Error('Insufficient draw history for reliable analysis');
       }
 
       return this.performAnalysisWithLottery(lotteryId, analysisType, lottery);
     } catch (error) {
       console.error('Error performing AI analysis:', error);
-      // Return fallback analysis instead of throwing
-      return this.getFallbackAnalysis(lotteryId, analysisType);
+      throw new Error('Failed to perform analysis: ' + error.message);
     }
   }
 
@@ -93,58 +89,7 @@ class AiService {
     }
   }
 
-  private getFallbackAnalysis(lotteryId: string, analysisType: string): AnalysisResult {
-    const fallbackResults = {
-      pattern: {
-        patterns: [
-          {
-            pattern: 'Números Consecutivos',
-            frequency: 15,
-            lastOccurrence: '2024-01-10',
-            predictedNext: [7, 14, 21, 28, 35, 42],
-          },
-          {
-            pattern: 'Distribuição Balanceada',
-            frequency: 28,
-            lastOccurrence: '2024-01-08',
-            predictedNext: [3, 18, 25, 31, 44, 55],
-          }
-        ]
-      },
-      prediction: {
-        primaryPrediction: [7, 14, 23, 35, 42, 58],
-        confidence: 0.75,
-        reasoning: 'Análise baseada em padrões históricos e distribuição de frequência.',
-        riskLevel: 'medium',
-        alternatives: [
-          { numbers: [12, 19, 28, 36, 41, 55], strategy: 'Números Quentes' },
-          { numbers: [3, 18, 27, 39, 45, 51], strategy: 'Números Frios' }
-        ]
-      },
-      strategy: {
-        recommendedStrategy: 'Estratégia Balanceada',
-        reasoning: 'Combinação otimizada de números quentes, mornos e frios.',
-        numberSelection: {
-          hotPercentage: 40,
-          warmPercentage: 35,
-          coldPercentage: 25,
-        },
-        riskLevel: 'balanced',
-        playFrequency: '2-3 vezes por semana',
-        budgetAdvice: 'Invista moderadamente, máximo 5% da renda',
-        expectedImprovement: '+15% em acertos'
-      }
-    };
-
-    return {
-      id: Date.now(),
-      lotteryId,
-      analysisType,
-      result: fallbackResults[analysisType as keyof typeof fallbackResults] || fallbackResults.prediction,
-      confidence: '75%',
-      createdAt: new Date().toISOString(),
-    };
-  }
+  
 
   private async analyzePatterns(lotteryId: string, lottery: LotteryType) {
     const frequencies = await storage.getNumberFrequencies(lotteryId);

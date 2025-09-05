@@ -379,34 +379,37 @@ class LotteryService {
         throw new Error('Lottery type not found');
       }
 
+      const nextDraw = await this.getNextDrawInfo(params.lotteryId);
+      if (!nextDraw) {
+        throw new Error('Unable to get next draw information');
+      }
+
+      // Ensure we're not generating for already drawn contests
+      const latestDraws = await storage.getLatestDraws(params.lotteryId, 1);
+      if (latestDraws.length > 0 && nextDraw.contestNumber <= latestDraws[0].contestNumber) {
+        throw new Error('Cannot generate games for already drawn contests');
+      }
+
       const games: InsertUserGame[] = [];
       
       for (let i = 0; i < params.gamesCount; i++) {
         let numbers: number[];
         
-        // Simple random number generation for now
-        numbers = this.generateRandomNumbers(params.numbersCount, lottery.totalNumbers);
-
-        const nextDraw = await this.getNextDrawInfo(params.lotteryId);
-        
-        // Calculate matches and prize based on latest draw results
-        const latestDraws = await storage.getLatestDraws(params.lotteryId, 1);
-        let matches = 0;
-        let prizeWon = "0.00";
-        
-        if (latestDraws.length > 0 && latestDraws[0].drawnNumbers) {
-          matches = numbers.filter(num => latestDraws[0].drawnNumbers.includes(num)).length;
-          prizeWon = this.calculatePrize(params.lotteryId, matches);
+        // Generate numbers based on strategy using real frequency data
+        if (params.strategy === 'ai') {
+          numbers = await this.generateAINumbers(params.lotteryId, params.numbersCount, lottery.totalNumbers);
+        } else {
+          numbers = await this.generateStrategyNumbers(params.lotteryId, params.strategy, params.numbersCount, lottery.totalNumbers);
         }
 
         const game: InsertUserGame = {
           userId: params.userId,
           lotteryId: params.lotteryId,
           selectedNumbers: numbers.sort((a, b) => a - b),
-          contestNumber: nextDraw?.contestNumber,
+          contestNumber: nextDraw.contestNumber,
           strategy: params.strategy,
-          matches,
-          prizeWon,
+          matches: 0, // Will be updated when draw results are available
+          prizeWon: "0.00", // Will be updated when draw results are available
         };
 
         games.push(game);
@@ -418,21 +421,108 @@ class LotteryService {
       return games;
     } catch (error) {
       console.error('Error generating games:', error);
-      throw new Error('Failed to generate games');
+      throw new Error('Failed to generate games: ' + error.message);
     }
   }
 
-  private generateRandomNumbers(count: number, maxNumber: number): number[] {
-    const numbers: number[] = [];
-    
-    while (numbers.length < count) {
-      const randomNum = Math.floor(Math.random() * maxNumber) + 1;
-      if (!numbers.includes(randomNum)) {
-        numbers.push(randomNum);
+  private async generateStrategyNumbers(lotteryId: string, strategy: string, count: number, maxNumber: number): Promise<number[]> {
+    try {
+      const frequencies = await storage.getNumberFrequencies(lotteryId);
+      
+      if (frequencies.length === 0) {
+        throw new Error('No frequency data available for strategy-based generation');
       }
+
+      const numbers: number[] = [];
+      let pool: number[] = [];
+
+      switch (strategy) {
+        case 'hot':
+          pool = frequencies.filter(f => f.temperature === 'hot').map(f => f.number);
+          break;
+        case 'cold':
+          pool = frequencies.filter(f => f.temperature === 'cold').map(f => f.number);
+          break;
+        case 'mixed':
+          const hotNumbers = frequencies.filter(f => f.temperature === 'hot').map(f => f.number);
+          const warmNumbers = frequencies.filter(f => f.temperature === 'warm').map(f => f.number);
+          const coldNumbers = frequencies.filter(f => f.temperature === 'cold').map(f => f.number);
+          
+          // Mix: 40% hot, 30% warm, 30% cold
+          const hotCount = Math.floor(count * 0.4);
+          const warmCount = Math.floor(count * 0.3);
+          const coldCount = count - hotCount - warmCount;
+          
+          pool = [
+            ...hotNumbers.slice(0, hotCount),
+            ...warmNumbers.slice(0, warmCount),
+            ...coldNumbers.slice(0, coldCount)
+          ];
+          break;
+        default:
+          pool = Array.from({ length: maxNumber }, (_, i) => i + 1);
+      }
+
+      if (pool.length < count) {
+        // Fill remaining with random numbers if pool is too small
+        const remaining = Array.from({ length: maxNumber }, (_, i) => i + 1)
+          .filter(n => !pool.includes(n));
+        pool = [...pool, ...remaining];
+      }
+
+      while (numbers.length < count && pool.length > 0) {
+        const randomIndex = Math.floor(Math.random() * pool.length);
+        numbers.push(pool.splice(randomIndex, 1)[0]);
+      }
+
+      return numbers;
+    } catch (error) {
+      console.error('Error generating strategy numbers:', error);
+      throw new Error('Failed to generate numbers based on strategy');
     }
-    
-    return numbers;
+  }
+
+  private async generateAINumbers(lotteryId: string, count: number, maxNumber: number): Promise<number[]> {
+    try {
+      const frequencies = await storage.getNumberFrequencies(lotteryId);
+      const latestDraws = await storage.getLatestDraws(lotteryId, 20);
+      
+      if (frequencies.length === 0 || latestDraws.length === 0) {
+        throw new Error('Insufficient data for AI number generation');
+      }
+
+      // AI logic: analyze patterns, frequencies, and recent trends
+      const recentNumbers = new Set<number>();
+      latestDraws.slice(0, 5).forEach(draw => {
+        draw.drawnNumbers.forEach(num => recentNumbers.add(num));
+      });
+
+      // Avoid recently drawn numbers and focus on high-frequency numbers
+      const candidates = frequencies
+        .filter(f => !recentNumbers.has(f.number))
+        .sort((a, b) => b.frequency - a.frequency);
+
+      const numbers: number[] = [];
+      for (let i = 0; i < count && i < candidates.length; i++) {
+        numbers.push(candidates[i].number);
+      }
+
+      // Fill remaining with balanced selection if needed
+      if (numbers.length < count) {
+        const remaining = Array.from({ length: maxNumber }, (_, i) => i + 1)
+          .filter(n => !numbers.includes(n) && !recentNumbers.has(n));
+        
+        while (numbers.length < count && remaining.length > 0) {
+          const randomIndex = Math.floor(Math.random() * remaining.length);
+          numbers.push(remaining.splice(randomIndex, 1)[0]);
+        }
+      }
+
+      return numbers;
+    } catch (error) {
+      console.error('Error generating AI numbers:', error);
+      throw new Error('Failed to generate AI-based numbers');
+    }
   }
 
   async syncLatestDraws(): Promise<void> {

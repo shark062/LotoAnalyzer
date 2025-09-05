@@ -390,25 +390,19 @@ class Storage {
   async getNumberFrequencies(lotteryId: string): Promise<NumberFrequency[]> {
     try {
       if (!this.db) {
-        return this.generateFallbackFrequencies(lotteryId);
+        throw new Error('Database connection required for real frequency data');
       }
 
-      // Check if the table exists and has data
-      try {
-        const result = await this.db
-          .select()
-          .from(schema.numberFrequencies)
-          .where(eq(schema.numberFrequencies.lotteryId, lotteryId))
-          .orderBy(desc(schema.numberFrequencies.frequency));
+      const result = await this.db
+        .select()
+        .from(schema.numberFrequencies)
+        .where(eq(schema.numberFrequencies.lotteryId, lotteryId))
+        .orderBy(desc(schema.numberFrequencies.frequency));
 
-        return result.length > 0 ? result : this.generateFallbackFrequencies(lotteryId);
-      } catch (dbError) {
-        console.log('Database table not available, using fallback data');
-        return this.generateFallbackFrequencies(lotteryId);
-      }
+      return result;
     } catch (error) {
       console.error('Error fetching number frequencies:', error);
-      return this.generateFallbackFrequencies(lotteryId);
+      throw new Error('Failed to fetch real frequency data');
     }
   }
 
@@ -435,63 +429,28 @@ class Storage {
   async createUserGame(game: InsertUserGame): Promise<UserGame> {
     try {
       if (!this.db) {
-        // Generate a mock game for fallback
-        const mockGame: UserGame = {
-          id: `game-${Date.now()}`,
-          userId: game.userId,
-          lotteryId: game.lotteryId,
-          selectedNumbers: game.selectedNumbers,
-          contestNumber: game.contestNumber || Math.floor(Math.random() * 1000) + 2800,
-          drawDate: game.drawDate || new Date(),
-          matches: Math.floor(Math.random() * game.selectedNumbers.length),
-          prizeWon: '0.00',
-          strategy: game.strategy || 'mixed',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        return mockGame;
+        throw new Error('Database connection required to save real games');
       }
 
       const [result] = await this.db.insert(schema.userGames).values(game).returning();
       return result;
     } catch (error) {
       console.error('Error creating user game:', error);
-      // Return mock game on error
-      const mockGame: UserGame = {
-        id: `game-${Date.now()}`,
-        userId: game.userId,
-        lotteryId: game.lotteryId,
-        selectedNumbers: game.selectedNumbers,
-        contestNumber: game.contestNumber || Math.floor(Math.random() * 1000) + 2800,
-        drawDate: game.drawDate || new Date(),
-        matches: Math.floor(Math.random() * game.selectedNumbers.length),
-        prizeWon: '0.00',
-        strategy: game.strategy || 'mixed',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      return mockGame;
+      throw new Error('Failed to save game to database');
     }
   }
 
   async getUserStats(userId: string): Promise<UserStats> {
     try {
       if (!this.db) {
-        return {
-          totalGames: 0,
-          wins: 0,
-          totalPrizeWon: '0.00',
-          accuracy: 0,
-          favoriteStrategy: 'mixed',
-          averageNumbers: 0,
-        };
+        throw new Error('Database connection required for real user stats');
       }
 
       const result = await this.db
         .select({
           totalGames: sql<number>`count(*)`,
-          wins: sql<number>`count(case when ${schema.userGames.prizeWon} > 0 then 1 end)`,
-          totalPrizeWon: sql<string>`coalesce(sum(${schema.userGames.prizeWon}), 0)`,
+          wins: sql<number>`count(case when ${schema.userGames.prizeWon} != '0.00' then 1 end)`,
+          totalPrizeWon: sql<string>`coalesce(sum(cast(${schema.userGames.prizeWon} as decimal)), 0)`,
           favoriteStrategy: sql<string>`mode() within group (order by ${schema.userGames.strategy})`,
           averageNumbers: sql<number>`coalesce(avg(array_length(${schema.userGames.selectedNumbers}, 1)), 0)`,
         })
@@ -512,7 +471,7 @@ class Storage {
         };
       }
 
-      // Return zero stats for new users
+      // Return zero stats for new users - real data only
       return {
         totalGames: 0,
         wins: 0,
@@ -523,37 +482,14 @@ class Storage {
       };
     } catch (error) {
       console.error('Error fetching user stats:', error);
-      return {
-        totalGames: 0,
-        wins: 0,
-        totalPrizeWon: '0.00',
-        accuracy: 0,
-        favoriteStrategy: 'mixed',
-        averageNumbers: 0,
-      };
+      throw new Error('Failed to fetch real user statistics');
     }
   }
 
   async getLatestAiAnalysis(lotteryId: string, analysisType: string): Promise<AiAnalysis | null> {
     try {
       if (!this.db) {
-        return {
-          id: 1,
-          lotteryId,
-          analysisType,
-          result: {
-            primaryPrediction: [7, 14, 23, 35, 42, 58],
-            confidence: 0.75,
-            reasoning: 'Baseado na análise dos últimos 20 concursos, estes números apresentam padrões favoráveis de frequência e distribuição.',
-            riskLevel: 'medium',
-            alternatives: [
-              { numbers: [3, 18, 27, 39, 45, 51], strategy: 'Números Frios' },
-              { numbers: [12, 19, 28, 36, 41, 55], strategy: 'Estratégia Mista' }
-            ]
-          },
-          confidence: '75%',
-          createdAt: new Date().toISOString(),
-        };
+        return null;
       }
 
       const result = await this.db
@@ -578,42 +514,14 @@ class Storage {
   async createAiAnalysis(analysis: InsertAiAnalysis): Promise<AiAnalysis> {
     try {
       if (!this.db) {
-        return {
-          id: Date.now(),
-          lotteryId: analysis.lotteryId,
-          analysisType: analysis.analysisType,
-          result: analysis.result,
-          confidence: analysis.confidence,
-          createdAt: new Date().toISOString(),
-        };
+        throw new Error('Database connection required to save analysis');
       }
 
-      // Try to insert into database, fallback on error
-      try {
-        const [result] = await this.db.insert(schema.aiAnalyses).values(analysis).returning();
-        return result;
-      } catch (dbError) {
-        console.log('Database insert failed, returning mock analysis');
-        return {
-          id: Date.now(),
-          lotteryId: analysis.lotteryId,
-          analysisType: analysis.analysisType,
-          result: analysis.result,
-          confidence: analysis.confidence,
-          createdAt: new Date().toISOString(),
-        };
-      }
+      const [result] = await this.db.insert(schema.aiAnalyses).values(analysis).returning();
+      return result;
     } catch (error) {
       console.error('Error creating AI analysis:', error);
-      // Return mock analysis instead of throwing error
-      return {
-        id: Date.now(),
-        lotteryId: analysis.lotteryId,
-        analysisType: analysis.analysisType,
-        result: analysis.result,
-        confidence: analysis.confidence,
-        createdAt: new Date().toISOString(),
-      };
+      throw new Error('Failed to save AI analysis to database');
     }
   }
 }

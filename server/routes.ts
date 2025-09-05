@@ -165,70 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const analysis = await storage.getLatestAiAnalysis(lotteryId, type as string || 'prediction');
       
       if (!analysis) {
-        // Generate fallback analysis based on type
-        let fallbackResult: any;
-        const analysisType = type as string || 'prediction';
-        
-        if (analysisType === 'pattern') {
-          fallbackResult = {
-            patterns: [
-              {
-                pattern: 'Números Consecutivos',
-                frequency: 15,
-                lastOccurrence: '2024-12-15',
-                predictedNext: [7, 14, 21, 28, 35, 42],
-              },
-              {
-                pattern: 'Distribuição Balanceada',
-                frequency: 28,
-                lastOccurrence: '2024-12-10',
-                predictedNext: [3, 18, 25, 31, 44, 55],
-              },
-              {
-                pattern: 'Sequência por Dezenas',
-                frequency: 22,
-                lastOccurrence: '2024-12-08',
-                predictedNext: [12, 19, 27, 38, 46, 59],
-              }
-            ]
-          };
-        } else if (analysisType === 'strategy') {
-          fallbackResult = {
-            recommendedStrategy: 'Estratégia Balanceada Premium',
-            reasoning: 'Com base no seu histórico de jogos e padrões identificados, a estratégia balanceada oferece a melhor relação risco-benefício.',
-            numberSelection: {
-              hotPercentage: 40,
-              warmPercentage: 35,
-              coldPercentage: 25,
-            },
-            riskLevel: 'balanced',
-            playFrequency: 'Recomendamos jogos 2-3 vezes por semana para otimizar suas chances',
-            budgetAdvice: 'Invista no máximo 5% da sua renda mensal em jogos de loteria',
-            expectedImprovement: '+15% em acertos'
-          };
-        } else {
-          // prediction fallback
-          fallbackResult = {
-            primaryPrediction: [7, 14, 23, 35, 42, 58],
-            confidence: 0.75,
-            reasoning: 'Análise baseada em padrões históricos dos últimos 50 concursos, considerando frequência e distribuição dos números.',
-            riskLevel: 'medium',
-            alternatives: [
-              { numbers: [12, 19, 28, 36, 41, 55], strategy: 'Números Quentes' },
-              { numbers: [3, 18, 27, 39, 45, 51], strategy: 'Números Frios' }
-            ]
-          };
-        }
-        
-        const fallbackAnalysis = {
-          id: 1,
-          lotteryId,
-          analysisType,
-          result: fallbackResult,
-          confidence: '75%',
-          createdAt: new Date().toISOString(),
-        };
-        res.json(fallbackAnalysis);
+        res.status(404).json({ message: "No analysis available. Please generate new analysis first." });
       } else {
         res.json(analysis);
       }
@@ -265,15 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(stats);
     } catch (error) {
       console.error("Error fetching user stats:", error);
-      // Return empty stats for new users
-      res.json({
-        totalGames: 0,
-        wins: 0,
-        totalPrizeWon: '0.00',
-        accuracy: 0,
-        favoriteStrategy: 'mixed',
-        averageNumbers: 0,
-      });
+      res.status(500).json({ message: "Failed to fetch real user statistics" });
     }
   });
 
