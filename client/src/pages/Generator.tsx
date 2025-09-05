@@ -426,7 +426,7 @@ export default function Generator() {
                 <Button
                   type="submit"
                   disabled={isGenerating || !selectedLottery}
-                  className="w-full bg-black/20 hover:bg-primary/20 border border-primary/50"
+                  className="w-full bg-black/20 hover:bg-primary/20 border border-primary/50 text-white"
                   data-testid="generate-games-button"
                 >
                   {isGenerating ? (
