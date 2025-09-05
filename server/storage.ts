@@ -380,18 +380,18 @@ class Storage {
       // Try to update existing frequency record
       const existing = await this.db
         .select()
-        .from(schema.numberFrequencies)
+        .from(schema.numberFrequency)
         .where(
           and(
-            eq(schema.numberFrequencies.lotteryId, data.lotteryId),
-            eq(schema.numberFrequencies.number, data.number)
+            eq(schema.numberFrequency.lotteryId, data.lotteryId),
+            eq(schema.numberFrequency.number, data.number)
           )
         )
         .limit(1);
 
       if (existing.length > 0) {
         await this.db
-          .update(schema.numberFrequencies)
+          .update(schema.numberFrequency)
           .set({
             frequency: data.frequency,
             lastDrawn: data.lastDrawn,
@@ -400,12 +400,12 @@ class Storage {
           })
           .where(
             and(
-              eq(schema.numberFrequencies.lotteryId, data.lotteryId),
-              eq(schema.numberFrequencies.number, data.number)
+              eq(schema.numberFrequency.lotteryId, data.lotteryId),
+              eq(schema.numberFrequency.number, data.number)
             )
           );
       } else {
-        await this.db.insert(schema.numberFrequencies).values({
+        await this.db.insert(schema.numberFrequency).values({
           lotteryId: data.lotteryId,
           number: data.number,
           frequency: data.frequency,
@@ -439,17 +439,13 @@ class Storage {
         return this.generateFallbackFrequencies(lotteryId);
       }
 
-      // Check if numberFrequencies table exists in schema
-      if (!schema.numberFrequencies) {
-        console.log('Number frequencies table not found in schema, using fallback');
-        return this.generateFallbackFrequencies(lotteryId);
-      }
+      
 
       const frequencies = await this.db
         .select()
-        .from(schema.numberFrequencies)
-        .where(eq(schema.numberFrequencies.lotteryId, lotteryId))
-        .orderBy(desc(schema.numberFrequencies.frequency));
+        .from(schema.numberFrequency)
+        .where(eq(schema.numberFrequency.lotteryId, lotteryId))
+        .orderBy(desc(schema.numberFrequency.frequency));
 
       if (frequencies.length === 0) {
         console.log(`No frequencies found for ${lotteryId}, generating fallback data`);
