@@ -141,7 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(games);
     } catch (error) {
       console.error("Error fetching user games:", error);
-      res.json([]); // Return empty array instead of error
+      res.json([]);
     }
   });
 
@@ -265,14 +265,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(stats);
     } catch (error) {
       console.error("Error fetching user stats:", error);
-      // Return fallback stats instead of error
+      // Return empty stats for new users
       res.json({
-        totalGames: 12,
-        wins: 2,
-        totalPrizeWon: '85.50',
-        accuracy: 8,
+        totalGames: 0,
+        wins: 0,
+        totalPrizeWon: '0.00',
+        accuracy: 0,
         favoriteStrategy: 'mixed',
-        averageNumbers: 6.8,
+        averageNumbers: 0,
       });
     }
   });

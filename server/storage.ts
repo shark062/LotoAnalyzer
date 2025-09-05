@@ -1,14 +1,13 @@
-
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@shared/schema";
 import { eq, desc, sql, and } from "drizzle-orm";
-import type { 
-  LotteryType, 
-  LotteryDraw, 
-  InsertLotteryDraw, 
-  UserGame, 
-  InsertUserGame, 
+import type {
+  LotteryType,
+  LotteryDraw,
+  InsertLotteryDraw,
+  UserGame,
+  InsertUserGame,
   NumberFrequency,
   UserStats,
   AiAnalysis,
@@ -32,7 +31,7 @@ class Storage {
         idle_timeout: 20,
         connect_timeout: 10,
       });
-      
+
       this.db = drizzle(client, { schema });
       console.log('Database connection established successfully');
     } catch (error) {
@@ -183,11 +182,11 @@ class Storage {
 
     const frequencies: NumberFrequency[] = [];
     const totalNumbers = lottery.totalNumbers;
-    
+
     for (let i = 1; i <= totalNumbers; i++) {
       const frequency = Math.floor(Math.random() * 20) + 1; // Random frequency between 1-20
       const temperature = frequency > 15 ? 'hot' : frequency > 8 ? 'warm' : 'cold';
-      
+
       frequencies.push({
         id: `${lotteryId}-${i}`,
         lotteryId,
@@ -199,50 +198,8 @@ class Storage {
         updatedAt: new Date(),
       });
     }
-    
+
     return frequencies;
-  }
-
-  private generateFallbackUserGames(): UserGame[] {
-    const games: UserGame[] = [];
-    const lotteryIds = ['megasena', 'lotofacil', 'quina'];
-    
-    for (let i = 0; i < 10; i++) {
-      const lotteryId = lotteryIds[Math.floor(Math.random() * lotteryIds.length)];
-      const lottery = this.getFallbackLotteryTypes().find(l => l.id === lotteryId);
-      if (!lottery) continue;
-
-      const numbersCount = lottery.minNumbers;
-      const selectedNumbers: number[] = [];
-      
-      while (selectedNumbers.length < numbersCount) {
-        const num = Math.floor(Math.random() * lottery.totalNumbers) + 1;
-        if (!selectedNumbers.includes(num)) {
-          selectedNumbers.push(num);
-        }
-      }
-      
-      selectedNumbers.sort((a, b) => a - b);
-      
-      const matches = Math.floor(Math.random() * (numbersCount + 1));
-      const prizeWon = matches >= numbersCount - 2 ? (Math.random() * 10000).toFixed(2) : '0.00';
-      
-      games.push({
-        id: `game-${i}`,
-        userId: 'guest-user',
-        lotteryId,
-        selectedNumbers,
-        contestNumber: 2800 + i,
-        drawDate: new Date(Date.now() - i * 24 * 60 * 60 * 1000),
-        matches,
-        prizeWon,
-        strategy: ['hot', 'cold', 'mixed', 'ai'][Math.floor(Math.random() * 4)],
-        createdAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000),
-        updatedAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000),
-      });
-    }
-    
-    return games;
   }
 
   async insertLotteryType(lottery: any): Promise<void> {
@@ -288,7 +245,7 @@ class Storage {
       if (!this.db) {
         return this.getFallbackLotteryTypes();
       }
-      
+
       const result = await this.db.select().from(schema.lotteryTypes).where(eq(schema.lotteryTypes.isActive, true));
       return result.length > 0 ? result : this.getFallbackLotteryTypes();
     } catch (error) {
@@ -312,14 +269,14 @@ class Storage {
       if (!this.db) {
         return [];
       }
-      
+
       const result = await this.db
         .select()
         .from(schema.lotteryDraws)
         .where(eq(schema.lotteryDraws.lotteryId, lotteryId))
         .orderBy(desc(schema.lotteryDraws.drawDate))
         .limit(limit);
-        
+
       return result;
     } catch (error) {
       console.error('Error fetching latest draws:', error);
@@ -421,7 +378,7 @@ class Storage {
       if (!this.db) {
         throw new Error('Database not available');
       }
-      
+
       const [result] = await this.db.insert(schema.lotteryDraws).values(draw).returning();
       return result;
     } catch (error) {
@@ -435,7 +392,7 @@ class Storage {
       if (!this.db) {
         return this.generateFallbackFrequencies(lotteryId);
       }
-      
+
       // Check if the table exists and has data
       try {
         const result = await this.db
@@ -443,7 +400,7 @@ class Storage {
           .from(schema.numberFrequencies)
           .where(eq(schema.numberFrequencies.lotteryId, lotteryId))
           .orderBy(desc(schema.numberFrequencies.frequency));
-          
+
         return result.length > 0 ? result : this.generateFallbackFrequencies(lotteryId);
       } catch (dbError) {
         console.log('Database table not available, using fallback data');
@@ -458,20 +415,20 @@ class Storage {
   async getUserGames(userId: string, limit = 20): Promise<UserGame[]> {
     try {
       if (!this.db) {
-        return this.generateFallbackUserGames();
+        return []; // Return empty array if db is not available
       }
-      
+
       const result = await this.db
         .select()
         .from(schema.userGames)
         .where(eq(schema.userGames.userId, userId))
         .orderBy(desc(schema.userGames.createdAt))
         .limit(limit);
-        
-      return result.length > 0 ? result : this.generateFallbackUserGames();
+
+      return result;
     } catch (error) {
       console.error('Error fetching user games:', error);
-      return this.generateFallbackUserGames();
+      return []; // Return empty array on error
     }
   }
 
@@ -494,7 +451,7 @@ class Storage {
         };
         return mockGame;
       }
-      
+
       const [result] = await this.db.insert(schema.userGames).values(game).returning();
       return result;
     } catch (error) {
@@ -521,36 +478,58 @@ class Storage {
     try {
       if (!this.db) {
         return {
-          totalGames: 15,
-          wins: 3,
-          totalPrizeWon: '125.50',
-          accuracy: 12,
+          totalGames: 0,
+          wins: 0,
+          totalPrizeWon: '0.00',
+          accuracy: 0,
           favoriteStrategy: 'mixed',
-          averageNumbers: 7.5,
+          averageNumbers: 0,
         };
       }
-      
-      const games = await this.getUserGames(userId, 1000);
-      const wins = games.filter(g => parseFloat(g.prizeWon || '0') > 0);
-      const totalPrizeWon = games.reduce((sum, g) => sum + parseFloat(g.prizeWon || '0'), 0);
-      
+
+      const result = await this.db
+        .select({
+          totalGames: sql<number>`count(*)`,
+          wins: sql<number>`count(case when ${schema.userGames.prizeWon} > 0 then 1 end)`,
+          totalPrizeWon: sql<string>`coalesce(sum(${schema.userGames.prizeWon}), 0)`,
+          favoriteStrategy: sql<string>`mode() within group (order by ${schema.userGames.strategy})`,
+          averageNumbers: sql<number>`coalesce(avg(array_length(${schema.userGames.selectedNumbers}, 1)), 0)`,
+        })
+        .from(schema.userGames)
+        .where(eq(schema.userGames.userId, userId));
+
+      if (result.length > 0 && result[0].totalGames > 0) {
+        const stats = result[0];
+        const accuracy = stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 100) : 0;
+
+        return {
+          totalGames: stats.totalGames,
+          wins: stats.wins,
+          totalPrizeWon: stats.totalPrizeWon,
+          accuracy,
+          favoriteStrategy: stats.favoriteStrategy || 'mixed',
+          averageNumbers: Math.round(stats.averageNumbers * 10) / 10,
+        };
+      }
+
+      // Return zero stats for new users
       return {
-        totalGames: games.length,
-        wins: wins.length,
-        totalPrizeWon: totalPrizeWon.toFixed(2),
-        accuracy: games.length > 0 ? Math.round((wins.length / games.length) * 100) : 0,
+        totalGames: 0,
+        wins: 0,
+        totalPrizeWon: '0.00',
+        accuracy: 0,
         favoriteStrategy: 'mixed',
-        averageNumbers: games.length > 0 ? games.reduce((sum, g) => sum + g.selectedNumbers.length, 0) / games.length : 0,
+        averageNumbers: 0,
       };
     } catch (error) {
       console.error('Error fetching user stats:', error);
       return {
-        totalGames: 10,
-        wins: 2,
-        totalPrizeWon: '50.00',
-        accuracy: 8,
+        totalGames: 0,
+        wins: 0,
+        totalPrizeWon: '0.00',
+        accuracy: 0,
         favoriteStrategy: 'mixed',
-        averageNumbers: 6.5,
+        averageNumbers: 0,
       };
     }
   }
@@ -576,7 +555,7 @@ class Storage {
           createdAt: new Date().toISOString(),
         };
       }
-      
+
       const result = await this.db
         .select()
         .from(schema.aiAnalyses)
@@ -588,7 +567,7 @@ class Storage {
         )
         .orderBy(desc(schema.aiAnalyses.createdAt))
         .limit(1);
-        
+
       return result[0] || null;
     } catch (error) {
       console.error('Error fetching AI analysis:', error);
@@ -608,7 +587,7 @@ class Storage {
           createdAt: new Date().toISOString(),
         };
       }
-      
+
       // Try to insert into database, fallback on error
       try {
         const [result] = await this.db.insert(schema.aiAnalyses).values(analysis).returning();

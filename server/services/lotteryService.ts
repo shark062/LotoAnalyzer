@@ -389,12 +389,24 @@ class LotteryService {
 
         const nextDraw = await this.getNextDrawInfo(params.lotteryId);
         
+        // Calculate matches and prize based on latest draw results
+        const latestDraws = await storage.getLatestDraws(params.lotteryId, 1);
+        let matches = 0;
+        let prizeWon = "0.00";
+        
+        if (latestDraws.length > 0 && latestDraws[0].drawnNumbers) {
+          matches = numbers.filter(num => latestDraws[0].drawnNumbers.includes(num)).length;
+          prizeWon = this.calculatePrize(params.lotteryId, matches);
+        }
+
         const game: InsertUserGame = {
           userId: params.userId,
           lotteryId: params.lotteryId,
           selectedNumbers: numbers.sort((a, b) => a - b),
           contestNumber: nextDraw?.contestNumber,
           strategy: params.strategy,
+          matches,
+          prizeWon,
         };
 
         games.push(game);
@@ -525,6 +537,39 @@ class LotteryService {
       count++;
     }
     return count;
+  }
+
+  private calculatePrize(lotteryId: string, matches: number): string {
+    const prizeTable: Record<string, Record<number, string>> = {
+      megasena: {
+        6: "100000.00",
+        5: "2500.00", 
+        4: "150.00",
+      },
+      lotofacil: {
+        15: "500000.00",
+        14: "1500.00",
+        13: "200.00",
+        12: "75.00",
+        11: "25.00",
+      },
+      quina: {
+        5: "50000.00",
+        4: "800.00",
+        3: "120.00",
+        2: "25.00",
+      },
+      lotomania: {
+        20: "1000000.00",
+        19: "15000.00",
+        18: "2000.00",
+        17: "200.00",
+        16: "100.00",
+        0: "500.00",
+      },
+    };
+    
+    return prizeTable[lotteryId]?.[matches] || "0.00";
   }
 }
 
