@@ -34,7 +34,7 @@ class LotteryService {
         console.log(`✓ Lottery types already initialized (${existingLotteries.length} types found)`);
         return;
       }
-      
+
       console.log(`🔧 Initializing lottery types... (found ${existingLotteries.length}, need 10)`);
 
       // Complete list of all official Brazilian lottery types
@@ -180,7 +180,7 @@ class LotteryService {
           console.log(`Lottery type ${lottery.id} may already exist`);
         }
       }
-      
+
       console.log('All lottery types initialized successfully');
     } catch (error) {
       console.error('Error initializing lottery types:', error);
@@ -194,7 +194,7 @@ class LotteryService {
       if (realData) {
         return realData;
       }
-      
+
       // Fallback to calculated data
       const lottery = await storage.getLotteryType(lotteryId);
       if (!lottery || !lottery.drawDays) {
@@ -204,7 +204,7 @@ class LotteryService {
       const now = new Date();
       const nextDrawDate = this.calculateNextDrawDate(lottery.drawDays, lottery.drawTime || '20:00');
       const timeDiff = nextDrawDate.getTime() - now.getTime();
-      
+
       const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
@@ -227,34 +227,72 @@ class LotteryService {
   }
 
   private calculateNextDrawDate(drawDays: string[], drawTime: string): Date {
+    // Create date in Brasília timezone (UTC-3)
     const now = new Date();
-    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const currentDay = now.getDay();
-    
-    // Find next draw day
-    let daysUntilNext = 7; // Default to a week if no match
-    
-    for (const drawDay of drawDays) {
-      const drawDayIndex = dayNames.indexOf(drawDay);
-      if (drawDayIndex !== -1) {
-        let daysAhead = drawDayIndex - currentDay;
-        if (daysAhead <= 0) {
-          daysAhead += 7;
-        }
-        if (daysAhead < daysUntilNext) {
-          daysUntilNext = daysAhead;
-        }
+    const brasiliaOffset = -3 * 60; // UTC-3 in minutes
+    const localOffset = now.getTimezoneOffset();
+    const brasiliaTime = new Date(now.getTime() + (localOffset - brasiliaOffset) * 60000);
+
+    const today = brasiliaTime.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+    // Map day names to numbers (Portuguese)
+    const dayMap: Record<string, number> = {
+      'domingo': 0,
+      'segunda': 1, 'segunda-feira': 1,
+      'terça': 2, 'terca': 2, 'terça-feira': 2, 'terca-feira': 2,
+      'quarta': 3, 'quarta-feira': 3,
+      'quinta': 4, 'quinta-feira': 4,
+      'sexta': 5, 'sexta-feira': 5,
+      'sábado': 6, 'sabado': 6
+    };
+
+    // Convert draw days to numbers
+    const drawDayNumbers = drawDays.map(day => dayMap[day.toLowerCase()]).filter(d => d !== undefined);
+
+    if (drawDayNumbers.length === 0) {
+      // Default to tomorrow at 20:00 if no valid draw days
+      const nextDay = new Date(brasiliaTime);
+      nextDay.setDate(nextDay.getDate() + 1);
+      nextDay.setHours(20, 0, 0, 0);
+      return nextDay;
+    }
+
+    // Sort draw days to find the next one
+    const sortedDrawDays = [...drawDayNumbers].sort((a, b) => a - b);
+    let nextDrawDay: number | undefined;
+    let daysToAdd = 0;
+
+    // Check if today is a draw day and if we're before 20:00
+    const currentHour = brasiliaTime.getHours();
+    const currentMinute = brasiliaTime.getMinutes();
+    const isBeforeDrawTime = currentHour < 20 || (currentHour === 20 && currentMinute === 0);
+
+    if (sortedDrawDays.includes(today) && isBeforeDrawTime) {
+      // Today is a draw day and we're before 20:00
+      nextDrawDay = today;
+      daysToAdd = 0;
+    } else {
+      // Find next draw day after today
+      nextDrawDay = sortedDrawDays.find(day => day > today);
+
+      if (nextDrawDay === undefined) {
+        // Next draw is next week (first day of next week)
+        nextDrawDay = sortedDrawDays[0];
+        daysToAdd = (7 - today) + nextDrawDay;
+      } else {
+        daysToAdd = nextDrawDay - today;
       }
     }
-    
-    const nextDrawDate = new Date(now);
-    nextDrawDate.setDate(now.getDate() + daysUntilNext);
-    
-    // Set the draw time
-    const [hours, minutes] = drawTime.split(':').map(Number);
-    nextDrawDate.setHours(hours, minutes, 0, 0);
-    
-    return nextDrawDate;
+
+    // Create the next draw date
+    const nextDraw = new Date(brasiliaTime);
+    nextDraw.setDate(brasiliaTime.getDate() + daysToAdd);
+    nextDraw.setHours(20, 0, 0, 0); // Always 20:00 Brasília time
+
+    // Convert back to UTC for storage
+    const utcNextDraw = new Date(nextDraw.getTime() - (localOffset - brasiliaOffset) * 60000);
+
+    return utcNextDraw;
   }
 
   async fetchRealLotteryData(lotteryId: string): Promise<NextDrawInfo | null> {
@@ -272,27 +310,27 @@ class LotteryService {
         'diadesore': 'diadesorte',
         'loteca': 'loteca'
       };
-      
+
       const officialId = lotteryMapping[lotteryId];
       if (!officialId) return null;
 
       // Fetch latest contest data from Loterias Caixa API
       const response = await fetch(`https://servicebus2.caixa.gov.br/portaldeloterias/api/${officialId}/`);
-      
+
       if (!response.ok) {
         console.log(`Failed to fetch ${lotteryId} data from official API`);
         return null;
       }
 
       const data = await response.json();
-      
+
       if (data && data.numero) {
         // Calculate next draw date based on draw days
         const lottery = await storage.getLotteryType(lotteryId);
         const nextDrawDate = lottery ? this.calculateNextDrawDate(lottery.drawDays || [], lottery.drawTime || '20:00') : new Date();
         const now = new Date();
         const timeDiff = nextDrawDate.getTime() - now.getTime();
-        
+
         const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
@@ -359,7 +397,7 @@ class LotteryService {
     // Updated realistic prize estimates
     const prizesMap: Record<string, string> = {
       'megasena': 'R$ 65.000.000,00',
-      'lotofacil': 'R$ 1.700.000,00', 
+      'lotofacil': 'R$ 1.700.000,00',
       'quina': 'R$ 1.200.000,00',
       'lotomania': 'R$ 3.500.000,00',
       'duplasena': 'R$ 900.000,00',
@@ -391,10 +429,10 @@ class LotteryService {
       }
 
       const games: InsertUserGame[] = [];
-      
+
       for (let i = 0; i < params.gamesCount; i++) {
         let numbers: number[];
-        
+
         // Generate numbers based on strategy using real frequency data
         if (params.strategy === 'ai') {
           numbers = await this.generateAINumbers(params.lotteryId, params.numbersCount, lottery.totalNumbers);
@@ -413,7 +451,7 @@ class LotteryService {
         };
 
         games.push(game);
-        
+
         // Save to database
         await storage.createUserGame(game);
       }
@@ -428,7 +466,7 @@ class LotteryService {
   private async generateStrategyNumbers(lotteryId: string, strategy: string, count: number, maxNumber: number): Promise<number[]> {
     try {
       const frequencies = await storage.getNumberFrequencies(lotteryId);
-      
+
       if (frequencies.length === 0) {
         throw new Error('No frequency data available for strategy-based generation');
       }
@@ -447,12 +485,12 @@ class LotteryService {
           const hotNumbers = frequencies.filter(f => f.temperature === 'hot').map(f => f.number);
           const warmNumbers = frequencies.filter(f => f.temperature === 'warm').map(f => f.number);
           const coldNumbers = frequencies.filter(f => f.temperature === 'cold').map(f => f.number);
-          
+
           // Mix: 40% hot, 30% warm, 30% cold
           const hotCount = Math.floor(count * 0.4);
           const warmCount = Math.floor(count * 0.3);
           const coldCount = count - hotCount - warmCount;
-          
+
           pool = [
             ...hotNumbers.slice(0, hotCount),
             ...warmNumbers.slice(0, warmCount),
@@ -486,7 +524,7 @@ class LotteryService {
     try {
       const frequencies = await storage.getNumberFrequencies(lotteryId);
       const latestDraws = await storage.getLatestDraws(lotteryId, 20);
-      
+
       if (frequencies.length === 0 || latestDraws.length === 0) {
         throw new Error('Insufficient data for AI number generation');
       }
@@ -511,7 +549,7 @@ class LotteryService {
       if (numbers.length < count) {
         const remaining = Array.from({ length: maxNumber }, (_, i) => i + 1)
           .filter(n => !numbers.includes(n) && !recentNumbers.has(n));
-        
+
         while (numbers.length < count && remaining.length > 0) {
           const randomIndex = Math.floor(Math.random() * remaining.length);
           numbers.push(remaining.splice(randomIndex, 1)[0]);
@@ -528,23 +566,23 @@ class LotteryService {
   async syncLatestDraws(): Promise<void> {
     try {
       console.log('Syncing latest draws from official Caixa API...');
-      
+
       const lotteries = await storage.getLotteryTypes();
-      
+
       for (const lottery of lotteries) {
         try {
           const realData = await this.fetchRealLotteryData(lottery.id);
           if (realData) {
             console.log(`✓ Synced ${lottery.displayName} - Contest #${realData.contestNumber - 1}`);
           }
-          
+
           // Small delay to avoid API rate limits
           await new Promise(resolve => setTimeout(resolve, 500));
         } catch (error) {
           console.error(`Error syncing ${lottery.id}:`, error);
         }
       }
-      
+
       console.log('Sync completed');
     } catch (error) {
       console.error('Error syncing latest draws:', error);
@@ -554,22 +592,22 @@ class LotteryService {
   async updateNumberFrequencies(lotteryId: string): Promise<void> {
     try {
       console.log(`Updating frequencies for ${lotteryId} based on real data...`);
-      
+
       // Get latest draws from database
       const draws = await storage.getLatestDraws(lotteryId, 100); // Last 100 draws for good frequency analysis
-      
+
       if (draws.length > 0) {
         const lottery = await storage.getLotteryType(lotteryId);
         if (!lottery) return;
 
         // Calculate frequencies from real draw data
         const frequencies: { [key: number]: number } = {};
-        
+
         // Initialize all numbers with 0 frequency
         for (let i = 1; i <= lottery.totalNumbers; i++) {
           frequencies[i] = 0;
         }
-        
+
         // Count frequencies from actual draws
         draws.forEach(draw => {
           if (draw.drawnNumbers && draw.drawnNumbers.length > 0) {
@@ -585,7 +623,7 @@ class LotteryService {
         const totalDraws = draws.length;
         for (const [number, count] of Object.entries(frequencies)) {
           const frequency = totalDraws > 0 ? (count / totalDraws) : 0;
-          
+
           try {
             await storage.updateNumberFrequency({
               lotteryId,
@@ -599,7 +637,7 @@ class LotteryService {
             continue;
           }
         }
-        
+
         console.log(`✓ Updated frequencies for ${lotteryId} based on ${totalDraws} real draws`);
       } else {
         console.log(`No draw data available for ${lotteryId} frequency calculation`);
@@ -633,7 +671,7 @@ class LotteryService {
     const prizeTable: Record<string, Record<number, string>> = {
       megasena: {
         6: "100000.00",
-        5: "2500.00", 
+        5: "2500.00",
         4: "150.00",
       },
       lotofacil: {
@@ -658,7 +696,7 @@ class LotteryService {
         0: "500.00",
       },
     };
-    
+
     return prizeTable[lotteryId]?.[matches] || "0.00";
   }
 }
