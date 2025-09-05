@@ -672,7 +672,7 @@ class LotteryService {
     // Ensure we don't try to select more numbers than available
     const actualCount = Math.min(count, maxNumber);
     
-    while (numbers.length < actualCount && pool.length > 0) {
+    while (numbers.length < actualCount) {
       const randomIndex = Math.floor(Math.random() * pool.length);
       numbers.push(pool.splice(randomIndex, 1)[0]);
     }
