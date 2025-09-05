@@ -1,4 +1,3 @@
-
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -35,7 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Initialize lottery types if needed
       await lotteryService.initializeLotteryTypes();
-      
+
       const lotteries = await storage.getLotteryTypes();
       res.json(lotteries);
     } catch (error) {
@@ -74,17 +73,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/lotteries/:id/next-draw', async (req, res) => {
     try {
       const { id } = req.params;
+
+      // Ensure we have lottery type data
+      await lotteryService.initializeLotteryTypes();
+
+      // Force sync with official API for real-time data
+      try {
+        await lotteryService.syncLatestDraws();
+      } catch (syncError) {
+        console.log('Sync warning (continuing with cached data):', syncError.message);
+      }
+
       const nextDraw = await lotteryService.getNextDrawInfo(id);
+
+      // Ensure we always have valid time remaining (never negative)
+      if (nextDraw && nextDraw.timeRemaining) {
+        const { days, hours, minutes, seconds } = nextDraw.timeRemaining;
+        nextDraw.timeRemaining = {
+          days: Math.max(0, days),
+          hours: Math.max(0, hours), 
+          minutes: Math.max(0, minutes),
+          seconds: Math.max(0, seconds)
+        };
+      }
+
       res.json(nextDraw);
     } catch (error) {
-      console.error("Error fetching next draw:", error);
-      // Return fallback next draw info
-      res.json({
-        contestNumber: 2850,
-        drawDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-        timeRemaining: { days: 2, hours: 5, minutes: 30, seconds: 45 },
-        estimatedPrize: 'R$ 50.000.000,00',
-      });
+      console.error("Error getting next draw info:", error);
+      res.status(500).json({ error: "Failed to get next draw information" });
     }
   });
 
@@ -111,12 +127,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Game generation routes
+  // Real-time data sync endpoint
+  app.post('/api/lotteries/sync', async (req, res) => {
+    try {
+      console.log('🔄 Manual sync requested from client');
+      await lotteryService.syncLatestDraws();
+
+      // Update frequencies after sync
+      const lotteries = await storage.getLotteryTypes();
+      for (const lottery of lotteries) {
+        try {
+          await lotteryService.updateNumberFrequencies(lottery.id);
+        } catch (error) {
+          console.log(`Could not update frequencies for ${lottery.id}`);
+        }
+      }
+
+      res.json({ success: true, message: 'Data synchronized successfully' });
+    } catch (error) {
+      console.error('Sync error:', error);
+      res.status(500).json({ error: 'Failed to sync data' });
+    }
+  });
+
+  // Lottery games routes
   app.post('/api/games/generate', async (req: any, res) => {
     try {
       const userId = 'guest-user'; // Default guest user for direct access
       const { lotteryId, numbersCount, gamesCount, strategy } = req.body;
-      
+
       const generatedGames = await lotteryService.generateGames({
         lotteryId,
         numbersCount: parseInt(numbersCount),
@@ -163,7 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { lotteryId } = req.params;
       const { type } = req.query;
       const analysis = await storage.getLatestAiAnalysis(lotteryId, type as string || 'prediction');
-      
+
       if (!analysis) {
         res.status(404).json({ message: "No analysis available. Please generate new analysis first." });
       } else {
@@ -210,7 +249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/sync/latest-draws', async (req, res) => {
     try {
       await lotteryService.syncLatestDraws();
-      
+
       // Update frequencies for all lotteries after sync
       const lotteries = await storage.getLotteryTypes();
       for (const lottery of lotteries) {
@@ -220,7 +259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error(`Error updating frequencies for ${lottery.id}:`, error);
         }
       }
-      
+
       res.json({ message: "Latest draws and frequencies synchronized successfully from official sources" });
     } catch (error) {
       console.error("Error syncing latest draws:", error);
