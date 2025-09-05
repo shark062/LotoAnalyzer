@@ -380,8 +380,28 @@ class LotteryService {
         // Use official next draw date from API if available
         let nextDrawDate: Date;
         if (data.dataProximoConcurso) {
-          nextDrawDate = new Date(data.dataProximoConcurso + 'T20:00:00-03:00'); // Always 20:00 Brasília time
-          console.log(`✓ Using official next draw date for ${lotteryId}: ${nextDrawDate.toISOString()}`);
+          // Handle different date formats from API
+          let dateStr = data.dataProximoConcurso;
+          if (typeof dateStr === 'string') {
+            // Convert DD/MM/YYYY to YYYY-MM-DD format for proper parsing
+            if (dateStr.includes('/')) {
+              const parts = dateStr.split('/');
+              if (parts.length === 3) {
+                dateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+              }
+            }
+            nextDrawDate = new Date(dateStr + 'T20:00:00-03:00'); // Always 20:00 Brasília time
+          } else {
+            nextDrawDate = new Date(data.dataProximoConcurso);
+          }
+          
+          // Validate the date
+          if (isNaN(nextDrawDate.getTime())) {
+            console.log(`Invalid date format for ${lotteryId}, using calculated date`);
+            nextDrawDate = lottery ? this.calculateNextDrawDate(lottery.drawDays || [], '20:00') : new Date();
+          } else {
+            console.log(`✓ Using official next draw date for ${lotteryId}: ${nextDrawDate.toISOString()}`);
+          }
         } else {
           // Fallback to calculated date
           nextDrawDate = lottery ? this.calculateNextDrawDate(lottery.drawDays || [], '20:00') : new Date();
@@ -408,12 +428,28 @@ class LotteryService {
         // Store the latest draw in database for analysis (with proper date validation)
         let validDrawDate = new Date();
         if (data.dataApuracao) {
-          const testDate = new Date(data.dataApuracao);
+          let dateStr = data.dataApuracao;
+          if (typeof dateStr === 'string' && dateStr.includes('/')) {
+            // Convert DD/MM/YYYY to YYYY-MM-DD format
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+              dateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            }
+          }
+          const testDate = new Date(dateStr);
           if (!isNaN(testDate.getTime())) {
             validDrawDate = testDate;
           }
         } else if (data.dataProximoConcurso) {
-          const testDate = new Date(data.dataProximoConcurso);
+          let dateStr = data.dataProximoConcurso;
+          if (typeof dateStr === 'string' && dateStr.includes('/')) {
+            // Convert DD/MM/YYYY to YYYY-MM-DD format
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+              dateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            }
+          }
+          const testDate = new Date(dateStr);
           if (!isNaN(testDate.getTime())) {
             validDrawDate = testDate;
           }

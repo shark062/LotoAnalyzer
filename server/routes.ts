@@ -77,11 +77,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Ensure we have lottery type data
       await lotteryService.initializeLotteryTypes();
 
-      // Force sync with official API for real-time data
+      // Force sync with official API for real-time data - single lottery for speed
       try {
-        await lotteryService.syncLatestDraws();
+        const realData = await lotteryService.fetchRealLotteryData(id);
+        if (realData) {
+          res.json(realData);
+          return;
+        }
       } catch (syncError) {
-        console.log('Sync warning (continuing with cached data):', syncError.message);
+        console.log('Direct fetch warning (using fallback):', syncError.message);
       }
 
       const nextDraw = await lotteryService.getNextDrawInfo(id);

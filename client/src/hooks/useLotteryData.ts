@@ -4,7 +4,9 @@ import type { LotteryType, LotteryDraw, NextDrawInfo, NumberFrequency, UserStats
 export function useLotteryTypes() {
   return useQuery<LotteryType[]>({
     queryKey: ["/api/lotteries"],
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 30 seconds for fresh data
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -23,6 +25,8 @@ export function useNextDrawInfo(lotteryId?: string) {
     refetchInterval: 1000, // Refetch every second for real-time countdown
     staleTime: 0, // Always fresh data for real-time countdown
     gcTime: 0, // Don't cache for real-time updates
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 }
 
