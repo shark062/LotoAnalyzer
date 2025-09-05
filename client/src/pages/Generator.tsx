@@ -311,19 +311,23 @@ export default function Generator() {
                           key={strategy}
                           className={`cursor-pointer transition-all duration-200 ${
                             isSelected
-                              ? 'bg-black/20'
-                              : 'bg-black/20 border-border hover:bg-black/20 hover:border-primary/50'
+                              ? 'bg-primary/20 border-primary/50 shadow-lg shadow-primary/20'
+                              : 'bg-black/10 border-border/50 hover:bg-black/20 hover:border-primary/30'
                           }`}
                           onClick={() => form.setValue('strategy', strategy)}
                         >
                           <CardContent className="p-4">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center space-x-3">
-                                <div className="p-2 rounded-full bg-background">
+                                <div className={`p-2 rounded-full transition-colors ${
+                                  isSelected ? 'bg-primary/30' : 'bg-background/50'
+                                }`}>
                                   {info.icon}
                                 </div>
                                 <div>
-                                  <h4 className="font-semibold text-foreground flex items-center">
+                                  <h4 className={`font-semibold flex items-center transition-colors ${
+                                    isSelected ? 'text-primary' : 'text-foreground'
+                                  }`}>
                                     {info.name}
                                     <span className="ml-2 text-lg">{info.emoji}</span>
                                   </h4>
@@ -333,7 +337,7 @@ export default function Generator() {
                                 </div>
                               </div>
                               {isSelected && (
-                                <div className="w-4 h-4 rounded-full bg-black/20 flex items-center justify-center">
+                                <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
                                   <div className="w-2 h-2 rounded-full bg-white"></div>
                                 </div>
                               )}
