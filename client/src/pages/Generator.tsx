@@ -14,12 +14,12 @@ import { z } from "zod";
 import { useLotteryTypes } from "@/hooks/useLotteryData";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Dice6, 
-  Sparkles, 
-  Zap, 
-  Flame, 
-  Snowflake, 
+import {
+  Dice6,
+  Sparkles,
+  Zap,
+  Flame,
+  Snowflake,
   Sun,
   Brain,
   Copy,
@@ -154,18 +154,24 @@ export default function Generator() {
   };
 
   const getNumberStyle = (number: number, strategy: string) => {
-    // Simulate temperature based on strategy and number
-    // In real app, this would use actual frequency data
-    const mod = number % 3;
+    const baseStyle = "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold";
+    const colorStyle = "text-white"; // White numbers as requested
 
-    if (strategy === 'hot' || (strategy === 'mixed' && mod === 0)) {
-      return "bg-black/20";
-    } else if (strategy === 'cold' || (strategy === 'mixed' && mod === 2)) {
-      return "bg-black/20";
-    } else {
-      return "bg-black/20";
+    if (strategy === 'hot') {
+      return `${baseStyle} ${colorStyle} bg-red-500`;
+    } else if (strategy === 'cold') {
+      return `${baseStyle} ${colorStyle} bg-blue-500`;
+    } else if (strategy === 'mixed') {
+      const mod = number % 3;
+      if (mod === 0) return `${baseStyle} ${colorStyle} bg-orange-500`; // Warm
+      if (mod === 1) return `${baseStyle} ${colorStyle} bg-red-500`; // Hot
+      return `${baseStyle} ${colorStyle} bg-blue-500`; // Cold
+    } else if (strategy === 'ai') {
+      return `${baseStyle} ${colorStyle} bg-purple-500`;
     }
+    return `${baseStyle} ${colorStyle} bg-gray-500`; // Default neutral color
   };
+
 
   const copyToClipboard = (numbers: number[]) => {
     const text = numbers.join(' - ');
@@ -177,7 +183,7 @@ export default function Generator() {
   };
 
   const exportGames = () => {
-    const content = generatedGames.map((game, index) => 
+    const content = generatedGames.map((game, index) =>
       `Jogo ${index + 1}: ${game.numbers.join(' - ')}`
     ).join('\n');
 
@@ -186,8 +192,14 @@ export default function Generator() {
     const a = document.createElement('a');
     a.href = url;
     a.download = 'jogos-shark-loto.txt';
+    document.body.appendChild(a); // Append to body for Firefox
     a.click();
     URL.revokeObjectURL(url);
+    document.body.removeChild(a); // Clean up
+    toast({
+      title: "Exportado!",
+      description: "Jogos salvos no seu dispositivo.",
+    });
   };
 
   return (
@@ -222,8 +234,8 @@ export default function Generator() {
                     <Target className="h-4 w-4 mr-2 text-primary" />
                     Modalidade
                   </Label>
-                  <Select 
-                    value={form.watch('lotteryId')} 
+                  <Select
+                    value={form.watch('lotteryId')}
                     onValueChange={(value) => form.setValue('lotteryId', value)}
                     disabled={lotteriesLoading}
                   >
@@ -295,10 +307,10 @@ export default function Generator() {
                       const isSelected = form.watch('strategy') === strategy;
 
                       return (
-                        <Card 
+                        <Card
                           key={strategy}
                           className={`cursor-pointer transition-all duration-200 ${
-                            isSelected 
+                            isSelected
                               ? 'bg-black/20'
                               : 'bg-black/20 border-border hover:bg-black/20 hover:border-primary/50'
                           }`}
@@ -414,7 +426,7 @@ export default function Generator() {
                 <Button
                   type="submit"
                   disabled={isGenerating || !selectedLottery}
-                  className="w-full bg-black/20"
+                  className="w-full bg-black/20 hover:bg-primary/20 border border-primary/50"
                   data-testid="generate-games-button"
                 >
                   {isGenerating ? (
@@ -446,6 +458,7 @@ export default function Generator() {
                     variant="outline"
                     size="sm"
                     onClick={exportGames}
+                    className="hover:bg-primary/20"
                     data-testid="export-games-button"
                   >
                     <Download className="h-4 w-4 mr-1" />
@@ -485,9 +498,7 @@ export default function Generator() {
                           {game.numbers.map((number) => (
                             <Badge
                               key={number}
-                              className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
-                                getNumberStyle(number, game.strategy)
-                              }`}
+                              className={getNumberStyle(number, game.strategy)}
                               data-testid={`game-${index}-number-${number}`}
                             >
                               {number.toString().padStart(2, '0')}
@@ -518,7 +529,7 @@ export default function Generator() {
         {generatedGames.length > 0 && (
           <div className="text-center mt-8">
             <div className="inline-flex gap-4">
-              <Button 
+              <Button
                 onClick={() => window.location.href = '/heat-map'}
                 variant="outline"
                 className="border-primary text-primary hover:bg-black/20"
@@ -528,9 +539,9 @@ export default function Generator() {
                 Ver Mapa de Calor
               </Button>
 
-              <Button 
+              <Button
                 onClick={() => window.location.href = '/results'}
-                className="bg-black/20"
+                className="bg-black/20 hover:bg-primary/20"
                 data-testid="view-results-button"
               >
                 <Target className="h-4 w-4 mr-2" />
