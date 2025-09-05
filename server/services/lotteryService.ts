@@ -28,14 +28,8 @@ class LotteryService {
 
   async initializeLotteryTypes(): Promise<void> {
     try {
-      // Check if lottery types already exist
-      const existingLotteries = await storage.getLotteryTypes();
-      if (existingLotteries.length >= 10) {
-        console.log(`✓ Lottery types already initialized (${existingLotteries.length} types found)`);
-        return;
-      }
-
-      console.log(`🔧 Initializing lottery types... (found ${existingLotteries.length}, need 10)`);
+      // Always try to initialize to ensure all types exist
+      console.log('🔧 Ensuring all lottery types are properly initialized...');
 
       // Complete list of all official Brazilian lottery types
       // Official draw schedules from Caixa Econômica Federal
@@ -172,17 +166,29 @@ class LotteryService {
         },
       ];
 
-      // Insert lottery types into the database
+      // Insert lottery types into the database with retry logic
       for (const lottery of defaultLotteries) {
-        try {
-          await storage.insertLotteryType(lottery);
-          console.log(`✓ Inserted lottery type: ${lottery.displayName}`);
-        } catch (error) {
-          console.log(`Lottery type ${lottery.id} may already exist`);
+        let retries = 3;
+        while (retries > 0) {
+          try {
+            await storage.insertLotteryType(lottery);
+            console.log(`✓ Inserted lottery type: ${lottery.displayName}`);
+            break;
+          } catch (error) {
+            retries--;
+            if (retries === 0) {
+              console.log(`Failed to insert lottery type ${lottery.id} after retries`);
+            } else {
+              console.log(`Retry ${4 - retries} for lottery type ${lottery.id}`);
+              await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+            }
+          }
         }
       }
 
-      console.log('All lottery types initialized successfully');
+      // Verify initialization
+      const finalCheck = await storage.getLotteryTypes();
+      console.log(`✓ Lottery initialization complete. Found ${finalCheck.length} types.`);
     } catch (error) {
       console.error('Error initializing lottery types:', error);
     }
@@ -596,7 +602,8 @@ class LotteryService {
       const frequencies = await storage.getNumberFrequencies(lotteryId);
 
       if (frequencies.length === 0) {
-        throw new Error('No frequency data available for strategy-based generation');
+        console.log(`No frequency data for ${lotteryId}, using random generation`);
+        return this.generateRandomNumbers(count, maxNumber);
       }
 
       const numbers: number[] = [];
@@ -644,8 +651,21 @@ class LotteryService {
       return numbers;
     } catch (error) {
       console.error('Error generating strategy numbers:', error);
-      throw new Error('Failed to generate numbers based on strategy');
+      console.log('Falling back to random number generation');
+      return this.generateRandomNumbers(count, maxNumber);
     }
+  }
+
+  private generateRandomNumbers(count: number, maxNumber: number): number[] {
+    const numbers: number[] = [];
+    const pool = Array.from({ length: maxNumber }, (_, i) => i + 1);
+
+    while (numbers.length < count && pool.length > 0) {
+      const randomIndex = Math.floor(Math.random() * pool.length);
+      numbers.push(pool.splice(randomIndex, 1)[0]);
+    }
+
+    return numbers.sort((a, b) => a - b);
   }
 
   private async generateAINumbers(lotteryId: string, count: number, maxNumber: number): Promise<number[]> {
