@@ -439,6 +439,12 @@ class Storage {
         return this.generateFallbackFrequencies(lotteryId);
       }
 
+      // Check if numberFrequencies table exists in schema
+      if (!schema.numberFrequencies) {
+        console.log('Number frequencies table not found in schema, using fallback');
+        return this.generateFallbackFrequencies(lotteryId);
+      }
+
       const frequencies = await this.db
         .select()
         .from(schema.numberFrequencies)

@@ -602,7 +602,7 @@ class LotteryService {
       const frequencies = await storage.getNumberFrequencies(lotteryId);
 
       if (frequencies.length === 0) {
-        console.log(`No frequency data for ${lotteryId}, using random generation`);
+        console.log(`No frequency data for ${lotteryId}, using random generation with exact count: ${count}`);
         return this.generateRandomNumbers(count, maxNumber);
       }
 
@@ -622,9 +622,9 @@ class LotteryService {
           const coldNumbers = frequencies.filter(f => f.temperature === 'cold').map(f => f.number);
 
           // Mix: 40% hot, 30% warm, 30% cold
-          const hotCount = Math.floor(count * 0.4);
-          const warmCount = Math.floor(count * 0.3);
-          const coldCount = count - hotCount - warmCount;
+          const hotCount = Math.max(1, Math.floor(count * 0.4));
+          const warmCount = Math.max(1, Math.floor(count * 0.3));
+          const coldCount = Math.max(1, count - hotCount - warmCount);
 
           pool = [
             ...hotNumbers.slice(0, hotCount),
@@ -636,19 +636,28 @@ class LotteryService {
           pool = Array.from({ length: maxNumber }, (_, i) => i + 1);
       }
 
+      // Ensure pool has enough numbers
       if (pool.length < count) {
-        // Fill remaining with random numbers if pool is too small
         const remaining = Array.from({ length: maxNumber }, (_, i) => i + 1)
           .filter(n => !pool.includes(n));
         pool = [...pool, ...remaining];
       }
 
+      // Shuffle the pool for randomness
+      pool = pool.sort(() => Math.random() - 0.5);
+
+      // Select exactly the requested count
       while (numbers.length < count && pool.length > 0) {
         const randomIndex = Math.floor(Math.random() * pool.length);
         numbers.push(pool.splice(randomIndex, 1)[0]);
       }
 
-      return numbers;
+      // Ensure we have exactly the requested count
+      if (numbers.length < count) {
+        console.log(`Warning: Could only generate ${numbers.length} numbers instead of ${count} for ${lotteryId}`);
+      }
+
+      return numbers.slice(0, count).sort((a, b) => a - b);
     } catch (error) {
       console.error('Error generating strategy numbers:', error);
       console.log('Falling back to random number generation');
@@ -660,11 +669,15 @@ class LotteryService {
     const numbers: number[] = [];
     const pool = Array.from({ length: maxNumber }, (_, i) => i + 1);
 
-    while (numbers.length < count && pool.length > 0) {
+    // Ensure we don't try to select more numbers than available
+    const actualCount = Math.min(count, maxNumber);
+    
+    while (numbers.length < actualCount && pool.length > 0) {
       const randomIndex = Math.floor(Math.random() * pool.length);
       numbers.push(pool.splice(randomIndex, 1)[0]);
     }
 
+    console.log(`Generated ${numbers.length} random numbers (requested: ${count}, max: ${maxNumber})`);
     return numbers.sort((a, b) => a - b);
   }
 
