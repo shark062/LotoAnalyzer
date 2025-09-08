@@ -69,7 +69,7 @@ export default function Generator() {
       lotteryId: preselectedLottery || undefined,
       numbersCount: undefined,
       gamesCount: undefined,
-      strategy: 'mixed',
+      strategy: undefined,
     },
   });
 

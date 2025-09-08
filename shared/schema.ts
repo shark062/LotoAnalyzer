@@ -86,6 +86,8 @@ export const numberFrequency = pgTable("number_frequency", {
   frequency: integer("frequency").default(0),
   lastDrawn: timestamp("last_drawn"),
   temperature: varchar("temperature"), // "hot", "warm", "cold"
+  drawsSinceLastSeen: integer("draws_since_last_seen").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
@@ -130,7 +132,6 @@ export const insertUserGameSchema = createInsertSchema(userGames).omit({
 
 export const insertNumberFrequencySchema = createInsertSchema(numberFrequency).omit({
   id: true,
-  createdAt: true,
   updatedAt: true,
 });
 

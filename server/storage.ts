@@ -83,8 +83,6 @@ class Storage {
         drawDays: ['Wednesday', 'Saturday'],
         drawTime: '20:00',
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
       {
         id: 'lotofacil',
@@ -96,8 +94,6 @@ class Storage {
         drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
         drawTime: '20:00',
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
       {
         id: 'quina',
@@ -109,8 +105,6 @@ class Storage {
         drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
         drawTime: '20:00',
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
       {
         id: 'lotomania',
@@ -122,8 +116,6 @@ class Storage {
         drawDays: ['Tuesday', 'Thursday', 'Saturday'],
         drawTime: '20:00',
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
       {
         id: 'duplasena',
@@ -135,8 +127,6 @@ class Storage {
         drawDays: ['Tuesday', 'Thursday', 'Saturday'],
         drawTime: '20:00',
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
       {
         id: 'supersete',
@@ -148,8 +138,6 @@ class Storage {
         drawDays: ['Monday', 'Wednesday', 'Friday'],
         drawTime: '20:00',
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
       {
         id: 'milionaria',
@@ -161,8 +149,6 @@ class Storage {
         drawDays: ['Wednesday', 'Saturday'],
         drawTime: '20:00',
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
       {
         id: 'timemania',
@@ -174,8 +160,6 @@ class Storage {
         drawDays: ['Tuesday', 'Thursday', 'Saturday'],
         drawTime: '20:00',
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
       {
         id: 'diadesore',
@@ -187,8 +171,6 @@ class Storage {
         drawDays: ['Tuesday', 'Thursday', 'Saturday'],
         drawTime: '20:00',
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
       {
         id: 'loteca',
@@ -200,8 +182,6 @@ class Storage {
         drawDays: ['Saturday'],
         drawTime: '20:00',
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
     ];
   }
@@ -218,12 +198,13 @@ class Storage {
       const temperature = frequency > 15 ? 'hot' : frequency > 8 ? 'warm' : 'cold';
 
       frequencies.push({
-        id: `${lotteryId}-${i}`,
+        id: Math.floor(Math.random() * 100000),
         lotteryId,
         number: i,
         frequency,
         temperature: temperature as 'hot' | 'warm' | 'cold',
-        lastDrawn: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000), // Random date within last 30 days
+        lastDrawn: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+        drawsSinceLastSeen: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -358,7 +339,8 @@ class Storage {
         contestNumber: drawData.contestNumber,
         drawDate: drawData.drawDate,
         drawnNumbers: drawData.drawnNumbers,
-        prizes: drawData.prizes || []
+        prizeAmount: drawData.prizeAmount || "0",
+        winners: drawData.winners || null
       });
 
       console.log(`✓ Stored draw ${drawData.lotteryId} #${drawData.contestNumber}`);
@@ -418,19 +400,6 @@ class Storage {
     }
   }
 
-  async createLotteryDraw(draw: InsertLotteryDraw): Promise<LotteryDraw> {
-    try {
-      if (!this.db) {
-        throw new Error('Database not available');
-      }
-
-      const [result] = await this.db.insert(schema.lotteryDraws).values(draw).returning();
-      return result;
-    } catch (error) {
-      console.error('Error creating lottery draw:', error);
-      throw error;
-    }
-  }
 
   async getNumberFrequencies(lotteryId: string): Promise<NumberFrequency[]> {
     try {
@@ -453,14 +422,14 @@ class Storage {
       }
 
       // Calculate temperatures based on frequency distribution
-      const sortedFreqs = frequencies.map(f => f.frequency).sort((a, b) => b - a);
+      const sortedFreqs = frequencies.map(f => f.frequency || 0).sort((a, b) => (b || 0) - (a || 0));
       const total = frequencies.length;
 
       const hotThreshold = Math.ceil(total * 0.3); // Top 30%
       const coldThreshold = Math.floor(total * 0.3); // Bottom 30%
 
       return frequencies.map(f => {
-        const rank = sortedFreqs.indexOf(f.frequency);
+        const rank = sortedFreqs.indexOf(f.frequency || 0);
         let temperature: 'hot' | 'warm' | 'cold' = 'warm';
 
         if (rank < hotThreshold) {
@@ -569,14 +538,14 @@ class Storage {
 
       const result = await this.db
         .select()
-        .from(schema.aiAnalyses)
+        .from(schema.aiAnalysis)
         .where(
           and(
-            eq(schema.aiAnalyses.lotteryId, lotteryId),
-            eq(schema.aiAnalyses.analysisType, analysisType)
+            eq(schema.aiAnalysis.lotteryId, lotteryId),
+            eq(schema.aiAnalysis.analysisType, analysisType)
           )
         )
-        .orderBy(desc(schema.aiAnalyses.createdAt))
+        .orderBy(desc(schema.aiAnalysis.createdAt))
         .limit(1);
 
       return result[0] || null;
@@ -592,7 +561,7 @@ class Storage {
         throw new Error('Database connection required to save analysis');
       }
 
-      const [result] = await this.db.insert(schema.aiAnalyses).values(analysis).returning();
+      const [result] = await this.db.insert(schema.aiAnalysis).values(analysis).returning();
       return result;
     } catch (error) {
       console.error('Error creating AI analysis:', error);
