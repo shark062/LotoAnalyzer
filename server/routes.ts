@@ -154,6 +154,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reset user data endpoint for deployment
+  app.post('/api/users/reset', async (req, res) => {
+    try {
+      const userId = 'guest-user';
+      
+      // Clear all user games
+      await storage.db?.delete(schema.userGames).where(eq(schema.userGames.userId, userId));
+      
+      console.log('✓ User data reset successfully for deployment');
+      res.json({ success: true, message: 'User data reset successfully' });
+    } catch (error) {
+      console.error('Error resetting user data:', error);
+      res.status(500).json({ error: 'Failed to reset user data' });
+    }
+  });
+
   // Lottery games routes
   app.post('/api/games/generate', async (req: any, res) => {
     try {

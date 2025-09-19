@@ -44,6 +44,12 @@ class Storage {
           profileImageUrl: null,
         });
         console.log('✓ Guest user created successfully');
+      } else {
+        // Reset guest user data for fresh start
+        await this.db
+          .delete(schema.userGames)
+          .where(eq(schema.userGames.userId, 'guest-user'));
+        console.log('✓ Guest user games reset for fresh start');
       }
     } catch (error) {
       console.error('Error ensuring guest user exists:', error);
