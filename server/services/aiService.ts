@@ -382,35 +382,7 @@ class AiService {
   private getFallbackAnalysis(lotteryId: string, analysisType: string): AnalysisResult {
     const lottery = this.getFallbackLotteryData(lotteryId);
     
-    let reasoning = '';
-    let confidence = '75%';
-    
-    switch (analysisType) {
-      case 'prediction':
-        reasoning = `Análise preditiva para ${lottery.displayName} baseada em padrões históricos e frequências estatísticas.`;
-        break;
-      case 'pattern':
-        reasoning = `Análise de padrões para ${lottery.displayName} identificando tendências nos sorteios recentes.`;
-        break;
-      case 'strategy':
-        reasoning = `Estratégia recomendada para ${lottery.displayName} combinando números quentes, mornos e frios.`;
-        break;
-      default:
-        reasoning = `Análise geral para ${lottery.displayName} baseada em dados estatísticos.`;
-    }
-    
-    return {
-      reasoning,
-      confidence,
-      recommendations: ['Use uma combinação balanceada de números', 'Considere padrões históricos', 'Varie suas apostas'],
-      riskLevel: 'medium' as const,
-      numberSelection: {
-        hotPercentage: 30,
-        warmPercentage: 40,
-        coldPercentage: 30
-      }
-    };
-  } result: any;
+    let result: any;
     let confidence: number;
 
     switch (analysisType) {
