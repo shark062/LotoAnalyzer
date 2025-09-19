@@ -676,6 +676,8 @@ class LotteryService {
     // Favorece números que criam melhor balanceamento
     return 0.5 + (isEven ? 0.1 : -0.1) + (decade * 0.05);
   }
+
+  private calculateBalanceScore(number: number): number {
     // Evita padrões óbvios como todos pares, todos ímpares, sequenciais
     const isEven = number % 2 === 0 ? 1 : 0;
     const digitSum = number.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
@@ -1005,8 +1007,6 @@ class LotteryService {
       
       if (lowNumbers > 10 || highNumbers > 10) return true;
     }
-
-    return false;
 
     return false;
   }
