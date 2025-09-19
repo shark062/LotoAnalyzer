@@ -362,10 +362,55 @@ class AiService {
     return frequencies;
   }
 
+  private getFallbackLotteryData(lotteryId: string) {
+    const lotteryMap: Record<string, any> = {
+      'megasena': { displayName: 'Mega-Sena', totalNumbers: 60 },
+      'lotofacil': { displayName: 'Lotofácil', totalNumbers: 25 },
+      'quina': { displayName: 'Quina', totalNumbers: 80 },
+      'lotomania': { displayName: 'Lotomania', totalNumbers: 100 },
+      'duplasena': { displayName: 'Dupla Sena', totalNumbers: 50 },
+      'supersete': { displayName: 'Super Sete', totalNumbers: 10 },
+      'milionaria': { displayName: '+Milionária', totalNumbers: 50 },
+      'timemania': { displayName: 'Timemania', totalNumbers: 80 },
+      'diadesore': { displayName: 'Dia de Sorte', totalNumbers: 31 },
+      'loteca': { displayName: 'Loteca', totalNumbers: 3 }
+    };
+    
+    return lotteryMap[lotteryId] || { displayName: 'Loteria', totalNumbers: 60 };
+  }
+
   private getFallbackAnalysis(lotteryId: string, analysisType: string): AnalysisResult {
     const lottery = this.getFallbackLotteryData(lotteryId);
     
-    let result: any;
+    let reasoning = '';
+    let confidence = '75%';
+    
+    switch (analysisType) {
+      case 'prediction':
+        reasoning = `Análise preditiva para ${lottery.displayName} baseada em padrões históricos e frequências estatísticas.`;
+        break;
+      case 'pattern':
+        reasoning = `Análise de padrões para ${lottery.displayName} identificando tendências nos sorteios recentes.`;
+        break;
+      case 'strategy':
+        reasoning = `Estratégia recomendada para ${lottery.displayName} combinando números quentes, mornos e frios.`;
+        break;
+      default:
+        reasoning = `Análise geral para ${lottery.displayName} baseada em dados estatísticos.`;
+    }
+    
+    return {
+      reasoning,
+      confidence,
+      recommendations: ['Use uma combinação balanceada de números', 'Considere padrões históricos', 'Varie suas apostas'],
+      riskLevel: 'medium' as const,
+      numberSelection: {
+        hotPercentage: 30,
+        warmPercentage: 40,
+        coldPercentage: 30
+      }
+    };
+  } result: any;
     let confidence: number;
 
     switch (analysisType) {

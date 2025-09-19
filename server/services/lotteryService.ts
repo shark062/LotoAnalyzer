@@ -665,7 +665,17 @@ class LotteryService {
     const recencyScore = Math.max(0, 1 - recency / 20);
     const balanceScore = this.calculateBalanceScore(frequency.number);
     
-    return (frequencyScore * 0.4) + (recencyScore * 0.35) + (balanceScore * 0.25);
+    return (frequencyScore * 0.4) + (recencyScore * 0.3) + (balanceScore * 0.3);
+  }
+
+  private calculateBalanceScore(number: number): number {
+    // Score baseado no balanceamento par/ímpar e distribuição por dezena
+    const isEven = number % 2 === 0;
+    const decade = Math.floor(number / 10);
+    
+    // Favorece números que criam melhor balanceamento
+    return 0.5 + (isEven ? 0.1 : -0.1) + (decade * 0.05);
+  }ecencyScore * 0.35) + (balanceScore * 0.25);
   }
 
   private calculateBalanceScore(number: number): number {
@@ -995,6 +1005,11 @@ class LotteryService {
       // Para lotofácil, evita concentração excessiva nas extremidades
       const lowNumbers = numbers.filter(n => n <= 8).length;
       const highNumbers = numbers.filter(n => n >= 18).length;
+      
+      if (lowNumbers > 10 || highNumbers > 10) return true;
+    }
+
+    return false;r(n => n >= 18).length;
       if (lowNumbers > 8 || highNumbers > 8) return true;
     }
 

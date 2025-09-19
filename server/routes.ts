@@ -5,6 +5,8 @@ import { setupAuth } from "./replitAuth";
 import { lotteryService } from "./services/lotteryService";
 import { aiService } from "./services/aiService";
 import { insertUserGameSchema } from "@shared/schema";
+import * as schema from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
