@@ -1,6 +1,6 @@
 import { storage } from "../storage";
 import { aiService } from "./aiService";
-import type { LotteryType, InsertLotteryDraw, InsertUserGame } from "@shared/schema";
+import type { LotteryType, InsertLotteryDraw, InsertUserGame, NextDrawInfo } from "@shared/schema";
 
 interface GenerateGamesParams {
   lotteryId: string;
@@ -10,17 +10,6 @@ interface GenerateGamesParams {
   userId: string;
 }
 
-interface NextDrawInfo {
-  contestNumber: number;
-  drawDate: string;
-  timeRemaining: {
-    days: number;
-    hours: number;
-    minutes: number;
-    seconds: number;
-  };
-  estimatedPrize: string;
-}
 
 class LotteryService {
   private readonly API_BASE = 'https://servicebus2.caixa.gov.br/portaldeloterias/api';
@@ -209,7 +198,7 @@ class LotteryService {
       }
 
       const now = new Date();
-      const nextDrawDate = this.calculateNextDrawDate(lottery.drawDays, lottery.drawTime); // Use lottery-specific time
+      const nextDrawDate = this.calculateNextDrawDate(lottery.drawDays, lottery.drawTime || '20:00'); // Use lottery-specific time
       const timeDiff = nextDrawDate.getTime() - now.getTime();
 
       // Ensure time difference is never negative
@@ -226,6 +215,7 @@ class LotteryService {
       return {
         contestNumber: nextContestNumber,
         drawDate: nextDrawDate.toISOString(),
+        drawTime: lottery.drawTime || '20:00',
         timeRemaining: { 
           days: Math.max(0, days), 
           hours: Math.max(0, hours), 
@@ -270,7 +260,7 @@ class LotteryService {
     };
 
     // Convert draw days to numbers
-    const drawDayNumbers = drawDays.map(day => dayMap[day.toLowerCase()]).filter(d => d !== undefined);
+    const drawDayNumbers = drawDays.map(day => dayMap[day.toLowerCase()]).filter((d): d is number => d !== undefined);
 
     if (drawDayNumbers.length === 0) {
       // Default to tomorrow at draw time if no valid draw days
@@ -301,7 +291,7 @@ class LotteryService {
       daysToAdd = 0;
     } else {
       // Find next draw day after today
-      nextDrawDay = sortedDrawDays.find(day => day > today);
+      nextDrawDay = sortedDrawDays.find(day => day > today) ?? sortedDrawDays[0];
 
       if (nextDrawDay === undefined) {
         // Next draw is next week (first day of next week)
@@ -360,8 +350,7 @@ class LotteryService {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
               'User-Agent': 'Mozilla/5.0 (compatible; SharkLoto/1.0)'
-            },
-            timeout: 10000
+            }
           });
 
           if (response.ok) {
@@ -372,7 +361,7 @@ class LotteryService {
             }
           }
         } catch (urlError) {
-          console.log(`Failed to fetch from ${url}:`, urlError.message);
+          console.log(`Failed to fetch from ${url}:`, urlError instanceof Error ? urlError.message : String(urlError));
           continue;
         }
       }
@@ -514,6 +503,7 @@ class LotteryService {
         return {
           contestNumber: nextContestNumber,
           drawDate: nextDrawDate.toISOString(),
+          drawTime: lottery?.drawTime || '20:00',
           timeRemaining: { 
             days: Math.max(0, days), 
             hours: Math.max(0, hours), 

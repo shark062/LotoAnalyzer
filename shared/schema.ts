@@ -154,6 +154,20 @@ export type InsertUserGame = z.infer<typeof insertUserGameSchema>;
 export type InsertNumberFrequency = z.infer<typeof insertNumberFrequencySchema>;
 export type InsertAiAnalysis = z.infer<typeof insertAiAnalysisSchema>;
 
+// Next Draw Info interface for API responses
+export interface NextDrawInfo {
+  contestNumber: number;
+  drawDate: string;
+  drawTime: string;
+  timeRemaining: {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  };
+  estimatedPrize: string;
+}
+
 // User Statistics interface for API responses
 export interface UserStats {
   totalGames: number;

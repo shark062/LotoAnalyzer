@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import CelebrationAnimation from "@/components/CelebrationAnimation";
@@ -20,19 +20,37 @@ import {
   Award,
   Sparkles,
   BarChart3,
-  Zap
+  Zap,
+  Clock
 } from "lucide-react";
-import type { UserGame } from "@/types/lottery";
+import type { UserGame, NextDrawInfo } from "@/types/lottery";
 
 export default function Results() {
   const [filterLottery, setFilterLottery] = useState<string>('all');
   const [searchContest, setSearchContest] = useState<string>('');
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationPrize, setCelebrationPrize] = useState<string>();
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   // Data queries
   const { data: lotteryTypes } = useLotteryTypes();
   const { data: userStats, isLoading: statsLoading } = useUserStats();
+  
+  // Get next Super Sete draw (since it draws at 15:00 today)
+  const { data: nextSupersete } = useQuery<NextDrawInfo>({
+    queryKey: ["/api/lotteries/supersete/next-draw"],
+    staleTime: 2 * 60 * 1000,
+    refetchInterval: 60 * 1000, // Update every minute
+  });
+
+  // Update time every second for real-time display
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, []);
   
   const { data: userGames, isLoading: gamesLoading } = useQuery<UserGame[]>({
     queryKey: ["/api/games", "limit=50"],
@@ -141,10 +159,73 @@ export default function Results() {
                 data-testid="live-draw-video"
               />
             </div>
-            <div className="mt-4 text-center">
-              <p className="text-xs text-muted-foreground">
-                Transmissão oficial da Caixa Econômica Federal
-              </p>
+            <div className="mt-4 space-y-3">
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">
+                  Transmissão oficial da Caixa Econômica Federal
+                </p>
+              </div>
+              
+              {/* Live Draw Info */}
+              <div className="bg-black/30 rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-center space-x-2 mb-3">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold text-primary">Informações dos Sorteios</span>
+                </div>
+                
+                {/* Current Time */}
+                <div className="text-center">
+                  <div className="text-xs text-muted-foreground mb-1">Horário Atual (Brasília)</div>
+                  <div className="font-mono text-lg text-accent" data-testid="current-time">
+                    {currentTime.toLocaleString('pt-BR', {
+                      timeZone: 'America/Sao_Paulo',
+                      weekday: 'short',
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit'
+                    })}
+                  </div>
+                </div>
+
+                {/* Next Super Sete Draw */}
+                {nextSupersete && (
+                  <div className="text-center border-t border-border/30 pt-3">
+                    <div className="text-xs text-muted-foreground mb-1">Próximo Super Sete (15:00h)</div>
+                    <div className="space-y-1">
+                      <div className="font-mono text-sm text-foreground" data-testid="next-supersete-date">
+                        {new Date(nextSupersete.drawDate).toLocaleDateString('pt-BR', {
+                          weekday: 'short',
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric'
+                        })} às 15:00
+                      </div>
+                      <div className="text-xs text-primary font-semibold" data-testid="next-supersete-contest">
+                        Concurso #{nextSupersete.contestNumber}
+                      </div>
+                      <div className="text-xs text-neon-green" data-testid="next-supersete-prize">
+                        {nextSupersete.estimatedPrize}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* General Draw Times */}
+                <div className="text-center border-t border-border/30 pt-3">
+                  <div className="text-xs text-muted-foreground mb-2">Horários dos Sorteios</div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-accent font-semibold">Super Sete:</span> 15:00h
+                    </div>
+                    <div>
+                      <span className="text-primary font-semibold">Demais:</span> 20:00h
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -53,6 +53,7 @@ export interface NumberFrequency {
 export interface NextDrawInfo {
   contestNumber: number;
   drawDate: string;
+  drawTime: string;
   timeRemaining: {
     days: number;
     hours: number;
