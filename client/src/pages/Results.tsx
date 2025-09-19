@@ -116,6 +116,39 @@ export default function Results() {
           </p>
         </div>
 
+        {/* Live Draw Video */}
+        <Card className="bg-black/20 mb-8">
+          <CardHeader>
+            <CardTitle className="text-primary flex items-center">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                <span>🎬 Sorteios ao Vivo</span>
+              </div>
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Acompanhe os sorteios das loterias em tempo real
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="aspect-video w-full rounded-lg overflow-hidden bg-black/20">
+              <iframe
+                src="https://www.youtube.com/embed/BuVN7GxUKWE?autoplay=1&mute=1"
+                title="Sorteios da Caixa ao Vivo"
+                className="w-full h-full"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                data-testid="live-draw-video"
+              />
+            </div>
+            <div className="mt-4 text-center">
+              <p className="text-xs text-muted-foreground">
+                Transmissão oficial da Caixa Econômica Federal
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Statistics Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-black/20">

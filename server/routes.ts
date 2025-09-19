@@ -85,7 +85,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return;
         }
       } catch (syncError) {
-        console.log('Direct fetch warning (using fallback):', syncError.message);
+        console.log('Direct fetch warning (using fallback):', syncError instanceof Error ? syncError.message : String(syncError));
       }
 
       const nextDraw = await lotteryService.getNextDrawInfo(id);

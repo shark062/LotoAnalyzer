@@ -54,7 +54,7 @@ class LotteryService {
           minNumbers: 15,
           maxNumbers: 20,
           totalNumbers: 25,
-          drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], // Segunda a Sexta
+          drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], // Segunda a Sábado
           drawTime: '20:00',
           isActive: true,
           createdAt: new Date(),
@@ -107,7 +107,7 @@ class LotteryService {
           maxNumbers: 21,
           totalNumbers: 10,
           drawDays: ['Monday', 'Wednesday', 'Friday'], // Segundas, Quartas e Sextas
-          drawTime: '20:00',
+          drawTime: '15:00',
           isActive: true,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -209,7 +209,7 @@ class LotteryService {
       }
 
       const now = new Date();
-      const nextDrawDate = this.calculateNextDrawDate(lottery.drawDays, '20:00'); // Always 20:00
+      const nextDrawDate = this.calculateNextDrawDate(lottery.drawDays, lottery.drawTime); // Use lottery-specific time
       const timeDiff = nextDrawDate.getTime() - now.getTime();
 
       // Ensure time difference is never negative
@@ -273,10 +273,11 @@ class LotteryService {
     const drawDayNumbers = drawDays.map(day => dayMap[day.toLowerCase()]).filter(d => d !== undefined);
 
     if (drawDayNumbers.length === 0) {
-      // Default to tomorrow at 20:00 if no valid draw days
+      // Default to tomorrow at draw time if no valid draw days
+      const [fallbackHour, fallbackMinute] = drawTime.split(':').map(Number);
       const nextDay = new Date(brasiliaTime);
       nextDay.setDate(nextDay.getDate() + 1);
-      nextDay.setHours(20, 0, 0, 0);
+      nextDay.setHours(fallbackHour, fallbackMinute, 0, 0);
       // Convert to UTC for return
       return new Date(nextDay.getTime() - (localOffset - brasiliaOffset) * 60000);
     }
@@ -286,13 +287,16 @@ class LotteryService {
     let nextDrawDay: number;
     let daysToAdd = 0;
 
-    // Check if today is a draw day and if we're before 20:00 Brasília time
+    // Parse draw time (format: "HH:MM")
+    const [drawHour, drawMinute] = drawTime.split(':').map(Number);
+    
+    // Check if today is a draw day and if we're before draw time Brasília time
     const currentHour = brasiliaTime.getHours();
     const currentMinute = brasiliaTime.getMinutes();
-    const isBeforeDrawTime = currentHour < 20;
+    const isBeforeDrawTime = currentHour < drawHour || (currentHour === drawHour && currentMinute < drawMinute);
 
     if (sortedDrawDays.includes(today) && isBeforeDrawTime) {
-      // Today is a draw day and we're before 20:00
+      // Today is a draw day and we're before draw time
       nextDrawDay = today;
       daysToAdd = 0;
     } else {
@@ -311,7 +315,7 @@ class LotteryService {
     // Create the next draw date in Brasília timezone
     const nextDraw = new Date(brasiliaTime);
     nextDraw.setDate(brasiliaTime.getDate() + daysToAdd);
-    nextDraw.setHours(20, 0, 0, 0); // Always 20:00 Brasília time
+    nextDraw.setHours(drawHour, drawMinute, 0, 0); // Use lottery-specific draw time
 
     // Convert to UTC for return
     const utcNextDraw = new Date(nextDraw.getTime() - (localOffset - brasiliaOffset) * 60000);
@@ -404,7 +408,7 @@ class LotteryService {
           // Validate the date
           if (isNaN(nextDrawDate.getTime())) {
             console.log(`Invalid date format for ${lotteryId}, using calculated date`);
-            nextDrawDate = lottery ? this.calculateNextDrawDate(lottery.drawDays || [], '20:00') : new Date();
+            nextDrawDate = lottery ? this.calculateNextDrawDate(lottery.drawDays || [], lottery.drawTime || '20:00') : new Date();
           } else {
             console.log(`✓ Using official next draw date for ${lotteryId}: ${nextDrawDate.toISOString()}`);
           }
