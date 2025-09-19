@@ -12,8 +12,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // Initialize lottery types if needed
-  await lotteryService.initializeLotteryTypes();
+  // Initialize lottery types once at startup
+  try {
+    await lotteryService.initializeLotteryTypes();
+  } catch (error) {
+    console.error("Failed to initialize lottery types:", error);
+  }
 
   // Auth routes - Mock user for direct access (no login required)
   app.get('/api/auth/user', async (req: any, res) => {
@@ -34,9 +38,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Lottery data routes
   app.get('/api/lotteries', async (req, res) => {
     try {
-      // Initialize lottery types if needed
-      await lotteryService.initializeLotteryTypes();
-
       const lotteries = await storage.getLotteryTypes();
       res.json(lotteries);
     } catch (error) {
@@ -75,9 +76,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/lotteries/:id/next-draw', async (req, res) => {
     try {
       const { id } = req.params;
-
-      // Ensure we have lottery type data
-      await lotteryService.initializeLotteryTypes();
 
       // Force sync with official API for real-time data - single lottery for speed
       try {

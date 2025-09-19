@@ -14,10 +14,20 @@ interface GenerateGamesParams {
 class LotteryService {
   private readonly API_BASE = 'https://servicebus2.caixa.gov.br/portaldeloterias/api';
   private readonly LOTERIAS_CAIXA_API = 'https://api.loterias.caixa.gov.br';
+  private initializationPromise: Promise<void> | null = null;
 
   async initializeLotteryTypes(): Promise<void> {
+    // Return existing promise if initialization is already in progress
+    if (this.initializationPromise) {
+      return this.initializationPromise;
+    }
+
+    this.initializationPromise = this._performInitialization();
+    return this.initializationPromise;
+  }
+
+  private async _performInitialization(): Promise<void> {
     try {
-      // Always try to initialize to ensure all types exist
       console.log('🔧 Ensuring all lottery types are properly initialized...');
 
       // Complete list of all official Brazilian lottery types
@@ -180,6 +190,9 @@ class LotteryService {
       console.log(`✓ Lottery initialization complete. Found ${finalCheck.length} types.`);
     } catch (error) {
       console.error('Error initializing lottery types:', error);
+      // Reset the promise so it can be retried
+      this.initializationPromise = null;
+      throw error;
     }
   }
 
