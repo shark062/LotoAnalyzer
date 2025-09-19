@@ -34,22 +34,32 @@ export default function Results() {
 
   // Data queries
   const { data: lotteryTypes } = useLotteryTypes();
-  const { data: userStats, isLoading: statsLoading } = useUserStats();
   
-  
+  const { data: userStats, isLoading: statsLoading } = useQuery({
+    queryKey: ['user-stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/users/stats');
+      if (!response.ok) throw new Error('Failed to fetch user stats');
+      return response.json();
+    },
+    refetchInterval: 60000, // Refetch every 60 seconds
+  });
+
+
 
   // Update time every second for real-time display
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
-    
+
     return () => clearInterval(timer);
   }, []);
-  
-  const { data: userGames, isLoading: gamesLoading } = useQuery<UserGame[]>({
+
+  const { data: userGames, isLoading: gamesLoading, refetch: refetchGames } = useQuery({
     queryKey: ["/api/games", "limit=50"],
     staleTime: 2 * 60 * 1000,
+    refetchInterval: 30000, // Refetch every 30 seconds
   });
 
   // Filter games
@@ -86,7 +96,7 @@ export default function Results() {
         2: 'Duque',
       },
     };
-    
+
     return tiers[lotteryId]?.[matches] || `${matches} acertos`;
   };
 
@@ -117,7 +127,7 @@ export default function Results() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -160,14 +170,14 @@ export default function Results() {
                   Transmissão oficial da Caixa Econômica Federal
                 </p>
               </div>
-              
+
               {/* Live Draw Info */}
               <div className="bg-black/30 rounded-lg p-4 space-y-3">
                 <div className="flex items-center justify-center space-x-2 mb-3">
                   <Clock className="h-4 w-4 text-primary" />
                   <span className="text-sm font-semibold text-primary">Informações dos Sorteios</span>
                 </div>
-                
+
                 {/* Current Time */}
                 <div className="text-center">
                   <div className="text-xs text-muted-foreground mb-1">Horário Atual (Brasília)</div>
@@ -185,14 +195,14 @@ export default function Results() {
                   </div>
                 </div>
 
-                
+
 
                 {/* General Draw Times */}
                 <div className="text-center border-t border-border/30 pt-3">
                   <div className="text-xs text-muted-foreground mb-2">Horários dos Sorteios</div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <span className="text-accent font-semibold">Super Sete:</span> 15:00h
+                      <span className="text-accent font-semibold">Super Sete:</span> 20:00h
                     </div>
                     <div>
                       <span className="text-primary font-semibold">Demais:</span> 20:00h
@@ -274,7 +284,7 @@ export default function Results() {
                   Comemorar
                 </Button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-neon-gold neon-text" data-testid="best-prize-amount">
@@ -307,7 +317,7 @@ export default function Results() {
                 <Filter className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Filtros:</span>
               </div>
-              
+
               <Select value={filterLottery} onValueChange={setFilterLottery}>
                 <SelectTrigger className="w-48" data-testid="lottery-filter">
                   <SelectValue placeholder="Todas as modalidades" />
@@ -374,7 +384,7 @@ export default function Results() {
                 {filteredGames.map((game, index) => {
                   const prizeWon = parseFloat(game.prizeWon || "0");
                   const hasWon = prizeWon > 0;
-                  
+
                   return (
                     <Card key={game.id} className={`bg-black/20 border-border/50 ${hasWon ? 'ring-1 ring-neon-green/30' : ''}`}>
                       <CardContent className="p-4">
@@ -391,7 +401,7 @@ export default function Results() {
                               {new Date(game.createdAt).toLocaleDateString('pt-BR')}
                             </span>
                           </div>
-                          
+
                           <div className="text-right">
                             <div className={`text-lg font-bold ${getMatchesColor(game.matches, game.prizeWon || "0")}`} data-testid={`game-${index}-prize`}>
                               {hasWon ? `R$ ${prizeWon.toFixed(2).replace('.', ',')}` : 'R$ 0,00'}
@@ -401,7 +411,7 @@ export default function Results() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <div className="flex flex-wrap gap-2">
                             {game.selectedNumbers.map((number) => (
@@ -417,7 +427,7 @@ export default function Results() {
                               </Badge>
                             ))}
                           </div>
-                          
+
                           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                             <span className="flex items-center">
                               <Target className="h-3 w-3 mr-1" />
@@ -468,7 +478,7 @@ export default function Results() {
                 <Zap className="h-4 w-4 mr-2" />
                 Gerar Mais Jogos
               </Button>
-              
+
               <Button 
                 onClick={() => window.location.href = '/ai-analysis'}
                 variant="outline"

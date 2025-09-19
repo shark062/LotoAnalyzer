@@ -61,7 +61,7 @@ class Storage {
 
       this.db = drizzle(client, { schema });
       console.log('Database connection established successfully');
-      
+
       // Ensure guest user exists
       await this.ensureGuestUser();
     } catch (error) {
@@ -225,7 +225,7 @@ class Storage {
     } catch (error) {
       // Ignore duplicate key errors and other conflicts
       if (error instanceof Error && (
-        error.message.includes('duplicate key') || 
+        error.message.includes('duplicate key') ||
         error.message.includes('already exists') ||
         error.message.includes('unique constraint')
       )) {
@@ -408,7 +408,7 @@ class Storage {
         return this.generateFallbackFrequencies(lotteryId);
       }
 
-      
+
 
       const frequencies = await this.db
         .select()
@@ -571,3 +571,145 @@ class Storage {
 }
 
 export const storage = new Storage();
+
+// Placeholder for lottery types, this should be fetched from the database or a config file
+const lotteryTypes: LotteryType[] = [
+  {
+    id: 'megasena',
+    name: 'megasena',
+    displayName: 'Mega-Sena',
+    minNumbers: 6,
+    maxNumbers: 15,
+    totalNumbers: 60,
+    drawDays: ['Wednesday', 'Saturday'],
+    drawTime: '20:00', // Corrected draw time
+    isActive: true,
+  },
+  {
+    id: 'lotofacil',
+    name: 'lotofacil',
+    displayName: 'Lotofácil',
+    minNumbers: 15,
+    maxNumbers: 20,
+    totalNumbers: 25,
+    drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    drawTime: '20:00',
+    isActive: true,
+  },
+  {
+    id: 'quina',
+    name: 'quina',
+    displayName: 'Quina',
+    minNumbers: 5,
+    maxNumbers: 15,
+    totalNumbers: 80,
+    drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    drawTime: '20:00',
+    isActive: true,
+  },
+  {
+    id: 'lotomania',
+    name: 'lotomania',
+    displayName: 'Lotomania',
+    minNumbers: 50,
+    maxNumbers: 50,
+    totalNumbers: 100,
+    drawDays: ['Tuesday', 'Friday'],
+    drawTime: '20:00',
+    isActive: true,
+  },
+  {
+    id: 'duplasena',
+    name: 'duplasena',
+    displayName: 'Dupla Sena',
+    minNumbers: 6,
+    maxNumbers: 15,
+    totalNumbers: 50,
+    drawDays: ['Tuesday', 'Thursday', 'Saturday'],
+    drawTime: '20:00',
+    isActive: true,
+  },
+  {
+    id: 'supersete',
+    name: 'supersete',
+    displayName: 'Super Sete',
+    minNumbers: 7,
+    maxNumbers: 21,
+    totalNumbers: 10,
+    drawDays: ['Monday', 'Wednesday', 'Friday'],
+    drawTime: '20:00', // Corrected draw time
+    isActive: true,
+  },
+  {
+    id: 'milionaria',
+    name: 'milionaria',
+    displayName: '+Milionária',
+    minNumbers: 6,
+    maxNumbers: 12,
+    totalNumbers: 50,
+    drawDays: ['Wednesday', 'Saturday'],
+    drawTime: '20:00',
+    isActive: true,
+  },
+  {
+    id: 'timemania',
+    name: 'timemania',
+    displayName: 'Timemania',
+    minNumbers: 10,
+    maxNumbers: 10,
+    totalNumbers: 80,
+    drawDays: ['Tuesday', 'Thursday', 'Saturday'],
+    drawTime: '20:00',
+    isActive: true,
+  },
+  {
+    id: 'diadesore',
+    name: 'diadesore',
+    displayName: 'Dia de Sorte',
+    minNumbers: 7,
+    maxNumbers: 15,
+    totalNumbers: 31,
+    drawDays: ['Tuesday', 'Thursday', 'Saturday'],
+    drawTime: '20:00',
+    isActive: true,
+  },
+  {
+    id: 'loteca',
+    name: 'loteca',
+    displayName: 'Loteca',
+    minNumbers: 14,
+    maxNumbers: 14,
+    totalNumbers: 3,
+    drawDays: ['Saturday'],
+    drawTime: '20:00',
+    isActive: true,
+  },
+];
+
+let isInitialized = false;
+
+export async function ensureLotteryTypesInitialized() {
+  if (isInitialized) {
+    return;
+  }
+
+  const log = (message: string) => console.log(message); // Helper for consistent logging
+
+  log('🔧 Ensuring all lottery types are properly initialized...');
+
+  const existingTypes = await storage.db?.select().from(schema.lotteryTypes).execute();
+  const existingTypeIds = new Set(existingTypes?.map(t => t.id) || []);
+
+  for (const lotteryType of lotteryTypes) {
+    // Check if the lottery type already exists in the database
+    if (!existingTypeIds.has(lotteryType.id)) {
+      await storage.insertLotteryType(lotteryType);
+    } else {
+      // Optionally, update existing types if needed. For now, we just ensure they exist.
+      log(`Lottery type ${lotteryType.id} already exists, skipping insertion.`);
+    }
+  }
+
+  log(`✓ Lottery initialization complete. Found ${existingTypes?.length ?? 0} types.`);
+  isInitialized = true;
+}

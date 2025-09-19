@@ -279,7 +279,7 @@ class LotteryService {
 
     // Parse draw time (format: "HH:MM")
     const [drawHour, drawMinute] = drawTime.split(':').map(Number);
-    
+
     // Check if today is a draw day and if we're before draw time Brasília time
     const currentHour = brasiliaTime.getHours();
     const currentMinute = brasiliaTime.getMinutes();
@@ -375,7 +375,7 @@ class LotteryService {
       if (data && data.numero) {
         // Get official draw schedule from Caixa data
         const lottery = await storage.getLotteryType(lotteryId);
-        
+
         // Use official next draw date from API if available
         let nextDrawDate: Date;
         if (data.dataProximoConcurso) {
@@ -393,7 +393,7 @@ class LotteryService {
           } else {
             nextDrawDate = new Date(data.dataProximoConcurso);
           }
-          
+
           // Validate the date
           if (isNaN(nextDrawDate.getTime())) {
             console.log(`Invalid date format for ${lotteryId}, using calculated date`);
@@ -411,7 +411,7 @@ class LotteryService {
         const brasiliaOffset = -3 * 60; // UTC-3 in minutes
         const localOffset = now.getTimezoneOffset();
         const brasiliaTime = new Date(now.getTime() + (localOffset - brasiliaOffset) * 60000);
-        
+
         // Ensure nextDrawDate is in UTC for proper calculation
         const nextDrawUTC = new Date(nextDrawDate.getTime());
         const timeDiff = nextDrawUTC.getTime() - now.getTime();
@@ -470,7 +470,7 @@ class LotteryService {
 
         // Format prize value properly with real-time data from official API
         let formattedPrize = this.getEstimatedPrize(lotteryId);
-        
+
         // Try multiple prize fields from the API response
         const prizeFields = [
           'valorEstimadoProximoConcurso',
@@ -488,7 +488,7 @@ class LotteryService {
             } else if (typeof data[field] === 'string') {
               prizeValue = parseFloat(data[field].toString().replace(/[^\d.,]/g, '').replace(',', '.'));
             }
-            
+
             if (!isNaN(prizeValue) && prizeValue > 0) {
               formattedPrize = `R$ ${prizeValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
               console.log(`✓ Updated ${lotteryId} prize from API: ${formattedPrize}`);
@@ -698,10 +698,10 @@ class LotteryService {
       const allCandidates = frequencies.sort((a, b) => b.frequency - a.frequency);
 
       const numbers: number[] = [];
-      
+
       // First, try to select from preferred candidates (non-recent)
       const candidatePool = preferredCandidates.length >= count ? preferredCandidates : allCandidates;
-      
+
       // Select exactly the requested count
       while (numbers.length < count && candidatePool.length > 0) {
         const randomIndex = Math.floor(Math.random() * candidatePool.length);
