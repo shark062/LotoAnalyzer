@@ -96,7 +96,7 @@ class LotteryService {
           maxNumbers: 21,
           totalNumbers: 10,
           drawDays: ['Monday', 'Wednesday', 'Friday'], // Segundas, Quartas e Sextas
-          drawTime: '15:00',
+          drawTime: '20:00',
           isActive: true,
           createdAt: new Date(),
           updatedAt: new Date(),

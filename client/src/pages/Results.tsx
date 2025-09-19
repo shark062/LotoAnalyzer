@@ -36,12 +36,7 @@ export default function Results() {
   const { data: lotteryTypes } = useLotteryTypes();
   const { data: userStats, isLoading: statsLoading } = useUserStats();
   
-  // Get next Super Sete draw (since it draws at 15:00 today)
-  const { data: nextSupersete } = useQuery<NextDrawInfo>({
-    queryKey: ["/api/lotteries/supersete/next-draw"],
-    staleTime: 2 * 60 * 1000,
-    refetchInterval: 60 * 1000, // Update every minute
-  });
+  
 
   // Update time every second for real-time display
   useEffect(() => {
@@ -190,28 +185,7 @@ export default function Results() {
                   </div>
                 </div>
 
-                {/* Next Super Sete Draw */}
-                {nextSupersete && (
-                  <div className="text-center border-t border-border/30 pt-3">
-                    <div className="text-xs text-muted-foreground mb-1">Próximo Super Sete (15:00h)</div>
-                    <div className="space-y-1">
-                      <div className="font-mono text-sm text-foreground" data-testid="next-supersete-date">
-                        {new Date(nextSupersete.drawDate).toLocaleDateString('pt-BR', {
-                          weekday: 'short',
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric'
-                        })} às 15:00
-                      </div>
-                      <div className="text-xs text-primary font-semibold" data-testid="next-supersete-contest">
-                        Concurso #{nextSupersete.contestNumber}
-                      </div>
-                      <div className="text-xs text-neon-green" data-testid="next-supersete-prize">
-                        {nextSupersete.estimatedPrize}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                
 
                 {/* General Draw Times */}
                 <div className="text-center border-t border-border/30 pt-3">

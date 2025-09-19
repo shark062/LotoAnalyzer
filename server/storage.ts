@@ -136,7 +136,7 @@ class Storage {
         maxNumbers: 21,
         totalNumbers: 10,
         drawDays: ['Monday', 'Wednesday', 'Friday'],
-        drawTime: '15:00',
+        drawTime: '20:00',
         isActive: true,
       },
       {
