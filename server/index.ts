@@ -62,20 +62,24 @@ app.use((req, res, next) => {
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
 
-  // Kill any existing process on the port
-  try {
-    const { execSync } = require('child_process');
-    execSync(`pkill -f "node.*${port}" || true`, { stdio: 'ignore' });
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  } catch (error) {
-    // Ignore errors, just try to start
-  }
+  // Generic port handling for any platform
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully');
+    server.close(() => {
+      process.exit(0);
+    });
+  });
 
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
+  process.on('SIGINT', () => {
+    console.log('SIGINT received, shutting down gracefully');
+    server.close(() => {
+      process.exit(0);
+    });
+  });
+
+  server.listen(port, "0.0.0.0", () => {
+    log(`🦈 Shark Loterias server running on port ${port}`);
+    log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+    log(`📊 Dashboard: http://0.0.0.0:${port}`);
   });
 })();

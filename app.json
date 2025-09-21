@@ -1,0 +1,33 @@
+
+{
+  "name": "shark-loterias",
+  "description": "Sistema avançado de análise de loterias brasileiras",
+  "repository": "https://github.com/usuario/shark-loterias",
+  "logo": "https://shark-loterias.com/logo.png",
+  "keywords": ["nodejs", "react", "lottery", "brasil"],
+  "env": {
+    "NODE_ENV": {
+      "description": "Node environment",
+      "value": "production"
+    },
+    "PORT": {
+      "description": "Port to run the server on",
+      "value": "5000"
+    },
+    "DATABASE_URL": {
+      "description": "PostgreSQL database URL",
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "stack": "heroku-22"
+}
