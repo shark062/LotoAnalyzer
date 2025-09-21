@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useLotteryTypes, useNextDrawInfo, useNumberFrequencies, useUserStats } from "@/hooks/useLotteryData";
 import { useAuth } from "@/hooks/useAuth";
-import { useCyberpunkSounds } from "@/lib/soundEffects";
+
 import { useSharkAI } from "@/lib/sharkAI";
 import { useSharkGamification } from "@/lib/gamification";
 import { useSecureStorage } from "@/lib/secureStorage";
@@ -30,8 +30,7 @@ import {
   Star,
   Shield,
   Gamepad2,
-  Volume2,
-  VolumeX,
+  
   Coins,
   Award,
   Wifi,
@@ -49,7 +48,6 @@ export default function Home() {
 
   // Hooks das funcionalidades avançadas
   const cyberpunkEffects = useCyberpunkEffects();
-  const sounds = useCyberpunkSounds();
   const sharkAI = useSharkAI();
   const gamification = useSharkGamification();
   const secureStorage = useSecureStorage();
@@ -99,11 +97,10 @@ export default function Home() {
       if (latestWin && !showCelebration) {
         setCelebrationPrize(`R$ ${latestWin.prizeWon}`);
         setShowCelebration(true);
-        sounds.playPatternFound(); // Som de comemoração
         cyberpunkEffects.triggerGlitch(3000); // Efeito visual
       }
     }
-  }, [recentGames, showCelebration, sounds, cyberpunkEffects]);
+  }, [recentGames, showCelebration, cyberpunkEffects]);
 
   // IA Shark analisando dados ao carregar
   useEffect(() => {
@@ -128,7 +125,6 @@ export default function Home() {
   // Funções para controlar as funcionalidades
   const activateSharkMode = () => {
     setShowSharkMode(true);
-    sounds.playSharkAttackMode();
     cyberpunkEffects.activateSharkMode();
     
     // IA Shark em modo agressivo
@@ -138,16 +134,7 @@ export default function Home() {
     setTimeout(() => setShowSharkMode(false), 5000);
   };
 
-  const toggleSounds = () => {
-    const newState = !sounds.getEnabled();
-    sounds.setEnabled(newState);
-    if (newState) {
-      sounds.playClickSound();
-    }
-  };
-
   const performQuickAnalysis = () => {
-    sounds.playScanSound();
     gamification.onAnalysisPerformed('megasena', Math.random());
     cyberpunkEffects.triggerGlitch(1000);
     
@@ -277,14 +264,6 @@ export default function Home() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={toggleSounds}
-                    className="h-6 w-6 p-0 text-neon-cyan hover:bg-neon-cyan/20"
-                  >
-                    {sounds.getEnabled() ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
                     onClick={activateSharkMode}
                     className={`h-6 px-2 text-xs font-mono ${
                       showSharkMode 
@@ -333,19 +312,17 @@ export default function Home() {
         <div className="mb-8 flex flex-wrap gap-4 justify-center lg:hidden">
           <Button 
             onClick={() => {
-              sounds.playSharkAlert();
               performQuickAnalysis();
               setTimeout(() => window.location.href = '/generator', 500);
             }}
             className="bg-black/20 neon-border hover:animate-pulse transition-all duration-300"
             data-testid="quick-generate-button"
           >
-            <Zap className="h-4 w-4 mr-2" />
+            <Zap className="h-4" w-4 mr-2" />
             Gerar Jogos Rápido
           </Button>
           <Button 
             onClick={() => {
-              sounds.playClickSound();
               window.location.href = '/results';
             }}
             className="bg-black/20 neon-border"
