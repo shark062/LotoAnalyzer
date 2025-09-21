@@ -542,7 +542,9 @@ export default function AIAnalysis() {
                             </div>
                             <div className="text-sm text-muted-foreground">❄️ Frios</div>
                           </div>
-                        </div></div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
                     {/* Additional Recommendations */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -586,58 +588,14 @@ export default function AIAnalysis() {
                       </CardContent>
                     </Card>
 
-                        <Button
-                          onClick={() => window.location.href = `/generator?lottery=${selectedLottery}&strategy=${strategyAnalysis.result.recommendedStrategy.toLowerCase()}`}
-                          className="w-full bg-black/20"
-                          data-testid="apply-strategy-button"
-                        >
-                          <Target className="h-4 w-4 mr-2" />
-                          Aplicar Estratégia
-                        </Button>
-                      </CardContent>
-                    </Card>
-
-                    {/* Additional Recommendations */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card className="bg-black/20 border-border/50">
-                        <CardContent className="p-4">
-                          <div className="flex items-center mb-3">
-                            <Calendar className="h-5 w-5 mr-2 text-primary" />
-                            <h5 className="font-semibold">Frequência de Jogo</h5>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {strategyAnalysis.result.playFrequency}
-                          </p>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="bg-black/20 border-border/50">
-                        <CardContent className="p-4">
-                          <div className="flex items-center mb-3">
-                            <Calculator className="h-5 w-5 mr-2 text-neon-green" />
-                            <h5 className="font-semibold">Gestão de Orçamento</h5>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {strategyAnalysis.result.budgetAdvice}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {/* Expected Improvement */}
-                    <Card className="bg-neon-green/10 border-neon-green/30">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <TrendingUp className="h-5 w-5 mr-2 text-neon-green" />
-                            <span className="font-semibold">Melhoria Esperada</span>
-                          </div>
-                          <div className="text-xl font-bold text-neon-green">
-                            {strategyAnalysis.result.expectedImprovement}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <Button
+                      onClick={() => window.location.href = `/generator?lottery=${selectedLottery}&strategy=${strategyAnalysis.result.recommendedStrategy.toLowerCase()}`}
+                      className="w-full bg-black/20"
+                      data-testid="apply-strategy-button"
+                    >
+                      <Target className="h-4 w-4 mr-2" />
+                      Aplicar Estratégia
+                    </Button>
                   </div>
                 ) : (
                   <div className="text-center text-muted-foreground py-12">
