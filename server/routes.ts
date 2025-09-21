@@ -8,7 +8,7 @@ import { lotteryCache } from "./cache";
 import { insertUserGameSchema } from "@shared/schema";
 import * as schema from "@shared/schema";
 import { eq } from "drizzle-orm";
-import { LOTTERY_CONFIGS, getLotteryDisplayInfo } from "@shared/lotteryConstants";
+import { LOTTERY_CONFIGS, getLotteryDisplayInfo, getLotteryConfig } from "@shared/lotteryConstants";
 import { DataValidator, DataFormatter } from "@shared/dataValidation";
 import { advancedAI } from "./services/advancedAI";
 
@@ -341,7 +341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lotteryId: lotteryId,
         analysisType: type || 'ensemble',
         result: analysis,
-        confidence: type === 'prediction' ? `${Math.round((analysis.confidence || 0.76) * 100)}%` : '76%',
+        confidence: type === 'prediction' ? Math.round((analysis.confidence || 0.76) * 100) : 76,
         createdAt: DataFormatter.formatToISO(new Date()),
       });
     } catch (error) {
@@ -370,7 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lotteryId: req.params.lotteryId,
         analysisType: req.query.type || 'prediction',
         result: mockAnalysis,
-        confidence: '65%',
+        confidence: 65,
         createdAt: DataFormatter.formatToISO(new Date()),
       });
     }

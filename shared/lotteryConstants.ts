@@ -311,7 +311,18 @@ export const NUMBER_TEMPERATURE = {
  */
 export const GAME_STRATEGIES = {
   HOT: 'hot',
-  COLD: 'cold', 
+  COLD: 'cold',
+  MIXED: 'mixed',
+  BALANCED: 'balanced',
+  PATTERN: 'pattern',
+} as const;
+
+/**
+ * 🔧 FUNÇÃO UTILITÁRIA PARA OBTER CONFIGURAÇÃO DA LOTERIA
+ */
+export function getLotteryConfig(lotteryId: string) {
+  return LOTTERY_CONFIGS[lotteryId as keyof typeof LOTTERY_CONFIGS];
+}d', 
   MIXED: 'mixed',
   AI: 'ai',
   RANDOM: 'random',
