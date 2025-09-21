@@ -1,3 +1,4 @@
+
 export class SoundEffects {
   private context: AudioContext | null = null;
   private enabled: boolean = false;
@@ -61,3 +62,20 @@ export class SoundEffects {
 }
 
 export const soundEffects = new SoundEffects();
+
+// Exportações adicionais para compatibilidade
+export const cyberpunkSound = {
+  play: () => {}, // No sound
+  stop: () => {}, // No sound
+  setVolume: (volume: number) => {} // No volume to set
+};
+
+export const playWinSound = () => {}; // No sound
+export const playClickSound = () => {}; // No sound
+export const playNotificationSound = () => {}; // No sound
+export const playErrorSound = () => {}; // No sound
+export const playSuccessSound = () => {}; // No sound
+export const playAnalysisCompleteSound = () => {}; // No sound
+export const playSharkModeSound = () => {}; // No sound
+export const playNumberSelectSound = () => {}; // No sound
+export const playGenerateSound = () => {}; // No sound
