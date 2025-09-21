@@ -46,10 +46,7 @@ interface LotteryInfo {
 }
 
 export default function Information() {
-  // Use lottery data from the system
-  const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
-
-  // Helper functions for lottery information
+  // Helper functions for lottery information - moved before component to fix initialization error
   const getEmojiForLottery = (id: string) => {
     const emojis: Record<string, string> = {
       'megasena': '💎',
@@ -250,6 +247,9 @@ export default function Information() {
     return colorMap[color] || 'text-primary';
   };
 
+  // Use lottery data from the system
+  const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
+
   // Map lottery data with complete information
   const lotteryData = lotteryTypes?.map(lottery => ({
     id: lottery.id,
@@ -264,7 +264,8 @@ export default function Information() {
     drawTime: lottery.drawTime || '20:00',
     categories: getCategoriesForLottery(lottery.id),
     description: getDescriptionForLottery(lottery.id),
-    tips: getTipsForLottery(lottery.id)
+    tips: getTipsForLottery(lottery.id),
+    minBet: 'R$ 2,50' // Default minimum bet
   })) || [];
 
   return (
@@ -287,7 +288,7 @@ export default function Information() {
           <Card className="neon-border bg-black/20 text-center">
             <CardContent className="p-4">
               <Target className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <div className="text-2xl font-bold text-primary neon-text">8</div>
+              <div className="text-2xl font-bold text-primary neon-text">{lotteryData.length}</div>
               <div className="text-xs text-muted-foreground">Modalidades</div>
             </CardContent>
           </Card>
@@ -423,25 +424,25 @@ export default function Information() {
                     {/* Prize Structure */}
                     <div>
                       <h4 className="font-semibold text-foreground mb-3 flex items-center">
-                        <DollarSign className="h-4 w-4 mr-2 text-neon-gold" />
+                        <DollarSign className="h-4 w-4 mr-2 text-neon-green" />
                         Estrutura de Prêmios
                       </h4>
                       <div className="space-y-2">
-                        {lottery.categories.map((prize, index) => (
+                        {lottery.categories.map((category, index) => (
                           <div key={index} className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
                             <div className="flex items-center space-x-3">
-                              <Badge variant="secondary" className="w-8 h-8 rounded-full flex items-center justify-center p-0">
-                                {prize.matches}
+                              <Badge variant="secondary" className="text-xs px-2 py-1">
+                                {index + 1}º
                               </Badge>
                               <div>
-                                <div className="font-medium text-foreground">{prize.name}</div>
+                                <div className="font-medium text-foreground">{category.name}</div>
                                 <div className="text-xs text-muted-foreground">
-                                  Probabilidade: {prize.probability}
+                                  Probabilidade: {category.probability}
                                 </div>
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-bold text-neon-green">{prize.prize}</div>
+                              <div className="font-bold text-neon-green">{category.prize}</div>
                               <div className="text-xs text-muted-foreground">Prêmio</div>
                             </div>
                           </div>
