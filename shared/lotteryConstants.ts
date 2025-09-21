@@ -318,11 +318,9 @@ export const GAME_STRATEGIES = {
 } as const;
 
 /**
- * 🔧 FUNÇÃO UTILITÁRIA PARA OBTER CONFIGURAÇÃO DA LOTERIA
+ * 🎯 ESTRATÉGIAS DE GERAÇÃO DE JOGOS
  */
-export function getLotteryConfig(lotteryId: string) {
-  return LOTTERY_CONFIGS[lotteryId as keyof typeof LOTTERY_CONFIGS];
-}d', 
+export const ADDITIONAL_GAME_STRATEGIES = {
   MIXED: 'mixed',
   AI: 'ai',
   RANDOM: 'random',
