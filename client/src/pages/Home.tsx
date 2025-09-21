@@ -38,6 +38,41 @@ import {
 } from "lucide-react";
 import type { UserGame } from "@/types/lottery";
 
+// Componente de efeito typewriter para mensagens da IA Shark
+function TypewriterText({ text, speed = 50, className = "" }: { text: string; speed?: number; className?: string }) {
+  const [displayText, setDisplayText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(false);
+
+  useEffect(() => {
+    if (text && text !== displayText) {
+      setDisplayText("");
+      setCurrentIndex(0);
+      setIsTyping(true);
+    }
+  }, [text]);
+
+  useEffect(() => {
+    if (isTyping && currentIndex < text.length) {
+      const timer = setTimeout(() => {
+        setDisplayText(prev => prev + text[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, speed);
+
+      return () => clearTimeout(timer);
+    } else if (currentIndex >= text.length) {
+      setIsTyping(false);
+    }
+  }, [currentIndex, text, speed, isTyping]);
+
+  return (
+    <span className={className}>
+      {displayText}
+      {isTyping && <span className="animate-pulse text-neon-pink">|</span>}
+    </span>
+  );
+}
+
 export default function Home() {
   const { user } = useAuth();
   const [showCelebration, setShowCelebration] = useState(false);
@@ -275,8 +310,12 @@ export default function Home() {
                   </Button>
                 </div>
               </div>
-              <div className="text-xs text-foreground/80 font-mono">
-                {sharkAIMessage || "🦈 Analisando padrões... Prepare-se para insights DEVASTADORES!"}
+              <div className="text-xs text-foreground/80 font-mono min-h-[2.5rem] flex items-center">
+                <TypewriterText 
+                  text={sharkAIMessage || "🦈 Analisando padrões... Prepare-se para insights DEVASTADORES!"} 
+                  speed={50}
+                  className="text-neon-cyan"
+                />
               </div>
             </CardContent>
           </Card>
