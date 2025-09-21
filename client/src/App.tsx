@@ -47,17 +47,6 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <div className="min-h-screen bg-background text-foreground" style={{ backgroundColor: 'hsl(240, 15%, 3%)' }}>
-          {/* Cyberpunk Shark Background */}
-          <div 
-            className="fixed inset-0 opacity-10 pointer-events-none"
-            style={{
-              backgroundImage: `url(${cyberpunkShark})`,
-              backgroundSize: 'contain',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'center',
-              backgroundAttachment: 'fixed'
-            }}
-          ></div>
           
           <Toaster />
           <Router />
