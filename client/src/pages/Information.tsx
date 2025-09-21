@@ -1,4 +1,3 @@
-
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,21 +46,21 @@ interface LotteryInfo {
 }
 
 // Helper functions para informações das loterias - movidas para antes do componente
-const getEmojiForLottery = (id: string) => {
-  const emojis: Record<string, string> = {
+function getEmojiForLottery(lotteryId: string): string {
+  const emojiMap: Record<string, string> = {
     'megasena': '💎',
     'lotofacil': '⭐',
     'quina': '🪙',
     'lotomania': '♾️',
     'duplasena': '👑',
     'supersete': '🚀',
-    'milionaria': '➕',
+    'maisMilionaria': '➕',
     'timemania': '🎁',
-    'diadesore': '🌟',
+    'diadesorte': '🌟',
     'loteca': '⚽'
   };
-  return emojis[id] || '🎰';
-};
+  return emojiMap[lotteryId] || '🎲';
+}
 
 const getPrizeColor = (id: string) => {
   const colors: Record<string, string> = {
@@ -71,9 +70,9 @@ const getPrizeColor = (id: string) => {
     'lotomania': 'text-pink-400',
     'duplasena': 'text-yellow-400',
     'supersete': 'text-red-400',
-    'milionaria': 'text-green-400',
+    'maisMilionaria': 'text-green-400',
     'timemania': 'text-rose-400',
-    'diadesore': 'text-cyan-400',
+    'diadesorte': 'text-cyan-400',
     'loteca': 'text-orange-400'
   };
   return colors[id] || 'text-pink-400';
@@ -119,7 +118,7 @@ const getCategoriesForLottery = (id: string) => {
       { name: '4 colunas', probability: '1 em 10.000', prize: 'R$ 20', prizeType: 'Fixo' },
       { name: '3 colunas', probability: '1 em 1.000', prize: 'R$ 5', prizeType: 'Fixo' },
     ],
-    'milionaria': [
+    'maisMilionaria': [
       { name: '6 + 2 trevos', probability: '1 em 238.360.500', prize: 'R$ 10.000.000', prizeType: 'Estimado' },
       { name: '6 + 1 trevo', probability: '1 em 79.453.500', prize: 'R$ 20.000', prizeType: 'Fixo' },
       { name: '6 + 0 trevos', probability: '1 em 39.726.750', prize: 'R$ 10.000', prizeType: 'Fixo' },
@@ -132,7 +131,7 @@ const getCategoriesForLottery = (id: string) => {
       { name: '4 números', probability: '1 em 276', prize: 'R$ 20', prizeType: 'Fixo' },
       { name: '3 números', probability: '1 em 29', prize: 'R$ 7', prizeType: 'Fixo' },
     ],
-    'diadesore': [
+    'diadesorte': [
       { name: '7 números + mês', probability: '1 em 2.629.575', prize: 'R$ 1.000.000', prizeType: 'Estimado' },
       { name: '7 números', probability: '1 em 219.298', prize: 'R$ 10.000', prizeType: 'Fixo' },
       { name: '6 números + mês', probability: '1 em 39.761', prize: 'R$ 2.000', prizeType: 'Fixo' },
@@ -157,9 +156,9 @@ const getDescriptionForLottery = (id: string) => {
     'lotomania': 'Escolha 50 números e concorra a prêmios milionários.',
     'duplasena': 'Uma aposta, dois sorteios! Mais chances de ganhar.',
     'supersete': 'Modalidade com sorteios três vezes por semana.',
-    'milionaria': 'A loteria com os maiores prêmios do Brasil.',
+    'maisMilionaria': 'A loteria com os maiores prêmios do Brasil.',
     'timemania': 'A loteria do seu time do coração.',
-    'diadesore': 'Escolha números e o mês da sorte.',
+    'diadesorte': 'Escolha números e o mês da sorte.',
     'loteca': 'Palpites esportivos com grandes prêmios.',
   };
   return descriptions[id] || 'Modalidade de loteria com grandes prêmios.';
@@ -203,7 +202,7 @@ const getTipsForLottery = (id: string) => {
       'Evite repetir muitos números',
       'Use estratégias de fechamento'
     ],
-    'milionaria': [
+    'maisMilionaria': [
       'Escolha 6 números principais + 2 trevos',
       'Distribua bem os números de 1 a 50',
       'Os trevos vão de 1 a 6',
@@ -215,7 +214,7 @@ const getTipsForLottery = (id: string) => {
       'Escolha seu time do coração',
       'Misture números pares e ímpares'
     ],
-    'diadesore': [
+    'diadesorte': [
       'Escolha 7 números de 1 a 31',
       'Selecione o mês da sorte',
       'Distribua números pelo calendário',
@@ -246,7 +245,7 @@ const getDrawDaysInPortuguese = (drawDays: string[]) => {
     'Saturday': 'Sábado',
     'Sunday': 'Domingo'
   };
-  
+
   return drawDays.map(day => dayTranslation[day] || day).join(', ');
 };
 
