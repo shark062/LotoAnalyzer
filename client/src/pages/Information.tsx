@@ -49,23 +49,6 @@ export default function Information() {
   // Use lottery data from the system
   const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
 
-  // Map lottery data with complete information
-  const lotteryData = lotteryTypes?.map(lottery => ({
-    id: lottery.id,
-    name: lottery.name,
-    displayName: lottery.displayName,
-    icon: getEmojiForLottery(lottery.id),
-    color: getPrizeColor(lottery.id),
-    minNumbers: lottery.minNumbers,
-    maxNumbers: lottery.maxNumbers,
-    totalNumbers: lottery.totalNumbers,
-    drawDays: lottery.drawDays || [],
-    drawTime: lottery.drawTime || '20:00',
-    categories: getCategoriesForLottery(lottery.id),
-    description: getDescriptionForLottery(lottery.id),
-    tips: getTipsForLottery(lottery.id)
-  })) || [];
-
   // Helper functions for lottery information
   const getEmojiForLottery = (id: string) => {
     const emojis: Record<string, string> = {
@@ -266,6 +249,23 @@ export default function Information() {
     };
     return colorMap[color] || 'text-primary';
   };
+
+  // Map lottery data with complete information
+  const lotteryData = lotteryTypes?.map(lottery => ({
+    id: lottery.id,
+    name: lottery.name,
+    displayName: lottery.displayName,
+    icon: getEmojiForLottery(lottery.id),
+    color: getPrizeColor(lottery.id),
+    minNumbers: lottery.minNumbers,
+    maxNumbers: lottery.maxNumbers,
+    totalNumbers: lottery.totalNumbers,
+    drawDays: lottery.drawDays || [],
+    drawTime: lottery.drawTime || '20:00',
+    categories: getCategoriesForLottery(lottery.id),
+    description: getDescriptionForLottery(lottery.id),
+    tips: getTipsForLottery(lottery.id)
+  })) || [];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
