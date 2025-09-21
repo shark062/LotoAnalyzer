@@ -80,70 +80,70 @@ export default function Information() {
   };
 
   const getCategoriesForLottery = (id: string) => {
-    const categories: Record<string, Array<{name: string, probability: string, prize: string}>> = {
+    const categories: Record<string, Array<{name: string, probability: string, prize: string, prizeType: string}>> = {
       'megasena': [
-        { name: 'Sena (6 números)', probability: '1 em 50.063.860', prize: 'Estimado' },
-        { name: 'Quina (5 números)', probability: '1 em 154.518', prize: 'Fixo' },
-        { name: 'Quadra (4 números)', probability: '1 em 2.332', prize: 'Fixo' },
+        { name: 'Sena (6 números)', probability: '1 em 50.063.860', prize: 'R$ 65.000.000', prizeType: 'Estimado' },
+        { name: 'Quina (5 números)', probability: '1 em 154.518', prize: 'R$ 60.000', prizeType: 'Fixo' },
+        { name: 'Quadra (4 números)', probability: '1 em 2.332', prize: 'R$ 1.200', prizeType: 'Fixo' },
       ],
       'lotofacil': [
-        { name: '15 números', probability: '1 em 3.268.760', prize: 'Estimado' },
-        { name: '14 números', probability: '1 em 21.791', prize: 'Fixo' },
-        { name: '13 números', probability: '1 em 691', prize: 'Fixo' },
-        { name: '12 números', probability: '1 em 60', prize: 'Fixo' },
-        { name: '11 números', probability: '1 em 11', prize: 'Fixo' },
+        { name: '15 números', probability: '1 em 3.268.760', prize: 'R$ 1.500.000', prizeType: 'Estimado' },
+        { name: '14 números', probability: '1 em 21.791', prize: 'R$ 1.500', prizeType: 'Fixo' },
+        { name: '13 números', probability: '1 em 691', prize: 'R$ 30', prizeType: 'Fixo' },
+        { name: '12 números', probability: '1 em 60', prize: 'R$ 12', prizeType: 'Fixo' },
+        { name: '11 números', probability: '1 em 11', prize: 'R$ 6', prizeType: 'Fixo' },
       ],
       'quina': [
-        { name: 'Quina (5 números)', probability: '1 em 24.040.016', prize: 'Estimado' },
-        { name: 'Quadra (4 números)', probability: '1 em 64.106', prize: 'Fixo' },
-        { name: 'Terno (3 números)', probability: '1 em 866', prize: 'Fixo' },
+        { name: 'Quina (5 números)', probability: '1 em 24.040.016', prize: 'R$ 8.000.000', prizeType: 'Estimado' },
+        { name: 'Quadra (4 números)', probability: '1 em 64.106', prize: 'R$ 9.000', prizeType: 'Fixo' },
+        { name: 'Terno (3 números)', probability: '1 em 866', prize: 'R$ 120', prizeType: 'Fixo' },
       ],
       'lotomania': [
-        { name: '20 números', probability: '1 em 11.372.635', prize: 'Estimado' },
-        { name: '19 números', probability: '1 em 352.551', prize: 'Fixo' },
-        { name: '18 números', probability: '1 em 24.235', prize: 'Fixo' },
-        { name: '17 números', probability: '1 em 2.776', prize: 'Fixo' },
-        { name: '16 números', probability: '1 em 472', prize: 'Fixo' },
-        { name: '0 números', probability: '1 em 11.372.635', prize: 'Especial' },
+        { name: '20 números', probability: '1 em 11.372.635', prize: 'R$ 6.000.000', prizeType: 'Estimado' },
+        { name: '19 números', probability: '1 em 352.551', prize: 'R$ 12.000', prizeType: 'Fixo' },
+        { name: '18 números', probability: '1 em 24.235', prize: 'R$ 600', prizeType: 'Fixo' },
+        { name: '17 números', probability: '1 em 2.776', prize: 'R$ 30', prizeType: 'Fixo' },
+        { name: '16 números', probability: '1 em 472', prize: 'R$ 15', prizeType: 'Fixo' },
+        { name: '0 números', probability: '1 em 11.372.635', prize: 'R$ 6.000.000', prizeType: 'Especial' },
       ],
       'duplasena': [
-        { name: 'Sena (6 números)', probability: '1 em 15.890.700', prize: 'Estimado' },
-        { name: 'Quina (5 números)', probability: '1 em 60.192', prize: 'Fixo' },
-        { name: 'Quadra (4 números)', probability: '1 em 1.357', prize: 'Fixo' },
-        { name: 'Terno (3 números)', probability: '1 em 81', prize: 'Fixo' },
+        { name: 'Sena (6 números)', probability: '1 em 15.890.700', prize: 'R$ 3.000.000', prizeType: 'Estimado' },
+        { name: 'Quina (5 números)', probability: '1 em 60.192', prize: 'R$ 4.000', prizeType: 'Fixo' },
+        { name: 'Quadra (4 números)', probability: '1 em 1.357', prize: 'R$ 100', prizeType: 'Fixo' },
+        { name: 'Terno (3 números)', probability: '1 em 81', prize: 'R$ 5', prizeType: 'Fixo' },
       ],
       'supersete': [
-        { name: '7 colunas', probability: '1 em 10.000.000', prize: 'Estimado' },
-        { name: '6 colunas', probability: '1 em 1.000.000', prize: 'Fixo' },
-        { name: '5 colunas', probability: '1 em 100.000', prize: 'Fixo' },
-        { name: '4 colunas', probability: '1 em 10.000', prize: 'Fixo' },
-        { name: '3 colunas', probability: '1 em 1.000', prize: 'Fixo' },
+        { name: '7 colunas', probability: '1 em 10.000.000', prize: 'R$ 4.000.000', prizeType: 'Estimado' },
+        { name: '6 colunas', probability: '1 em 1.000.000', prize: 'R$ 8.000', prizeType: 'Fixo' },
+        { name: '5 colunas', probability: '1 em 100.000', prize: 'R$ 200', prizeType: 'Fixo' },
+        { name: '4 colunas', probability: '1 em 10.000', prize: 'R$ 20', prizeType: 'Fixo' },
+        { name: '3 colunas', probability: '1 em 1.000', prize: 'R$ 5', prizeType: 'Fixo' },
       ],
       'milionaria': [
-        { name: '6 + 2 trevos', probability: '1 em 238.360.500', prize: 'Estimado' },
-        { name: '6 + 1 trevo', probability: '1 em 79.453.500', prize: 'Fixo' },
-        { name: '6 + 0 trevos', probability: '1 em 39.726.750', prize: 'Fixo' },
-        { name: '5 + 2 trevos', probability: '1 em 1.357.510', prize: 'Fixo' },
+        { name: '6 + 2 trevos', probability: '1 em 238.360.500', prize: 'R$ 10.000.000', prizeType: 'Estimado' },
+        { name: '6 + 1 trevo', probability: '1 em 79.453.500', prize: 'R$ 20.000', prizeType: 'Fixo' },
+        { name: '6 + 0 trevos', probability: '1 em 39.726.750', prize: 'R$ 10.000', prizeType: 'Fixo' },
+        { name: '5 + 2 trevos', probability: '1 em 1.357.510', prize: 'R$ 1.000', prizeType: 'Fixo' },
       ],
       'timemania': [
-        { name: '7 números', probability: '1 em 26.472.637', prize: 'Estimado' },
-        { name: '6 números', probability: '1 em 216.103', prize: 'Fixo' },
-        { name: '5 números', probability: '1 em 5.220', prize: 'Fixo' },
-        { name: '4 números', probability: '1 em 276', prize: 'Fixo' },
-        { name: '3 números', probability: '1 em 29', prize: 'Fixo' },
+        { name: '7 números', probability: '1 em 26.472.637', prize: 'R$ 3.000.000', prizeType: 'Estimado' },
+        { name: '6 números', probability: '1 em 216.103', prize: 'R$ 8.000', prizeType: 'Fixo' },
+        { name: '5 números', probability: '1 em 5.220', prize: 'R$ 300', prizeType: 'Fixo' },
+        { name: '4 números', probability: '1 em 276', prize: 'R$ 20', prizeType: 'Fixo' },
+        { name: '3 números', probability: '1 em 29', prize: 'R$ 7', prizeType: 'Fixo' },
       ],
       'diadesore': [
-        { name: '7 números + mês', probability: '1 em 2.629.575', prize: 'Estimado' },
-        { name: '7 números', probability: '1 em 219.298', prize: 'Fixo' },
-        { name: '6 números + mês', probability: '1 em 39.761', prize: 'Fixo' },
-        { name: '6 números', probability: '1 em 3.314', prize: 'Fixo' },
-        { name: '5 números + mês', probability: '1 em 1.169', prize: 'Fixo' },
-        { name: '5 números', probability: '1 em 97', prize: 'Fixo' },
-        { name: '4 números', probability: '1 em 15', prize: 'Fixo' },
+        { name: '7 números + mês', probability: '1 em 2.629.575', prize: 'R$ 1.000.000', prizeType: 'Estimado' },
+        { name: '7 números', probability: '1 em 219.298', prize: 'R$ 10.000', prizeType: 'Fixo' },
+        { name: '6 números + mês', probability: '1 em 39.761', prize: 'R$ 2.000', prizeType: 'Fixo' },
+        { name: '6 números', probability: '1 em 3.314', prize: 'R$ 200', prizeType: 'Fixo' },
+        { name: '5 números + mês', probability: '1 em 1.169', prize: 'R$ 50', prizeType: 'Fixo' },
+        { name: '5 números', probability: '1 em 97', prize: 'R$ 20', prizeType: 'Fixo' },
+        { name: '4 números', probability: '1 em 15', prize: 'R$ 4', prizeType: 'Fixo' },
       ],
       'loteca': [
-        { name: '14 jogos', probability: '1 em 4.782.969', prize: 'Estimado' },
-        { name: '13 jogos', probability: '1 em 54.182', prize: 'Fixo' },
+        { name: '14 jogos', probability: '1 em 4.782.969', prize: 'R$ 500.000', prizeType: 'Estimado' },
+        { name: '13 jogos', probability: '1 em 54.182', prize: 'R$ 1.500', prizeType: 'Fixo' },
       ],
     };
     return categories[id] || [];
@@ -443,7 +443,7 @@ export default function Information() {
                             </div>
                             <div className="text-right">
                               <div className="font-bold text-neon-green">{category.prize}</div>
-                              <div className="text-xs text-muted-foreground">Prêmio</div>
+                              <div className="text-xs text-muted-foreground">{category.prizeType}</div>
                             </div>
                           </div>
                         ))}
