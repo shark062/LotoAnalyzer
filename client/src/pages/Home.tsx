@@ -226,18 +226,7 @@ export default function Home() {
   ];
 
   return (
-    <div 
-      className="min-h-screen bg-background text-foreground relative"
-      style={{
-        backgroundImage: 'url(/cyberpunk-shark-bg.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed'
-      }}
-    >
-      {/* Dark overlay for better readability */}
-      <div className="fixed inset-0 bg-black/70 z-0" />
+    <div className="min-h-screen bg-background text-foreground relative">
       
       {/* Efeitos Cyberpunk */}
       <CyberpunkEffects 
