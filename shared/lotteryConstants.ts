@@ -194,9 +194,9 @@ export const LOTTERY_CONFIGS: Record<string, LotteryConfig> = {
     ],
   },
 
-  diadesore: {
-    id: 'diadesore',
-    name: 'diadesore',
+  diadesorte: {
+    id: 'diadesorte',
+    name: 'diadesorte',
     displayName: 'Dia de Sorte',
     emoji: '🌟',
     minNumbers: 7,
