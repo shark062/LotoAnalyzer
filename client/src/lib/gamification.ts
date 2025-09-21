@@ -67,12 +67,12 @@ class SharkGamificationEngine {
   addExperience(points: number, reason: string) {
     this.stats.experience += points;
     const newLevel = this.calculateLevel(this.stats.experience);
-    
+
     if (newLevel > this.stats.level) {
       this.stats.level = newLevel;
-      cyberpunkSound.playNotification();
+      // Removed: cyberpunkSound.playNotification();
       this.emit('levelUp', { level: newLevel, reason });
-      
+
       // Recompensa por subir de nível
       this.addSharkCoins(newLevel * 50, `Level ${newLevel} alcançado!`);
     }
@@ -105,18 +105,18 @@ class SharkGamificationEngine {
 
   unlockAchievement(achievementId: string): boolean {
     const achievement = this.achievements.find(a => a.id === achievementId);
-    
+
     if (achievement && !achievement.unlocked) {
       achievement.unlocked = true;
       achievement.unlockedAt = new Date();
       this.stats.achievementsUnlocked++;
-      
+
       // Recompensas baseadas na raridade
       const coinReward = this.getAchievementReward(achievement.rarity);
       this.addSharkCoins(coinReward, `Conquista: ${achievement.title}`);
       this.addExperience(achievement.points, `Conquista: ${achievement.title}`);
-      
-      cyberpunkSound.playPatternFound();
+
+      // Removed: cyberpunkSound.playPatternFound();
       this.emit('achievementUnlocked', achievement);
       this.saveStats();
       return true;
@@ -128,11 +128,11 @@ class SharkGamificationEngine {
     const achievement = this.achievements.find(a => a.id === achievementId);
     if (achievement && !achievement.unlocked) {
       achievement.progress = Math.min(progress, achievement.maxProgress);
-      
+
       if (achievement.progress >= achievement.maxProgress) {
         this.unlockAchievement(achievementId);
       }
-      
+
       this.saveStats();
     }
   }
@@ -144,13 +144,13 @@ class SharkGamificationEngine {
 
   completeMission(missionId: string): boolean {
     const mission = this.missions.find(m => m.id === missionId);
-    
+
     if (mission && !mission.completed && mission.progress >= mission.maxProgress) {
       mission.completed = true;
       this.addSharkCoins(mission.reward, `Missão: ${mission.title}`);
       this.addExperience(mission.reward / 2, `Missão: ${mission.title}`);
-      
-      cyberpunkSound.playPatternFound();
+
+      // Removed: cyberpunkSound.playPatternFound();
       this.emit('missionCompleted', mission);
       this.saveStats();
       return true;
@@ -162,7 +162,7 @@ class SharkGamificationEngine {
     const mission = this.missions.find(m => m.id === missionId);
     if (mission && !mission.completed && !this.isMissionExpired(mission)) {
       mission.progress = Math.min(progress, mission.maxProgress);
-      
+
       if (mission.progress >= mission.maxProgress) {
         this.completeMission(missionId);
       }
@@ -173,16 +173,16 @@ class SharkGamificationEngine {
   onAnalysisPerformed(lotteryType: string, accuracy?: number) {
     this.stats.totalAnalyses++;
     this.addExperience(10, 'Análise realizada');
-    
+
     // Atualizar missões
     this.updateMissionProgress('daily_analysis', this.getMissionProgress('daily_analysis') + 1);
     this.updateMissionProgress('weekly_analyst', this.getMissionProgress('weekly_analyst') + 1);
-    
+
     // Atualizar conquistas
     this.updateAchievementProgress('first_analysis', 1);
     this.updateAchievementProgress('analyst_100', this.stats.totalAnalyses);
     this.updateAchievementProgress('analyst_500', this.stats.totalAnalyses);
-    
+
     if (accuracy && accuracy > 0.8) {
       this.updateAchievementProgress('high_accuracy', this.getAchievementProgress('high_accuracy') + 1);
     }
@@ -191,15 +191,15 @@ class SharkGamificationEngine {
   onPredictionMade(numbers: number[], lotteryType: string) {
     this.stats.totalPredictions++;
     this.addExperience(15, 'Predição gerada');
-    
+
     // Missões
     this.updateMissionProgress('daily_predictions', this.getMissionProgress('daily_predictions') + 1);
-    
+
     // Conquistas especiais
     if (numbers.length >= 15) {
       this.updateAchievementProgress('big_bettor', this.getAchievementProgress('big_bettor') + 1);
     }
-    
+
     const consecutiveCount = this.countConsecutiveNumbers(numbers);
     if (consecutiveCount >= 4) {
       this.unlockAchievement('consecutive_master');
@@ -208,11 +208,11 @@ class SharkGamificationEngine {
 
   onPatternFound(patternType: string, strength: number) {
     this.addExperience(20, `Padrão ${patternType} encontrado`);
-    
+
     if (strength > 0.9) {
       this.updateAchievementProgress('pattern_master', this.getAchievementProgress('pattern_master') + 1);
     }
-    
+
     // Conquistas por tipo de padrão
     if (patternType === 'fibonacci') {
       this.unlockAchievement('fibonacci_finder');
@@ -222,12 +222,12 @@ class SharkGamificationEngine {
   onDailyLogin() {
     const today = new Date().toDateString();
     const lastLogin = localStorage.getItem('shark_last_login');
-    
+
     if (lastLogin !== today) {
       this.stats.streakDays++;
       this.addExperience(5, 'Login diário');
       this.addSharkCoins(10, 'Login diário');
-      
+
       // Conquistas de streak
       if (this.stats.streakDays >= 7) {
         this.unlockAchievement('weekly_warrior');
@@ -235,7 +235,7 @@ class SharkGamificationEngine {
       if (this.stats.streakDays >= 30) {
         this.unlockAchievement('monthly_master');
       }
-      
+
       localStorage.setItem('shark_last_login', today);
     }
   }
@@ -245,9 +245,9 @@ class SharkGamificationEngine {
     const level = this.stats.level;
     const achievements = this.stats.achievementsUnlocked;
     const accuracy = this.stats.accuracyRate;
-    
+
     const rankScore = (level * 10) + (achievements * 5) + (accuracy * 100);
-    
+
     if (rankScore >= 1000) return 'MEGA SHARK';
     if (rankScore >= 750) return 'APEX PREDATOR';
     if (rankScore >= 500) return 'ALPHA SHARK';
@@ -289,7 +289,7 @@ class SharkGamificationEngine {
     const sorted = [...numbers].sort((a, b) => a - b);
     let maxConsecutive = 1;
     let current = 1;
-    
+
     for (let i = 1; i < sorted.length; i++) {
       if (sorted[i] === sorted[i-1] + 1) {
         current++;
@@ -298,7 +298,7 @@ class SharkGamificationEngine {
         current = 1;
       }
     }
-    
+
     return maxConsecutive;
   }
 
@@ -320,9 +320,9 @@ class SharkGamificationEngine {
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(0, 0, 0, 0);
-    
+
     const msUntilMidnight = tomorrow.getTime() - now.getTime();
-    
+
     setTimeout(() => {
       this.resetDailyMissions();
       setInterval(() => this.resetDailyMissions(), 24 * 60 * 60 * 1000);
