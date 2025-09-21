@@ -3,10 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { 
-  Info, 
-  AlertTriangle, 
-  BookOpen, 
+import {
+  Info,
+  AlertTriangle,
+  BookOpen,
   Shield,
   Target,
   DollarSign,
@@ -21,6 +21,7 @@ import {
   Lightbulb,
   BarChart3
 } from "lucide-react";
+import { useLotteryTypes } from "@/hooks/useLotteryData";
 
 interface LotteryInfo {
   id: string;
@@ -45,117 +46,220 @@ interface LotteryInfo {
 }
 
 export default function Information() {
-  const lotteryData: LotteryInfo[] = [
-    {
-      id: 'megasena',
-      name: 'Mega-Sena',
-      displayName: 'MEGA-SENA',
-      icon: '💎',
-      color: 'neon-green',
-      minNumbers: 6,
-      maxNumbers: 15,
-      totalNumbers: 60,
-      drawDays: ['Quarta-feira', 'Sábado'],
-      drawTime: '20:00',
-      description: 'A maior e mais tradicional loteria do Brasil. Para ganhar na Sena, você deve acertar os 6 números sorteados.',
-      minBet: 'R$ 5,00',
-      maxBet: 'R$ 22.522,50',
-      prizes: [
-        { tier: 'Sena', matches: 6, probability: '1 em 50.063.860', avgPrize: 'R$ 30.000.000+' },
-        { tier: 'Quina', matches: 5, probability: '1 em 154.518', avgPrize: 'R$ 50.000' },
-        { tier: 'Quadra', matches: 4, probability: '1 em 2.332', avgPrize: 'R$ 1.000' },
-      ]
-    },
-    {
-      id: 'lotofacil',
-      name: 'Lotofácil',
-      displayName: 'LOTOFÁCIL',
-      icon: '⭐',
-      color: 'neon-purple',
-      minNumbers: 15,
-      maxNumbers: 20,
-      totalNumbers: 25,
-      drawDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
-      drawTime: '20:00',
-      description: 'A loteria mais fácil de ganhar! Marque 15 números e torça para acertar 11, 12, 13, 14 ou 15.',
-      minBet: 'R$ 3,00',
-      maxBet: 'R$ 46.512,00',
-      prizes: [
-        { tier: '15 acertos', matches: 15, probability: '1 em 3.268.760', avgPrize: 'R$ 1.500.000+' },
-        { tier: '14 acertos', matches: 14, probability: '1 em 21.791', avgPrize: 'R$ 1.500' },
-        { tier: '13 acertos', matches: 13, probability: '1 em 691', avgPrize: 'R$ 30' },
-        { tier: '12 acertos', matches: 12, probability: '1 em 60', avgPrize: 'R$ 12' },
-        { tier: '11 acertos', matches: 11, probability: '1 em 11', avgPrize: 'R$ 6' },
-      ]
-    },
-    {
-      id: 'quina',
-      name: 'Quina',
-      displayName: 'QUINA',
-      icon: '🪙',
-      color: 'neon-pink',
-      minNumbers: 5,
-      maxNumbers: 15,
-      totalNumbers: 80,
-      drawDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
-      drawTime: '20:00',
-      description: 'Escolha 5 números entre 80 disponíveis. Ganha quem acertar 2, 3, 4 ou 5 números.',
-      minBet: 'R$ 2,50',
-      maxBet: 'R$ 9.289,50',
-      prizes: [
-        { tier: 'Quina', matches: 5, probability: '1 em 24.040.016', avgPrize: 'R$ 10.000.000+' },
-        { tier: 'Quadra', matches: 4, probability: '1 em 64.106', avgPrize: 'R$ 8.000' },
-        { tier: 'Terno', matches: 3, probability: '1 em 866', avgPrize: 'R$ 120' },
-        { tier: 'Duque', matches: 2, probability: '1 em 36', avgPrize: 'R$ 4' },
-      ]
-    },
-    {
-      id: 'lotomania',
-      name: 'Lotomania',
-      displayName: 'LOTOMANIA',
-      icon: '♾️',
-      color: 'primary',
-      minNumbers: 50,
-      maxNumbers: 50,
-      totalNumbers: 100,
-      drawDays: ['Terça', 'Quinta', 'Sábado'],
-      drawTime: '20:00',
-      description: 'Marque 50 números de 00 a 99. Ganha quem acertar 15, 16, 17, 18, 19, 20 números ou nenhum número!',
-      minBet: 'R$ 3,00',
-      maxBet: 'R$ 3,00',
-      prizes: [
-        { tier: '20 acertos', matches: 20, probability: '1 em 11.372.635', avgPrize: 'R$ 2.000.000+' },
-        { tier: '0 acertos', matches: 0, probability: '1 em 11.372.635', avgPrize: 'R$ 2.000.000+' },
-        { tier: '19 acertos', matches: 19, probability: '1 em 352.551', avgPrize: 'R$ 25.000' },
-        { tier: '18 acertos', matches: 18, probability: '1 em 24.235', avgPrize: 'R$ 1.000' },
-      ]
-    },
-    {
-        id: 'loteca',
-        name: 'Loteca',
-        displayName: 'LOTECA',
-        icon: '⚽',
-        color: 'primary',
-        minNumbers: 14,
-        maxNumbers: 14,
-        totalNumbers: 3,
-        drawDays: ['Sábado'],
-        drawTime: '20:00',
-        description: 'A loteria dos palpites esportivos! Faça seus palpites em 14 jogos de futebol.',
-        minBet: 'R$ 3,00',
-        maxBet: 'R$ 3,00',
-        prizes: [
-          { tier: '14 acertos', matches: 14, probability: '1 em 4.782.969', avgPrize: 'R$ 500.000+' },
-          { tier: '13 acertos', matches: 13, probability: '1 em 68.328', avgPrize: 'R$ 1.000' },
-          { tier: '12 acertos', matches: 12, probability: '1 em 2.187', avgPrize: 'R$ 50' },
-        ]
-      },
-  ];
+  // Use lottery data from the system
+  const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
+
+  // Map lottery data with complete information
+  const lotteryData = lotteryTypes?.map(lottery => ({
+    id: lottery.id,
+    name: lottery.name,
+    displayName: lottery.displayName,
+    icon: getEmojiForLottery(lottery.id),
+    color: getPrizeColor(lottery.id),
+    minNumbers: lottery.minNumbers,
+    maxNumbers: lottery.maxNumbers,
+    totalNumbers: lottery.totalNumbers,
+    drawDays: lottery.drawDays || [],
+    drawTime: lottery.drawTime || '20:00',
+    categories: getCategoriesForLottery(lottery.id),
+    description: getDescriptionForLottery(lottery.id),
+    tips: getTipsForLottery(lottery.id)
+  })) || [];
+
+  // Helper functions for lottery information
+  const getEmojiForLottery = (id: string) => {
+    const emojis: Record<string, string> = {
+      'megasena': '💎',
+      'lotofacil': '⭐',
+      'quina': '🪙',
+      'lotomania': '♾️',
+      'duplasena': '👑',
+      'supersete': '🚀',
+      'milionaria': '➕',
+      'timemania': '🎁',
+      'diadesore': '🌟',
+      'loteca': '⚽'
+    };
+    return emojis[id] || '🎰';
+  };
+
+  const getPrizeColor = (id: string) => {
+    const colors: Record<string, string> = {
+      'megasena': 'text-emerald-400',
+      'lotofacil': 'text-purple-400',
+      'quina': 'text-yellow-400',
+      'lotomania': 'text-pink-400',
+      'duplasena': 'text-yellow-400',
+      'supersete': 'text-red-400',
+      'milionaria': 'text-green-400',
+      'timemania': 'text-rose-400',
+      'diadesore': 'text-cyan-400',
+      'loteca': 'text-orange-400'
+    };
+    return colors[id] || 'text-pink-400';
+  };
+
+  const getCategoriesForLottery = (id: string) => {
+    const categories: Record<string, Array<{name: string, probability: string, prize: string}>> = {
+      'megasena': [
+        { name: 'Sena (6 números)', probability: '1 em 50.063.860', prize: 'Estimado' },
+        { name: 'Quina (5 números)', probability: '1 em 154.518', prize: 'Fixo' },
+        { name: 'Quadra (4 números)', probability: '1 em 2.332', prize: 'Fixo' },
+      ],
+      'lotofacil': [
+        { name: '15 números', probability: '1 em 3.268.760', prize: 'Estimado' },
+        { name: '14 números', probability: '1 em 21.791', prize: 'Fixo' },
+        { name: '13 números', probability: '1 em 691', prize: 'Fixo' },
+        { name: '12 números', probability: '1 em 60', prize: 'Fixo' },
+        { name: '11 números', probability: '1 em 11', prize: 'Fixo' },
+      ],
+      'quina': [
+        { name: 'Quina (5 números)', probability: '1 em 24.040.016', prize: 'Estimado' },
+        { name: 'Quadra (4 números)', probability: '1 em 64.106', prize: 'Fixo' },
+        { name: 'Terno (3 números)', probability: '1 em 866', prize: 'Fixo' },
+      ],
+      'lotomania': [
+        { name: '20 números', probability: '1 em 11.372.635', prize: 'Estimado' },
+        { name: '19 números', probability: '1 em 352.551', prize: 'Fixo' },
+        { name: '18 números', probability: '1 em 24.235', prize: 'Fixo' },
+        { name: '17 números', probability: '1 em 2.776', prize: 'Fixo' },
+        { name: '16 números', probability: '1 em 472', prize: 'Fixo' },
+        { name: '0 números', probability: '1 em 11.372.635', prize: 'Especial' },
+      ],
+      'duplasena': [
+        { name: 'Sena (6 números)', probability: '1 em 15.890.700', prize: 'Estimado' },
+        { name: 'Quina (5 números)', probability: '1 em 60.192', prize: 'Fixo' },
+        { name: 'Quadra (4 números)', probability: '1 em 1.357', prize: 'Fixo' },
+        { name: 'Terno (3 números)', probability: '1 em 81', prize: 'Fixo' },
+      ],
+      'supersete': [
+        { name: '7 colunas', probability: '1 em 10.000.000', prize: 'Estimado' },
+        { name: '6 colunas', probability: '1 em 1.000.000', prize: 'Fixo' },
+        { name: '5 colunas', probability: '1 em 100.000', prize: 'Fixo' },
+        { name: '4 colunas', probability: '1 em 10.000', prize: 'Fixo' },
+        { name: '3 colunas', probability: '1 em 1.000', prize: 'Fixo' },
+      ],
+      'milionaria': [
+        { name: '6 + 2 trevos', probability: '1 em 238.360.500', prize: 'Estimado' },
+        { name: '6 + 1 trevo', probability: '1 em 79.453.500', prize: 'Fixo' },
+        { name: '6 + 0 trevos', probability: '1 em 39.726.750', prize: 'Fixo' },
+        { name: '5 + 2 trevos', probability: '1 em 1.357.510', prize: 'Fixo' },
+      ],
+      'timemania': [
+        { name: '7 números', probability: '1 em 26.472.637', prize: 'Estimado' },
+        { name: '6 números', probability: '1 em 216.103', prize: 'Fixo' },
+        { name: '5 números', probability: '1 em 5.220', prize: 'Fixo' },
+        { name: '4 números', probability: '1 em 276', prize: 'Fixo' },
+        { name: '3 números', probability: '1 em 29', prize: 'Fixo' },
+      ],
+      'diadesore': [
+        { name: '7 números + mês', probability: '1 em 2.629.575', prize: 'Estimado' },
+        { name: '7 números', probability: '1 em 219.298', prize: 'Fixo' },
+        { name: '6 números + mês', probability: '1 em 39.761', prize: 'Fixo' },
+        { name: '6 números', probability: '1 em 3.314', prize: 'Fixo' },
+        { name: '5 números + mês', probability: '1 em 1.169', prize: 'Fixo' },
+        { name: '5 números', probability: '1 em 97', prize: 'Fixo' },
+        { name: '4 números', probability: '1 em 15', prize: 'Fixo' },
+      ],
+      'loteca': [
+        { name: '14 jogos', probability: '1 em 4.782.969', prize: 'Estimado' },
+        { name: '13 jogos', probability: '1 em 54.182', prize: 'Fixo' },
+      ],
+    };
+    return categories[id] || [];
+  };
+
+  const getDescriptionForLottery = (id: string) => {
+    const descriptions: Record<string, string> = {
+      'megasena': 'A maior e mais famosa loteria do Brasil. Sorteios às quartas e sábados.',
+      'lotofacil': 'A loteria mais fácil de ganhar! Sorteios de segunda a sábado.',
+      'quina': 'Sorteios diários com ótimas chances de premiação.',
+      'lotomania': 'Escolha 50 números e concorra a prêmios milionários.',
+      'duplasena': 'Uma aposta, dois sorteios! Mais chances de ganhar.',
+      'supersete': 'Modalidade com sorteios três vezes por semana.',
+      'milionaria': 'A loteria com os maiores prêmios do Brasil.',
+      'timemania': 'A loteria do seu time do coração.',
+      'diadesore': 'Escolha números e o mês da sorte.',
+      'loteca': 'Palpites esportivos com grandes prêmios.',
+    };
+    return descriptions[id] || 'Modalidade de loteria com grandes prêmios.';
+  };
+
+  const getTipsForLottery = (id: string) => {
+    const tips: Record<string, string[]> = {
+      'megasena': [
+        'Evite sequências numéricas como 1-2-3-4-5-6',
+        'Distribua os números por toda a cartela',
+        'Considere jogar com números que não saíram recentemente',
+        'Use a estratégia mista: números quentes e frios'
+      ],
+      'lotofacil': [
+        'Equilibre números das extremidades (1-5 e 21-25)',
+        'Use estratégia de fechamento para reduzir custos',
+        'Considere números que saem com mais frequência',
+        'Evite apostar apenas em números baixos ou altos'
+      ],
+      'quina': [
+        'Distribua os números pelas dezenas (1-10, 11-20, etc.)',
+        'Misture números pares e ímpares',
+        'Observe os números mais sorteados recentemente',
+        'Use fechamentos para aumentar as chances'
+      ],
+      'lotomania': [
+        'Distribua os números por toda a cartela (1 a 100)',
+        'Evite concentrar números em poucas dezenas',
+        'Considere a estratégia do zero (não acertar nenhum)',
+        'Use fechamentos inteligentes para reduzir custos'
+      ],
+      'duplasena': [
+        'Lembre-se: são dois sorteios por aposta',
+        'Distribua números equilibradamente (1 a 50)',
+        'Evite sequências óbvias',
+        'Considere números que não saíram recentemente'
+      ],
+      'supersete': [
+        'Escolha números de 0 a 9 para cada coluna',
+        'Varie os números por coluna',
+        'Evite repetir muitos números',
+        'Use estratégias de fechamento'
+      ],
+      'milionaria': [
+        'Escolha 6 números principais + 2 trevos',
+        'Distribua bem os números de 1 a 50',
+        'Os trevos vão de 1 a 6',
+        'Combine números quentes e frios'
+      ],
+      'timemania': [
+        'Escolha 10 números de 1 a 80',
+        'Distribua por todas as dezenas',
+        'Escolha seu time do coração',
+        'Misture números pares e ímpares'
+      ],
+      'diadesore': [
+        'Escolha 7 números de 1 a 31',
+        'Selecione o mês da sorte',
+        'Distribua números pelo calendário',
+        'Considere datas especiais'
+      ],
+      'loteca': [
+        'Analise o desempenho dos times',
+        'Considere jogos em casa e fora',
+        'Estude estatísticas recentes',
+        'Varie entre 1, X e 2'
+      ],
+    };
+    return tips[id] || [
+      'Distribua os números equilibradamente',
+      'Evite sequências óbvias',
+      'Considere números quentes e frios',
+      'Use estratégias de fechamento'
+    ];
+  };
 
   const getColorClass = (color: string) => {
     const colorMap: Record<string, string> = {
       'neon-green': 'text-neon-green',
-      'neon-purple': 'text-neon-purple', 
+      'neon-purple': 'text-neon-purple',
       'neon-pink': 'text-neon-pink',
       'primary': 'text-primary',
       'accent': 'text-accent',
@@ -272,7 +376,7 @@ export default function Information() {
                     <div className="flex items-center space-x-3">
                       <span className="text-2xl">{lottery.icon}</span>
                       <div className="text-left">
-                        <h3 className={`text-lg font-bold ${getColorClass(lottery.color)} neon-text`}>
+                        <h3 className={`text-lg font-bold ${getPrizeColor(lottery.id)} neon-text`}>
                           {lottery.displayName}
                         </h3>
                         <p className="text-sm text-muted-foreground">
@@ -323,22 +427,22 @@ export default function Information() {
                         Estrutura de Prêmios
                       </h4>
                       <div className="space-y-2">
-                        {lottery.prizes.map((prize, index) => (
+                        {lottery.categories.map((prize, index) => (
                           <div key={index} className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
                             <div className="flex items-center space-x-3">
                               <Badge variant="secondary" className="w-8 h-8 rounded-full flex items-center justify-center p-0">
                                 {prize.matches}
                               </Badge>
                               <div>
-                                <div className="font-medium text-foreground">{prize.tier}</div>
+                                <div className="font-medium text-foreground">{prize.name}</div>
                                 <div className="text-xs text-muted-foreground">
                                   Probabilidade: {prize.probability}
                                 </div>
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-bold text-neon-green">{prize.avgPrize}</div>
-                              <div className="text-xs text-muted-foreground">Prêmio médio</div>
+                              <div className="font-bold text-neon-green">{prize.prize}</div>
+                              <div className="text-xs text-muted-foreground">Prêmio</div>
                             </div>
                           </div>
                         ))}
@@ -431,7 +535,7 @@ export default function Information() {
                     Como funciona a análise de números quentes e frios?
                   </AccordionTrigger>
                   <AccordionContent className="text-sm text-muted-foreground">
-                    Analisamos a frequência dos números nos últimos 20 concursos. Números que saíram mais vezes são "quentes", 
+                    Analisamos a frequência dos números nos últimos 20 concursos. Números que saíram mais vezes são "quentes",
                     os que saíram menos são "frios", e os intermediários são "mornos".
                   </AccordionContent>
                 </AccordionItem>
@@ -441,7 +545,7 @@ export default function Information() {
                     A IA realmente aumenta as chances de ganhar?
                   </AccordionTrigger>
                   <AccordionContent className="text-sm text-muted-foreground">
-                    Nossa IA otimiza estratégias baseadas em dados históricos e padrões estatísticos, 
+                    Nossa IA otimiza estratégias baseadas em dados históricos e padrões estatísticos,
                     mas não pode garantir prêmios. O objetivo é maximizar as chances dentro das probabilidades matemáticas.
                   </AccordionContent>
                 </AccordionItem>
@@ -451,7 +555,7 @@ export default function Information() {
                     Os dados são realmente oficiais?
                   </AccordionTrigger>
                   <AccordionContent className="text-sm text-muted-foreground">
-                    Sim, coletamos todos os dados diretamente do site oficial da Loterias Caixa, 
+                    Sim, coletamos todos os dados diretamente do site oficial da Loterias Caixa,
                     garantindo informações atualizadas e confiáveis.
                   </AccordionContent>
                 </AccordionItem>
@@ -461,7 +565,7 @@ export default function Information() {
                     Posso jogar offline?
                   </AccordionTrigger>
                   <AccordionContent className="text-sm text-muted-foreground">
-                    O Shark Loterias funciona online e offline. Você pode gerar jogos offline, 
+                    O Shark Loterias funciona online e offline. Você pode gerar jogos offline,
                     mas precisa estar online para sincronizar dados e verificar resultados.
                   </AccordionContent>
                 </AccordionItem>
@@ -515,7 +619,7 @@ export default function Information() {
                 <span className="font-medium text-foreground">Objetivo do Shark Loterias</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Nossa missão é fornecer ferramentas de análise estatística avançada para ajudar usuários a tomar 
+                Nossa missão é fornecer ferramentas de análise estatística avançada para ajudar usuários a tomar
                 decisões mais informadas, sempre dentro dos limites das probabilidades matemáticas das loterias.
               </p>
             </div>
@@ -525,7 +629,7 @@ export default function Information() {
         {/* Quick Actions */}
         <div className="text-center mt-8">
           <div className="inline-flex gap-4">
-            <Button 
+            <Button
               onClick={() => window.location.href = '/generator'}
               className="bg-black/20"
               data-testid="start-playing-button"
@@ -534,7 +638,7 @@ export default function Information() {
               Começar a Jogar
             </Button>
 
-            <Button 
+            <Button
               onClick={() => window.location.href = '/heat-map'}
               variant="outline"
               className="border-primary text-primary hover:bg-black/20"
