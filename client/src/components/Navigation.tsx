@@ -263,33 +263,36 @@ export default function Navigation() {
               })}
             </nav>
 
-            {/* Quick Actions */}
+            {/* Quick Actions - Estilo padronizado como itens de navegação */}
             <div className="mt-8 pt-6 border-t border-border/50">
               <h3 className="text-sm font-medium text-muted-foreground mb-4">Ações Rápidas</h3>
-              <div className="grid grid-cols-1 gap-3">
+              <div className="space-y-4">
                 {quickActions.map((action, index) => {
                   const Icon = action.icon;
                   return (
-                    <Button
+                    <div
                       key={index}
+                      className="flex items-center justify-between p-4 rounded-xl transition-all duration-300 group text-muted-foreground hover:text-primary hover:bg-black/20 border border-transparent cursor-pointer"
                       onClick={() => {
                         action.action();
                         setIsMobileMenuOpen(false);
                       }}
-                      variant={action.variant === "primary" ? "default" : action.variant as any}
-                      className={`justify-start h-12 ${
-                        action.variant === "primary" 
-                          ? "bg-black/20" 
-                          : ""
-                      }`}
                       data-testid={`quick-action-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
                     >
-                      <Icon className="h-5 w-5 mr-3" />
-                      <div className="text-left">
-                        <div className="font-medium">{action.label}</div>
-                        <div className="text-xs opacity-70">{action.tooltip}</div>
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-muted/30 group-hover:bg-black/20">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-lg">{action.label}</div>
+                          <div className="text-xs opacity-70">{action.tooltip}</div>
+                        </div>
                       </div>
-                    </Button>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-lg">⚡</span>
+                        <span className="text-xs">→</span>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
