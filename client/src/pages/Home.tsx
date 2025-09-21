@@ -4,10 +4,17 @@ import Navigation from "@/components/Navigation";
 import AllLotteriesCard from "@/components/AllLotteriesCard";
 import HeatMapGrid from "@/components/HeatMapGrid";
 import CelebrationAnimation from "@/components/CelebrationAnimation";
+import CyberpunkEffects, { useCyberpunkEffects } from "@/components/CyberpunkEffects";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { useLotteryTypes, useNextDrawInfo, useNumberFrequencies, useUserStats } from "@/hooks/useLotteryData";
 import { useAuth } from "@/hooks/useAuth";
+import { useCyberpunkSounds } from "@/lib/soundEffects";
+import { useSharkAI } from "@/lib/sharkAI";
+import { useSharkGamification } from "@/lib/gamification";
+import { useSecureStorage } from "@/lib/secureStorage";
 import { 
   Calendar, 
   TrendingUp, 
@@ -20,7 +27,15 @@ import {
   DollarSign,
   BarChart3,
   Activity,
-  Star
+  Star,
+  Shield,
+  Gamepad2,
+  Volume2,
+  VolumeX,
+  Coins,
+  Award,
+  Wifi,
+  WifiOff
 } from "lucide-react";
 import type { UserGame } from "@/types/lottery";
 
@@ -29,6 +44,15 @@ export default function Home() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationPrize, setCelebrationPrize] = useState<string>();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [sharkAIMessage, setSharkAIMessage] = useState<string>("");
+  const [showSharkMode, setShowSharkMode] = useState(false);
+
+  // Hooks das funcionalidades avançadas
+  const cyberpunkEffects = useCyberpunkEffects();
+  const sounds = useCyberpunkSounds();
+  const sharkAI = useSharkAI();
+  const gamification = useSharkGamification();
+  const secureStorage = useSecureStorage();
 
   // Data queries
   const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
@@ -75,9 +99,62 @@ export default function Home() {
       if (latestWin && !showCelebration) {
         setCelebrationPrize(`R$ ${latestWin.prizeWon}`);
         setShowCelebration(true);
+        sounds.playPatternFound(); // Som de comemoração
+        cyberpunkEffects.triggerGlitch(3000); // Efeito visual
       }
     }
-  }, [recentGames, showCelebration]);
+  }, [recentGames, showCelebration, sounds, cyberpunkEffects]);
+
+  // IA Shark analisando dados ao carregar
+  useEffect(() => {
+    if (megasenaFrequencies && megasenaFrequencies.length > 0) {
+      const randomNumbers = [1, 15, 23, 35, 44, 58]; // Exemplo
+      const analysis = sharkAI.analyzeNumbers(randomNumbers, 'megasena', megasenaFrequencies);
+      setSharkAIMessage(analysis.message);
+      
+      // Registrar análise na gamificação
+      gamification.onAnalysisPerformed('megasena', 0.75);
+    }
+  }, [megasenaFrequencies, sharkAI, gamification]);
+
+  // Inicialização da IA Shark com dados de fallback
+  useEffect(() => {
+    if (!megasenaFrequencies || megasenaFrequencies.length === 0) {
+      const fallbackAnalysis = sharkAI.analyzeNumbers([1, 15, 23, 35, 44, 58], 'megasena');
+      setSharkAIMessage(fallbackAnalysis.message);
+    }
+  }, [sharkAI]);
+
+  // Funções para controlar as funcionalidades
+  const activateSharkMode = () => {
+    setShowSharkMode(true);
+    sounds.playSharkAttackMode();
+    cyberpunkEffects.activateSharkMode();
+    
+    // IA Shark em modo agressivo
+    const aggressiveAnalysis = sharkAI.analyzeStrategy('aggressive', recentGames || []);
+    setSharkAIMessage(aggressiveAnalysis.message);
+    
+    setTimeout(() => setShowSharkMode(false), 5000);
+  };
+
+  const toggleSounds = () => {
+    const newState = !sounds.getEnabled();
+    sounds.setEnabled(newState);
+    if (newState) {
+      sounds.playClickSound();
+    }
+  };
+
+  const performQuickAnalysis = () => {
+    sounds.playScanSound();
+    gamification.onAnalysisPerformed('megasena', Math.random());
+    cyberpunkEffects.triggerGlitch(1000);
+    
+    const numbers = Array.from({length: 6}, () => Math.floor(Math.random() * 60) + 1);
+    const analysis = sharkAI.analyzeNumbers(numbers, 'megasena', megasenaFrequencies);
+    setSharkAIMessage(analysis.message);
+  };
 
   const mainLotteries = [
     {
@@ -120,11 +197,113 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground relative">
+      {/* Efeitos Cyberpunk */}
+      <CyberpunkEffects 
+        intensity={showSharkMode ? 'high' : 'medium'}
+        glitchActive={cyberpunkEffects.glitchActive}
+        matrixRain={cyberpunkEffects.matrixRain}
+        scanLines={cyberpunkEffects.scanLines}
+      />
+      
       <Navigation />
       
-      <main className={`container mx-auto px-4 py-8 ${isMenuOpen ? 'hidden' : ''}`}>
-        {/* Status Indicators */}
+      <main className={`container mx-auto px-4 py-8 relative z-40 ${isMenuOpen ? 'hidden' : ''}`}>
+        
+        {/* Painel de Controle Shark */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
+          {/* Status do Sistema */}
+          <Card className="neon-border bg-black/20 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-mono font-semibold text-neon-cyan">SISTEMA</h3>
+                {secureStorage.isOnline ? (
+                  <Wifi className="w-4 h-4 text-neon-green" />
+                ) : (
+                  <WifiOff className="w-4 h-4 text-destructive" />
+                )}
+              </div>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span>Status:</span>
+                  <span className={secureStorage.isOnline ? 'text-neon-green' : 'text-destructive'}>
+                    {secureStorage.isOnline ? 'ONLINE' : 'OFFLINE'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Cache:</span>
+                  <span className="text-neon-cyan">{secureStorage.systemStatus.cacheSize}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Segurança:</span>
+                  <Shield className="w-3 h-3 text-neon-green" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Gamificação */}
+          <Card className="neon-border bg-black/20 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-mono font-semibold text-neon-purple">SHARK LEVEL</h3>
+                <Trophy className="w-4 h-4 text-neon-gold" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span>Nível {gamification.stats.level}</span>
+                  <span className="text-neon-gold">{gamification.stats.rank}</span>
+                </div>
+                <Progress 
+                  value={(gamification.stats.experience % 100)} 
+                  className="h-2"
+                />
+                <div className="flex items-center gap-2 text-xs">
+                  <Coins className="w-3 h-3 text-neon-gold" />
+                  <span className="text-neon-gold">{gamification.stats.sharkCoins}</span>
+                  <Award className="w-3 h-3 text-neon-purple ml-2" />
+                  <span className="text-neon-purple">{gamification.stats.achievementsUnlocked}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* IA Shark */}
+          <Card className="lg:col-span-2 neon-border bg-black/20 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-mono font-semibold text-neon-pink">🦈 SHARK AI</h3>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={toggleSounds}
+                    className="h-6 w-6 p-0 text-neon-cyan hover:bg-neon-cyan/20"
+                  >
+                    {sounds.getEnabled() ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={activateSharkMode}
+                    className={`h-6 px-2 text-xs font-mono ${
+                      showSharkMode 
+                        ? 'bg-destructive/20 text-destructive animate-pulse' 
+                        : 'text-neon-pink hover:bg-neon-pink/20'
+                    }`}
+                  >
+                    {showSharkMode ? 'ATTACK MODE' : 'SHARK MODE'}
+                  </Button>
+                </div>
+              </div>
+              <div className="text-xs text-foreground/80 font-mono">
+                {sharkAIMessage || "🦈 Analisando padrões... Prepare-se para insights DEVASTADORES!"}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Status Indicators Principais */}
         <div className="text-center mb-6">
           <p className="text-lg text-muted-foreground mb-4">
             Central de Comando • Análise Inteligente das Loterias Federais
@@ -137,15 +316,15 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-1 text-sm bg-black/20 text-secondary px-3 py-1.5 rounded-full border border-secondary/30">
               <Brain className="w-4 h-4" />
-              <span className="font-mono font-semibold">IA ChatGPT Ativa</span>
+              <span className="font-mono font-semibold">IA Shark Ativa</span>
             </div>
             <div className="flex items-center gap-1 text-sm bg-black/20 text-accent px-3 py-1.5 rounded-full border border-accent/30">
               <Activity className="w-4 h-4" />
               <span className="font-mono font-semibold">Análise Tempo Real</span>
             </div>
             <div className="flex items-center gap-1 text-sm bg-black/20 text-primary px-3 py-1.5 rounded-full border border-primary/30">
-              <Star className="w-4 h-4" />
-              <span className="font-mono font-semibold">10 Modalidades</span>
+              <Gamepad2 className="w-4 h-4" />
+              <span className="font-mono font-semibold">Modo Gamificação</span>
             </div>
           </div>
         </div>
@@ -153,20 +332,35 @@ export default function Home() {
         {/* Quick Actions */}
         <div className="mb-8 flex flex-wrap gap-4 justify-center lg:hidden">
           <Button 
-            onClick={() => window.location.href = '/generator'}
-            className="bg-black/20"
+            onClick={() => {
+              sounds.playSharkAlert();
+              performQuickAnalysis();
+              setTimeout(() => window.location.href = '/generator', 500);
+            }}
+            className="bg-black/20 neon-border hover:animate-pulse transition-all duration-300"
             data-testid="quick-generate-button"
           >
             <Zap className="h-4 w-4 mr-2" />
             Gerar Jogos Rápido
           </Button>
           <Button 
-            onClick={() => window.location.href = '/results'}
-            className="bg-black/20"
+            onClick={() => {
+              sounds.playClickSound();
+              window.location.href = '/results';
+            }}
+            className="bg-black/20 neon-border"
             data-testid="quick-results-button"
           >
             <History className="h-4 w-4 mr-2" />
             Ver Resultados
+          </Button>
+          <Button 
+            onClick={performQuickAnalysis}
+            className="bg-black/20 neon-border hover:bg-neon-cyan/10 text-neon-cyan"
+            data-testid="quick-analysis-button"
+          >
+            <Brain className="h-4 w-4 mr-2" />
+            Análise Shark
           </Button>
         </div>
 
