@@ -318,7 +318,7 @@ export default function Home() {
             className="bg-black/20 neon-border hover:animate-pulse transition-all duration-300"
             data-testid="quick-generate-button"
           >
-            <Zap className="h-4" w-4 mr-2" />
+            <Zap className="h-4 w-4 mr-2" />
             Gerar Jogos Rápido
           </Button>
           <Button 
