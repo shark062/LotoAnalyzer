@@ -476,6 +476,24 @@ class Storage {
     }
   }
 
+  async clearUserGames(userId: string): Promise<void> {
+    try {
+      if (!this.db) {
+        console.warn('Database not available for clearing user games');
+        return;
+      }
+
+      await this.db
+        .delete(schema.userGames)
+        .where(eq(schema.userGames.userId, userId));
+
+      console.log(`✓ Cleared all games for user: ${userId}`);
+    } catch (error) {
+      console.error('Error clearing user games:', error);
+      throw new Error('Failed to clear user games from database');
+    }
+  }
+
   async createUserGame(game: InsertUserGame): Promise<UserGame> {
     try {
       if (!this.db) {

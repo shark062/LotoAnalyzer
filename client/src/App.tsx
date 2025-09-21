@@ -11,6 +11,7 @@ import Generator from "@/pages/Generator";
 import Results from "@/pages/Results";
 import AIAnalysis from "@/pages/AIAnalysis";
 import Information from "@/pages/Information";
+import AdvancedDashboard from "@/components/AdvancedDashboard";
 
 
 function Router() {
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/results" component={Results} />
       <Route path="/ai-analysis" component={AIAnalysis} />
       <Route path="/information" component={Information} />
+      <Route path="/advanced-dashboard" component={AdvancedDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

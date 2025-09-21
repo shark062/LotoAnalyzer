@@ -1,6 +1,8 @@
 import { storage } from "../storage";
 import { aiService } from "./aiService";
 import type { LotteryType, InsertLotteryDraw, InsertUserGame, NextDrawInfo } from "@shared/schema";
+import { LOTTERY_CONFIGS, API_ENDPOINTS, DATE_FORMATS, getLotteryConfig, getAllLotteryConfigs } from "@shared/lotteryConstants";
+import { DataValidator, DataFormatter, AnomalyDetector } from "@shared/dataValidation";
 
 interface GenerateGamesParams {
   lotteryId: string;
@@ -12,8 +14,8 @@ interface GenerateGamesParams {
 
 
 class LotteryService {
-  private readonly API_BASE = 'https://servicebus2.caixa.gov.br/portaldeloterias/api';
-  private readonly LOTERIAS_CAIXA_API = 'https://api.loterias.caixa.gov.br';
+  private readonly API_BASE = API_ENDPOINTS.CAIXA_BASE;
+  private readonly LOTERIAS_CAIXA_API = API_ENDPOINTS.FALLBACK_BASE;
   private initializationPromise: Promise<void> | null = null;
 
   async initializeLotteryTypes(): Promise<void> {
@@ -30,140 +32,20 @@ class LotteryService {
     try {
       console.log('🔧 Ensuring all lottery types are properly initialized...');
 
-      // Complete list of all official Brazilian lottery types
-      // Official draw schedules from Caixa Econômica Federal
-      const defaultLotteries = [
-        {
-          id: 'megasena',
-          name: 'megasena',
-          displayName: 'Mega-Sena',
-          minNumbers: 6,
-          maxNumbers: 15,
-          totalNumbers: 60,
-          drawDays: ['Wednesday', 'Saturday'], // Quartas e Sábados
-          drawTime: '20:00',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 'lotofacil',
-          name: 'lotofacil',
-          displayName: 'Lotofácil',
-          minNumbers: 15,
-          maxNumbers: 20,
-          totalNumbers: 25,
-          drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], // Segunda a Sábado
-          drawTime: '20:00',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 'quina',
-          name: 'quina',
-          displayName: 'Quina',
-          minNumbers: 5,
-          maxNumbers: 15,
-          totalNumbers: 80,
-          drawDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], // Segunda a Sábado
-          drawTime: '20:00',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 'lotomania',
-          name: 'lotomania',
-          displayName: 'Lotomania',
-          minNumbers: 50,
-          maxNumbers: 50,
-          totalNumbers: 100,
-          drawDays: ['Tuesday', 'Friday'], // Terças e Sextas
-          drawTime: '20:00',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 'duplasena',
-          name: 'duplasena',
-          displayName: 'Dupla Sena',
-          minNumbers: 6,
-          maxNumbers: 15,
-          totalNumbers: 50,
-          drawDays: ['Tuesday', 'Thursday', 'Saturday'], // Terças, Quintas e Sábados
-          drawTime: '20:00',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 'supersete',
-          name: 'supersete',
-          displayName: 'Super Sete',
-          minNumbers: 7,
-          maxNumbers: 21,
-          totalNumbers: 10,
-          drawDays: ['Monday', 'Wednesday', 'Friday'], // Segundas, Quartas e Sextas
-          drawTime: '20:00',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 'milionaria',
-          name: 'milionaria',
-          displayName: '+Milionária',
-          minNumbers: 6,
-          maxNumbers: 12,
-          totalNumbers: 50,
-          drawDays: ['Wednesday', 'Saturday'], // Quartas e Sábados
-          drawTime: '20:00',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 'timemania',
-          name: 'timemania',
-          displayName: 'Timemania',
-          minNumbers: 10,
-          maxNumbers: 10,
-          totalNumbers: 80,
-          drawDays: ['Tuesday', 'Thursday', 'Saturday'], // Terças, Quintas e Sábados
-          drawTime: '20:00',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 'diadesore',
-          name: 'diadesore',
-          displayName: 'Dia de Sorte',
-          minNumbers: 7,
-          maxNumbers: 15,
-          totalNumbers: 31,
-          drawDays: ['Tuesday', 'Thursday', 'Saturday'], // Terças, Quintas e Sábados
-          drawTime: '20:00',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 'loteca',
-          name: 'loteca',
-          displayName: 'Loteca',
-          minNumbers: 14,
-          maxNumbers: 14,
-          totalNumbers: 3,
-          drawDays: ['Saturday'], // Sábados
-          drawTime: '20:00',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
+      // 🎯 FASE 1: Usando configurações centralizadas das loterias
+      const defaultLotteries = getAllLotteryConfigs().map(config => ({
+        id: config.id,
+        name: config.name,
+        displayName: config.displayName,
+        minNumbers: config.minNumbers,
+        maxNumbers: config.maxNumbers,
+        totalNumbers: config.totalNumbers,
+        drawDays: config.drawDays,
+        drawTime: config.drawTime,
+        isActive: config.isActive,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }));
 
       // Insert lottery types into the database with retry logic
       for (const lottery of defaultLotteries) {
