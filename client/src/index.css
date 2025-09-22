@@ -98,6 +98,7 @@
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
+    background-color: hsl(240, 15%, 3%);
   }
 
   body::before {
