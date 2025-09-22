@@ -2,24 +2,23 @@
 {
   "version": 2,
   "name": "shark-loterias",
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "/server/index.ts"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/client/index.html"
+      "src": "server/index.ts",
+      "use": "@vercel/node@3.0.0"
     }
   ],
-  "functions": {
-    "server/index.ts": {
-      "runtime": "nodejs18.x"
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server/index.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/client/index.html"
     }
-  },
+  ],
   "env": {
     "NODE_ENV": "production"
-  },
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/public"
+  }
 }
