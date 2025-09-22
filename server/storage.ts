@@ -721,7 +721,7 @@ export async function ensureLotteryTypesInitialized() {
 
   log('🔧 Ensuring all lottery types are properly initialized...');
 
-  const existingTypes = await storage.db?.select().from(schema.lotteryTypes).execute();
+  const existingTypes = await storage.getLotteryTypes();
   const existingTypeIds = new Set(existingTypes?.map(t => t.id) || []);
 
   for (const lotteryType of lotteryTypes) {

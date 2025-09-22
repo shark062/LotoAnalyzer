@@ -93,7 +93,7 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
     min-height: 100vh;
-    background-image: url('./cyberpunk-shark-bg.png'), url('/cyberpunk-shark-bg.png');
+    background-image: url('/shark-bg.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

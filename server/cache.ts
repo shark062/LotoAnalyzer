@@ -105,11 +105,11 @@ export class MemoryCache {
   private cleanupExpired(): void {
     const now = Date.now();
     
-    for (const [key, item] of this.cache.entries()) {
+    Array.from(this.cache.entries()).forEach(([key, item]) => {
       if (now > item.expiresAt) {
         this.cache.delete(key);
       }
-    }
+    });
   }
 
   private hitRate = { hits: 0, misses: 0 };
@@ -121,7 +121,7 @@ export class MemoryCache {
   }
 
   private estimateMemoryUsage(): string {
-    const jsonString = JSON.stringify([...this.cache.entries()]);
+    const jsonString = JSON.stringify(Array.from(this.cache.entries()));
     const bytes = new Blob([jsonString]).size;
     return `${(bytes / 1024).toFixed(1)} KB`;
   }
