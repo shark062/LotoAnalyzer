@@ -43,6 +43,23 @@ function App() {
           });
       });
     }
+
+    // Handle online/offline status
+    const handleOnline = () => {
+      console.log('🌐 Aplicação online');
+    };
+
+    const handleOffline = () => {
+      console.log('📴 Aplicação offline - usando cache');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   return (

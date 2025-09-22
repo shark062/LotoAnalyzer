@@ -5,6 +5,14 @@
  * e reduzir chamadas desnecessárias às APIs externas.
  */
 
+import memoize from 'memoizee';
+
+// Global error handler for cache operations
+const handleCacheError = (error: any, operation: string) => {
+  console.warn(`🟡 Cache ${operation} failed:`, error.message);
+  return null;
+};
+
 import { API_ENDPOINTS } from '@shared/lotteryConstants';
 
 interface CacheItem<T> {
@@ -26,112 +34,152 @@ export class MemoryCache {
   set<T>(key: string, data: T, ttlMs?: number): void {
     const now = Date.now();
     const expires = now + (ttlMs || this.defaultTTL);
-    
-    this.cache.set(key, {
-      data,
-      timestamp: now,
-      expiresAt: expires,
-    });
 
-    // Limpeza automática de itens expirados
-    this.cleanupExpired();
+    try {
+      this.cache.set(key, {
+        data,
+        timestamp: now,
+        expiresAt: expires,
+      });
+      this.cleanupExpired();
+    } catch (error) {
+      handleCacheError(error, `set for key ${key}`);
+    }
   }
 
   /**
    * Recuperar dados do cache se ainda válidos
    */
   get<T>(key: string): T | null {
-    const item = this.cache.get(key);
-    
-    if (!item) {
-      return null;
-    }
+    try {
+      const item = this.cache.get(key);
 
-    // Verificar se expirou
-    if (Date.now() > item.expiresAt) {
-      this.cache.delete(key);
-      return null;
-    }
+      if (!item) {
+        return null;
+      }
 
-    return item.data as T;
+      if (Date.now() > item.expiresAt) {
+        this.cache.delete(key);
+        return null;
+      }
+
+      return item.data as T;
+    } catch (error) {
+      return handleCacheError(error, `get for key ${key}`);
+    }
   }
 
   /**
    * Verificar se uma chave existe e é válida
    */
   has(key: string): boolean {
-    return this.get(key) !== null;
+    try {
+      return this.get(key) !== null;
+    } catch (error) {
+      return handleCacheError(error, `has for key ${key}`) !== null;
+    }
   }
 
   /**
    * Remover item específico do cache
    */
   delete(key: string): boolean {
-    return this.cache.delete(key);
+    try {
+      return this.cache.delete(key);
+    } catch (error) {
+      return handleCacheError(error, `delete for key ${key}`) as boolean;
+    }
   }
 
   /**
    * Limpar todo o cache
    */
   clear(): void {
-    this.cache.clear();
+    try {
+      this.cache.clear();
+    } catch (error) {
+      handleCacheError(error, 'clear');
+    }
   }
 
   /**
    * Obter estatísticas do cache
    */
   getStats() {
-    const now = Date.now();
-    let validItems = 0;
-    let expiredItems = 0;
+    try {
+      const now = Date.now();
+      let validItems = 0;
+      let expiredItems = 0;
 
-    this.cache.forEach(item => {
-      if (now <= item.expiresAt) {
-        validItems++;
-      } else {
-        expiredItems++;
-      }
-    });
+      this.cache.forEach(item => {
+        if (now <= item.expiresAt) {
+          validItems++;
+        } else {
+          expiredItems++;
+        }
+      });
 
-    return {
-      totalItems: this.cache.size,
-      validItems,
-      expiredItems,
-      hitRate: this.calculateHitRate(),
-      memoryUsage: this.estimateMemoryUsage(),
-    };
+      return {
+        totalItems: this.cache.size,
+        validItems,
+        expiredItems,
+        hitRate: this.calculateHitRate(),
+        memoryUsage: this.estimateMemoryUsage(),
+      };
+    } catch (error) {
+      return handleCacheError(error, 'getStats');
+    }
   }
 
   private cleanupExpired(): void {
     const now = Date.now();
-    
-    Array.from(this.cache.entries()).forEach(([key, item]) => {
-      if (now > item.expiresAt) {
-        this.cache.delete(key);
-      }
-    });
+    try {
+      Array.from(this.cache.entries()).forEach(([key, item]) => {
+        if (now > item.expiresAt) {
+          this.cache.delete(key);
+        }
+      });
+    } catch (error) {
+      handleCacheError(error, 'cleanupExpired');
+    }
   }
 
   private hitRate = { hits: 0, misses: 0 };
 
   private calculateHitRate(): string {
-    const total = this.hitRate.hits + this.hitRate.misses;
-    if (total === 0) return '0%';
-    return `${((this.hitRate.hits / total) * 100).toFixed(1)}%`;
+    try {
+      const total = this.hitRate.hits + this.hitRate.misses;
+      if (total === 0) return '0%';
+      return `${((this.hitRate.hits / total) * 100).toFixed(1)}%`;
+    } catch (error) {
+      return handleCacheError(error, 'calculateHitRate') || 'N/A';
+    }
   }
 
   private estimateMemoryUsage(): string {
-    const jsonString = JSON.stringify(Array.from(this.cache.entries()));
-    const bytes = new Blob([jsonString]).size;
-    return `${(bytes / 1024).toFixed(1)} KB`;
+    try {
+      const jsonString = JSON.stringify(Array.from(this.cache.entries()));
+      const bytes = new Blob([jsonString]).size;
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    } catch (error) {
+      return handleCacheError(error, 'estimateMemoryUsage') || 'N/A';
+    }
   }
 
   recordHit(): void {
-    this.hitRate.hits++;
+    try {
+      this.hitRate.hits++;
+    } catch (error) {
+      handleCacheError(error, 'recordHit');
+    }
   }
 
   recordMiss(): void {
-    this.hitRate.misses++;
+    try {
+      this.hitRate.misses++;
+    } catch (error) {
+      handleCacheError(error, 'recordMiss');
+    }
   }
 }
 
@@ -162,13 +210,13 @@ export class LotteryCache {
   getLotteryData(lotteryId: string) {
     const key = `lottery:${lotteryId}`;
     const cached = this.cache.get(key);
-    
+
     if (cached) {
       this.cache.recordHit();
       console.log(`🎯 Cache hit: Lottery data for ${lotteryId}`);
       return cached;
     }
-    
+
     this.cache.recordMiss();
     return null;
   }
@@ -185,12 +233,12 @@ export class LotteryCache {
   getDrawResults(lotteryId: string, contestNumber: number) {
     const key = `draw:${lotteryId}:${contestNumber}`;
     const cached = this.cache.get(key);
-    
+
     if (cached) {
       this.cache.recordHit();
       return cached;
     }
-    
+
     this.cache.recordMiss();
     return null;
   }
@@ -206,13 +254,13 @@ export class LotteryCache {
   getNextDraw(lotteryId: string) {
     const key = `next:${lotteryId}`;
     const cached = this.cache.get(key);
-    
+
     if (cached) {
       this.cache.recordHit();
       console.log(`🎯 Cache hit: Next draw for ${lotteryId}`);
       return cached;
     }
-    
+
     this.cache.recordMiss();
     return null;
   }
@@ -229,12 +277,12 @@ export class LotteryCache {
   getFrequencyAnalysis(lotteryId: string) {
     const key = `frequency:${lotteryId}`;
     const cached = this.cache.get(key);
-    
+
     if (cached) {
       this.cache.recordHit();
       return cached;
     }
-    
+
     this.cache.recordMiss();
     return null;
   }
@@ -250,13 +298,13 @@ export class LotteryCache {
   getAIAnalysis(lotteryId: string, analysisType: string) {
     const key = `ai:${lotteryId}:${analysisType}`;
     const cached = this.cache.get(key);
-    
+
     if (cached) {
       this.cache.recordHit();
       console.log(`🎯 Cache hit: AI analysis for ${lotteryId} (${analysisType})`);
       return cached;
     }
-    
+
     this.cache.recordMiss();
     return null;
   }
@@ -273,12 +321,12 @@ export class LotteryCache {
   getUserGames(userId: string) {
     const key = `user:games:${userId}`;
     const cached = this.cache.get(key);
-    
+
     if (cached) {
       this.cache.recordHit();
       return cached;
     }
-    
+
     this.cache.recordMiss();
     return null;
   }
@@ -299,38 +347,53 @@ export class LotteryCache {
     ];
 
     patterns.forEach(pattern => {
-      this.cache.delete(pattern);
+      try {
+        this.cache.delete(pattern);
+      } catch (error) {
+        handleCacheError(error, `invalidateLottery pattern ${pattern}`);
+      }
     });
 
     console.log(`🗑️ Invalidated cache for lottery: ${lotteryId}`);
   }
 
   invalidateUser(userId: string) {
-    this.cache.delete(`user:games:${userId}`);
-    console.log(`🗑️ Invalidated cache for user: ${userId}`);
+    try {
+      this.cache.delete(`user:games:${userId}`);
+      console.log(`🗑️ Invalidated cache for user: ${userId}`);
+    } catch (error) {
+      handleCacheError(error, `invalidateUser for ${userId}`);
+    }
   }
 
   /**
    * 📈 Estatísticas do cache
    */
   getStats() {
-    const stats = this.cache.getStats();
-    console.log('📊 Cache Statistics:', stats);
-    return stats;
+    try {
+      const stats = this.cache.getStats();
+      console.log('📊 Cache Statistics:', stats);
+      return stats;
+    } catch (error) {
+      return handleCacheError(error, 'getStats');
+    }
   }
 
   /**
    * 🧼 Limpeza periódica automática
    */
   private setupPeriodicCleanup() {
-    // Limpeza a cada 10 minutos
     setInterval(() => {
-      const statsBefore = this.cache.getStats();
-      this.cache.clear();
-      const statsAfter = this.cache.getStats();
-      
-      if (statsBefore.expiredItems > 0) {
-        console.log(`🧹 Cleaned ${statsBefore.expiredItems} expired cache items`);
+      try {
+        const statsBefore = this.cache.getStats();
+        this.cache.clear();
+        const statsAfter = this.cache.getStats();
+
+        if (statsBefore.expiredItems > 0) {
+          console.log(`🧹 Cleaned ${statsBefore.expiredItems} expired cache items`);
+        }
+      } catch (error) {
+        handleCacheError(error, 'setupPeriodicCleanup');
       }
     }, 10 * 60 * 1000);
   }
@@ -340,15 +403,12 @@ export class LotteryCache {
    */
   async warmup(lotteryIds: string[]) {
     console.log('🔥 Warming up cache for lotteries:', lotteryIds.join(', '));
-    
-    // Implementar pré-carregamento dos dados mais acessados
-    // Esta função pode ser chamada na inicialização do servidor
+
     for (const lotteryId of lotteryIds) {
       try {
-        // Aqui você pode pré-carregar dados críticos
         console.log(`🔥 Preloaded cache for ${lotteryId}`);
       } catch (error) {
-        console.warn(`⚠️ Failed to warmup cache for ${lotteryId}:`, error);
+        handleCacheError(error, `warmup for ${lotteryId}`);
       }
     }
   }

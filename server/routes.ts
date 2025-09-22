@@ -23,6 +23,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.error("Failed to initialize lottery types:", error);
   }
 
+  // Health check endpoint
+  app.get('/api/health', (req, res) => {
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
+
   // Auth routes - Mock user for direct access (no login required)
   app.get('/api/auth/user', async (req: any, res) => {
     try {

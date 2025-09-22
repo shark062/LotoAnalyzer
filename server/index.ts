@@ -69,6 +69,13 @@ app.use((req, res, next) => {
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
 
+  // Keep-alive mechanism
+  const keepAlive = () => {
+    setInterval(() => {
+      log('🔥 Keep-alive ping');
+    }, 25 * 60 * 1000); // 25 minutes
+  };
+
   // Generic port handling for any platform
   process.on('SIGTERM', () => {
     console.log('SIGTERM received, shutting down gracefully');
@@ -84,9 +91,25 @@ app.use((req, res, next) => {
     });
   });
 
+  // Handle uncaught exceptions
+  process.on('uncaughtException', (error) => {
+    log(`❌ Uncaught Exception: ${error.message}`, "error");
+    console.error('Stack:', error.stack);
+  });
+
+  process.on('unhandledRejection', (reason, promise) => {
+    log(`❌ Unhandled Rejection at: ${promise}, reason: ${reason}`, "error");
+  });
+
   server.listen(port, "0.0.0.0", () => {
     log(`🦈 Shark Loterias server running on port ${port}`);
     log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
     log(`📊 Dashboard: http://0.0.0.0:${port}`);
+    
+    // Start keep-alive mechanism
+    if (process.env.NODE_ENV === 'production') {
+      keepAlive();
+      log('🔄 Keep-alive mechanism started');
+    }
   });
 })();
