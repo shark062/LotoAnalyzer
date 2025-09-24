@@ -222,7 +222,7 @@ export default function Home() {
     { id: 'milionaria', name: '+Milionária', icon: '➕', color: 'from-neon-gold to-accent' },
     { id: 'timemania', name: 'Timemania', icon: '🎁', color: 'from-destructive to-neon-pink' },
     { id: 'diadesore', name: 'Dia de Sorte', icon: '🌟', color: 'from-neon-cyan to-primary' },
-    { id: 'loteca', name: 'Loteca', icon: '⚽', color: 'from-neon-green to-primary' }⚽', color: 'from-primary to-destructive' },
+    { id: 'loteca', name: 'Loteca', icon: '⚽', color: 'from-neon-green to-primary' },
   ];
 
   return (
