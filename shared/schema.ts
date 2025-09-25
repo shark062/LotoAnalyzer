@@ -112,6 +112,95 @@ export const userPreferences = pgTable("user_preferences", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// ===== SISTEMA DE MÉTRICAS DE PERFORMANCE =====
+
+// Predições do sistema para avaliação posterior
+export const predictions = pgTable("predictions", {
+  id: serial("id").primaryKey(),
+  lotteryId: varchar("lottery_id").references(() => lotteryTypes.id),
+  contestNumber: integer("contest_number").notNull(),
+  modelName: varchar("model_name").notNull(), // "aiService", "advancedAI", "temporal", etc.
+  strategy: varchar("strategy").notNull(), // "balanced", "hot", "fibonacci", etc.
+  predictedNumbers: integer("predicted_numbers").array().notNull(),
+  confidence: decimal("confidence", { precision: 5, scale: 4 }),
+  metadata: jsonb("metadata"), // informações adicionais sobre a predição
+  actualNumbers: integer("actual_numbers").array(), // preenchido quando sai o resultado
+  matches: integer("matches"), // quantos números acertou
+  accuracy: decimal("accuracy", { precision: 5, scale: 4 }), // % de acerto
+  isEvaluated: boolean("is_evaluated").default(false),
+  evaluatedAt: timestamp("evaluated_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  // Índice único para evitar predições duplicadas
+  index("unique_prediction").on(table.lotteryId, table.contestNumber, table.modelName, table.strategy)
+]);
+
+// Performance histórica dos modelos
+export const modelPerformance = pgTable("model_performance", {
+  id: serial("id").primaryKey(),
+  modelName: varchar("model_name").notNull(),
+  lotteryId: varchar("lottery_id").references(() => lotteryTypes.id),
+  totalPredictions: integer("total_predictions").default(0),
+  totalCorrectPredictions: integer("total_correct_predictions").default(0),
+  averageAccuracy: decimal("average_accuracy", { precision: 5, scale: 4 }),
+  averageConfidence: decimal("average_confidence", { precision: 5, scale: 4 }),
+  bestAccuracy: decimal("best_accuracy", { precision: 5, scale: 4 }),
+  worstAccuracy: decimal("worst_accuracy", { precision: 5, scale: 4 }),
+  lastEvaluationDate: timestamp("last_evaluation_date"),
+  performanceGrade: varchar("performance_grade"), // "A", "B", "C", "D", "F"
+  isActive: boolean("is_active").default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Comparação de estratégias
+export const strategyComparison = pgTable("strategy_comparison", {
+  id: serial("id").primaryKey(),
+  strategyA: varchar("strategy_a").notNull(),
+  strategyB: varchar("strategy_b").notNull(),
+  lotteryId: varchar("lottery_id").references(() => lotteryTypes.id),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  strategyAWins: integer("strategy_a_wins").default(0),
+  strategyBWins: integer("strategy_b_wins").default(0),
+  draws: integer("draws").default(0),
+  winnerStrategy: varchar("winner_strategy"),
+  significanceLevel: decimal("significance_level", { precision: 5, scale: 4 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Logs de versionamento dos modelos
+export const modelVersions = pgTable("model_versions", {
+  id: serial("id").primaryKey(),
+  modelName: varchar("model_name").notNull(),
+  version: varchar("version").notNull(),
+  changes: text("changes").notNull(),
+  performanceImprovement: decimal("performance_improvement", { precision: 5, scale: 4 }),
+  isProduction: boolean("is_production").default(false),
+  backupData: jsonb("backup_data"), // backup dos parâmetros anteriores
+  deployedAt: timestamp("deployed_at").defaultNow(),
+  deployedBy: varchar("deployed_by").default("system"),
+});
+
+// Backtesting - testes em dados históricos
+export const backtestResults = pgTable("backtest_results", {
+  id: serial("id").primaryKey(),
+  testName: varchar("test_name").notNull(),
+  modelName: varchar("model_name").notNull(),
+  lotteryId: varchar("lottery_id").references(() => lotteryTypes.id),
+  strategy: varchar("strategy").notNull(),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  totalTests: integer("total_tests").notNull(),
+  successfulPredictions: integer("successful_predictions").default(0),
+  averageAccuracy: decimal("average_accuracy", { precision: 5, scale: 4 }),
+  profitability: decimal("profitability", { precision: 10, scale: 2 }), // se fosse dinheiro real
+  maxDrawdown: decimal("max_drawdown", { precision: 5, scale: 4 }),
+  sharpeRatio: decimal("sharpe_ratio", { precision: 5, scale: 4 }),
+  testResults: jsonb("test_results"), // dados detalhados dos testes
+  conclusions: text("conclusions"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
@@ -140,6 +229,33 @@ export const insertAiAnalysisSchema = createInsertSchema(aiAnalysis).omit({
   createdAt: true,
 });
 
+// Insert schemas para as novas tabelas de performance
+export const insertPredictionSchema = createInsertSchema(predictions).omit({
+  id: true,
+  createdAt: true,
+  evaluatedAt: true,
+});
+
+export const insertModelPerformanceSchema = createInsertSchema(modelPerformance).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export const insertStrategyComparisonSchema = createInsertSchema(strategyComparison).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertModelVersionSchema = createInsertSchema(modelVersions).omit({
+  id: true,
+  deployedAt: true,
+});
+
+export const insertBacktestResultSchema = createInsertSchema(backtestResults).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -153,6 +269,19 @@ export type InsertLotteryDraw = z.infer<typeof insertLotteryDrawSchema>;
 export type InsertUserGame = z.infer<typeof insertUserGameSchema>;
 export type InsertNumberFrequency = z.infer<typeof insertNumberFrequencySchema>;
 export type InsertAiAnalysis = z.infer<typeof insertAiAnalysisSchema>;
+
+// Novos tipos para sistema de métricas de performance
+export type Prediction = typeof predictions.$inferSelect;
+export type ModelPerformance = typeof modelPerformance.$inferSelect;
+export type StrategyComparison = typeof strategyComparison.$inferSelect;
+export type ModelVersion = typeof modelVersions.$inferSelect;
+export type BacktestResult = typeof backtestResults.$inferSelect;
+
+export type InsertPrediction = z.infer<typeof insertPredictionSchema>;
+export type InsertModelPerformance = z.infer<typeof insertModelPerformanceSchema>;
+export type InsertStrategyComparison = z.infer<typeof insertStrategyComparisonSchema>;
+export type InsertModelVersion = z.infer<typeof insertModelVersionSchema>;
+export type InsertBacktestResult = z.infer<typeof insertBacktestResultSchema>;
 
 // Next Draw Info interface for API responses
 export interface NextDrawInfo {

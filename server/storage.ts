@@ -11,7 +11,18 @@ import type {
   NumberFrequency,
   UserStats,
   AiAnalysis,
-  InsertAiAnalysis
+  InsertAiAnalysis,
+  // Novos tipos para sistema de métricas
+  Prediction,
+  InsertPrediction,
+  ModelPerformance,
+  InsertModelPerformance,
+  StrategyComparison,
+  InsertStrategyComparison,
+  ModelVersion,
+  InsertModelVersion,
+  BacktestResult,
+  InsertBacktestResult
 } from "@shared/schema";
 
 class Storage {
@@ -350,6 +361,21 @@ class Storage {
       });
 
       console.log(`✓ Stored draw ${drawData.lotteryId} #${drawData.contestNumber}`);
+
+      // 📊 AVALIAR PREDIÇÕES AUTOMATICAMENTE
+      if (drawData.drawnNumbers && drawData.drawnNumbers.length > 0) {
+        try {
+          const { performanceService } = await import('./services/performanceService');
+          await performanceService.evaluatePredictions(
+            drawData.lotteryId,
+            drawData.contestNumber,
+            drawData.drawnNumbers
+          );
+          console.log(`🎯 Predições avaliadas para ${drawData.lotteryId} #${drawData.contestNumber}`);
+        } catch (error) {
+          console.log(`⚠️ Erro ao avaliar predições para ${drawData.lotteryId} #${drawData.contestNumber}:`, error);
+        }
+      }
     } catch (error) {
       console.error('Error creating lottery draw:', error);
     }
@@ -590,6 +616,357 @@ class Storage {
     } catch (error) {
       console.error('Error creating AI analysis:', error);
       throw new Error('Failed to save AI analysis to database');
+    }
+  }
+
+  // ===== SISTEMA DE MÉTRICAS DE PERFORMANCE =====
+
+  // Salvar predição para avaliação posterior (com upsert para evitar duplicatas)
+  async savePrediction(prediction: InsertPrediction): Promise<Prediction> {
+    try {
+      if (!this.db) {
+        throw new Error('Database connection required to save prediction');
+      }
+
+      // Verificar se predição já existe
+      const existing = await this.db
+        .select()
+        .from(schema.predictions)
+        .where(
+          and(
+            eq(schema.predictions.lotteryId, prediction.lotteryId),
+            eq(schema.predictions.contestNumber, prediction.contestNumber),
+            eq(schema.predictions.modelName, prediction.modelName),
+            eq(schema.predictions.strategy, prediction.strategy)
+          )
+        )
+        .limit(1);
+
+      if (existing.length > 0) {
+        // Atualizar predição existente se não foi avaliada
+        if (!existing[0].isEvaluated) {
+          const [updated] = await this.db
+            .update(schema.predictions)
+            .set({
+              predictedNumbers: prediction.predictedNumbers,
+              confidence: prediction.confidence,
+              metadata: prediction.metadata
+            })
+            .where(eq(schema.predictions.id, existing[0].id))
+            .returning();
+          
+          console.log(`🔄 Predição atualizada: ${prediction.modelName} para ${prediction.lotteryId} #${prediction.contestNumber}`);
+          return updated;
+        } else {
+          // Retornar predição existente se já foi avaliada
+          console.log(`📊 Predição já existe e foi avaliada: ${prediction.modelName} para ${prediction.lotteryId} #${prediction.contestNumber}`);
+          return existing[0];
+        }
+      }
+
+      // Inserir nova predição
+      const [result] = await this.db.insert(schema.predictions).values(prediction).returning();
+      console.log(`💾 Nova predição salva: ${prediction.modelName} para ${prediction.lotteryId} #${prediction.contestNumber}`);
+      return result;
+    } catch (error) {
+      console.error('Error saving prediction:', error);
+      throw new Error('Failed to save prediction to database');
+    }
+  }
+
+  // Obter predições não avaliadas para um concurso específico
+  async getUnevaluatedPredictions(lotteryId: string, contestNumber: number): Promise<Prediction[]> {
+    try {
+      if (!this.db) return [];
+
+      const results = await this.db
+        .select()
+        .from(schema.predictions)
+        .where(
+          and(
+            eq(schema.predictions.lotteryId, lotteryId),
+            eq(schema.predictions.contestNumber, contestNumber),
+            eq(schema.predictions.isEvaluated, false)
+          )
+        );
+
+      return results;
+    } catch (error) {
+      console.error('Error fetching unevaluated predictions:', error);
+      return [];
+    }
+  }
+
+  // Avaliar predição quando sai o resultado real
+  async evaluatePrediction(
+    predictionId: number, 
+    actualNumbers: number[], 
+    matches: number, 
+    accuracy: number
+  ): Promise<void> {
+    try {
+      if (!this.db) return;
+
+      await this.db
+        .update(schema.predictions)
+        .set({
+          actualNumbers,
+          matches,
+          accuracy: accuracy.toString(),
+          isEvaluated: true,
+          evaluatedAt: new Date()
+        })
+        .where(eq(schema.predictions.id, predictionId));
+
+      console.log(`✅ Predição ${predictionId} avaliada: ${matches} acertos (${accuracy}% precisão)`);
+    } catch (error) {
+      console.error('Error evaluating prediction:', error);
+    }
+  }
+
+  // Obter ou criar performance de modelo
+  async getOrCreateModelPerformance(modelName: string, lotteryId: string): Promise<ModelPerformance> {
+    try {
+      if (!this.db) {
+        throw new Error('Database connection required');
+      }
+
+      // Tentar encontrar performance existente
+      const existing = await this.db
+        .select()
+        .from(schema.modelPerformance)
+        .where(
+          and(
+            eq(schema.modelPerformance.modelName, modelName),
+            eq(schema.modelPerformance.lotteryId, lotteryId)
+          )
+        )
+        .limit(1);
+
+      if (existing.length > 0) {
+        return existing[0];
+      }
+
+      // Criar nova entrada se não existir
+      const [newPerformance] = await this.db
+        .insert(schema.modelPerformance)
+        .values({
+          modelName,
+          lotteryId,
+          totalPredictions: 0,
+          totalCorrectPredictions: 0,
+          averageAccuracy: '0',
+          averageConfidence: '0',
+          bestAccuracy: '0',
+          worstAccuracy: '0',
+          performanceGrade: 'N/A',
+          isActive: true
+        })
+        .returning();
+
+      return newPerformance;
+    } catch (error) {
+      console.error('Error getting/creating model performance:', error);
+      throw new Error('Failed to handle model performance');
+    }
+  }
+
+  // Atualizar performance do modelo
+  async updateModelPerformance(
+    modelName: string,
+    lotteryId: string,
+    accuracy: number,
+    confidence: number
+  ): Promise<void> {
+    try {
+      if (!this.db) return;
+
+      const performance = await this.getOrCreateModelPerformance(modelName, lotteryId);
+      
+      // Calcular novas métricas
+      const newTotal = performance.totalPredictions + 1;
+      const newCorrect = accuracy > 0.5 ? performance.totalCorrectPredictions + 1 : performance.totalCorrectPredictions;
+      const newAvgAccuracy = ((parseFloat(performance.averageAccuracy?.toString() || '0') * performance.totalPredictions) + accuracy) / newTotal;
+      const newAvgConfidence = ((parseFloat(performance.averageConfidence?.toString() || '0') * performance.totalPredictions) + confidence) / newTotal;
+      const newBestAccuracy = Math.max(parseFloat(performance.bestAccuracy?.toString() || '0'), accuracy);
+      const newWorstAccuracy = performance.totalPredictions === 0 
+        ? accuracy 
+        : Math.min(parseFloat(performance.worstAccuracy?.toString() || '1'), accuracy);
+
+      // Determinar grau de performance
+      let grade = 'F';
+      if (newAvgAccuracy >= 0.9) grade = 'A';
+      else if (newAvgAccuracy >= 0.8) grade = 'B';
+      else if (newAvgAccuracy >= 0.7) grade = 'C';
+      else if (newAvgAccuracy >= 0.6) grade = 'D';
+
+      await this.db
+        .update(schema.modelPerformance)
+        .set({
+          totalPredictions: newTotal,
+          totalCorrectPredictions: newCorrect,
+          averageAccuracy: newAvgAccuracy.toFixed(4),
+          averageConfidence: newAvgConfidence.toFixed(4),
+          bestAccuracy: newBestAccuracy.toFixed(4),
+          worstAccuracy: newWorstAccuracy.toFixed(4),
+          performanceGrade: grade,
+          lastEvaluationDate: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(schema.modelPerformance.id, performance.id));
+
+      console.log(`📊 Performance ${modelName} atualizada: ${grade} (${(newAvgAccuracy * 100).toFixed(1)}%)`);
+    } catch (error) {
+      console.error('Error updating model performance:', error);
+    }
+  }
+
+  // Obter performance de todos os modelos para uma loteria
+  async getModelPerformances(lotteryId: string): Promise<ModelPerformance[]> {
+    try {
+      if (!this.db) return [];
+
+      const results = await this.db
+        .select()
+        .from(schema.modelPerformance)
+        .where(eq(schema.modelPerformance.lotteryId, lotteryId))
+        .orderBy(desc(schema.modelPerformance.averageAccuracy));
+
+      return results;
+    } catch (error) {
+      console.error('Error fetching model performances:', error);
+      return [];
+    }
+  }
+
+  // Salvar resultado de backtesting
+  async saveBacktestResult(backtest: InsertBacktestResult): Promise<BacktestResult> {
+    try {
+      if (!this.db) {
+        throw new Error('Database connection required to save backtest');
+      }
+
+      const [result] = await this.db.insert(schema.backtestResults).values(backtest).returning();
+      console.log(`🧪 Resultado de backtesting salvo: ${backtest.testName}`);
+      return result;
+    } catch (error) {
+      console.error('Error saving backtest result:', error);
+      throw new Error('Failed to save backtest result');
+    }
+  }
+
+  // Obter resultados de backtesting
+  async getBacktestResults(modelName?: string, lotteryId?: string): Promise<BacktestResult[]> {
+    try {
+      if (!this.db) return [];
+
+      let query = this.db.select().from(schema.backtestResults);
+
+      if (modelName && lotteryId) {
+        query = query.where(
+          and(
+            eq(schema.backtestResults.modelName, modelName),
+            eq(schema.backtestResults.lotteryId, lotteryId)
+          )
+        );
+      } else if (modelName) {
+        query = query.where(eq(schema.backtestResults.modelName, modelName));
+      } else if (lotteryId) {
+        query = query.where(eq(schema.backtestResults.lotteryId, lotteryId));
+      }
+
+      const results = await query.orderBy(desc(schema.backtestResults.createdAt));
+      return results;
+    } catch (error) {
+      console.error('Error fetching backtest results:', error);
+      return [];
+    }
+  }
+
+  // Comparar duas estratégias
+  async compareStrategies(
+    strategyA: string,
+    strategyB: string,
+    lotteryId: string,
+    periodStart: Date,
+    periodEnd: Date
+  ): Promise<StrategyComparison> {
+    try {
+      if (!this.db) {
+        throw new Error('Database connection required');
+      }
+
+      // Obter predições de ambas as estratégias no período
+      const predictionsA = await this.db
+        .select()
+        .from(schema.predictions)
+        .where(
+          and(
+            eq(schema.predictions.strategy, strategyA),
+            eq(schema.predictions.lotteryId, lotteryId),
+            eq(schema.predictions.isEvaluated, true)
+          )
+        );
+
+      const predictionsB = await this.db
+        .select()
+        .from(schema.predictions)
+        .where(
+          and(
+            eq(schema.predictions.strategy, strategyB),
+            eq(schema.predictions.lotteryId, lotteryId),
+            eq(schema.predictions.isEvaluated, true)
+          )
+        );
+
+      // Calcular vitórias
+      const strategyAWins = predictionsA.filter(p => parseFloat(p.accuracy?.toString() || '0') > 0.5).length;
+      const strategyBWins = predictionsB.filter(p => parseFloat(p.accuracy?.toString() || '0') > 0.5).length;
+      const totalDraws = Math.max(predictionsA.length, predictionsB.length);
+
+      // Determinar vencedor
+      let winnerStrategy = 'empate';
+      if (strategyAWins > strategyBWins) winnerStrategy = strategyA;
+      else if (strategyBWins > strategyAWins) winnerStrategy = strategyB;
+
+      // Salvar comparação
+      const [comparison] = await this.db
+        .insert(schema.strategyComparison)
+        .values({
+          strategyA,
+          strategyB,
+          lotteryId,
+          periodStart,
+          periodEnd,
+          strategyAWins,
+          strategyBWins,
+          draws: totalDraws,
+          winnerStrategy,
+          significanceLevel: '0.05' // placeholder para teste estatístico
+        })
+        .returning();
+
+      console.log(`⚔️ Comparação ${strategyA} vs ${strategyB}: ${winnerStrategy} venceu`);
+      return comparison;
+    } catch (error) {
+      console.error('Error comparing strategies:', error);
+      throw new Error('Failed to compare strategies');
+    }
+  }
+
+  // Salvar versão do modelo
+  async saveModelVersion(version: InsertModelVersion): Promise<ModelVersion> {
+    try {
+      if (!this.db) {
+        throw new Error('Database connection required');
+      }
+
+      const [result] = await this.db.insert(schema.modelVersions).values(version).returning();
+      console.log(`🔄 Nova versão do modelo salva: ${version.modelName} v${version.version}`);
+      return result;
+    } catch (error) {
+      console.error('Error saving model version:', error);
+      throw new Error('Failed to save model version');
     }
   }
 }

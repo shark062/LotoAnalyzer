@@ -560,5 +560,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== ENDPOINTS DE MÉTRICAS DE PERFORMANCE =====
+
+  // Obter performance de modelos para uma loteria
+  app.get('/api/lotteries/:id/performance', async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+      const performances = await storage.getModelPerformances(id);
+      res.json(performances);
+    } catch (error) {
+      console.error('Error fetching model performances:', error);
+      res.status(500).json({ error: 'Failed to fetch model performances' });
+    }
+  });
+
+  // Obter relatório detalhado de performance de um modelo
+  app.get('/api/performance/:modelName/:lotteryId', async (req, res) => {
+    const { modelName, lotteryId } = req.params;
+    
+    try {
+      const { performanceService } = await import('./services/performanceService');
+      const report = await performanceService.getModelPerformanceReport(modelName, lotteryId);
+      res.json(report);
+    } catch (error) {
+      console.error('Error fetching performance report:', error);
+      res.status(500).json({ error: 'Failed to fetch performance report' });
+    }
+  });
+
+  // Comparar duas estratégias
+  app.get('/api/performance/compare/:strategyA/:strategyB/:lotteryId', async (req, res) => {
+    const { strategyA, strategyB, lotteryId } = req.params;
+    const periodDays = parseInt(req.query.days as string) || 30;
+    
+    try {
+      const { performanceService } = await import('./services/performanceService');
+      const comparison = await performanceService.compareStrategies(
+        strategyA,
+        strategyB,
+        lotteryId,
+        periodDays
+      );
+      res.json(comparison);
+    } catch (error) {
+      console.error('Error comparing strategies:', error);
+      res.status(500).json({ error: 'Failed to compare strategies' });
+    }
+  });
+
+  // Obter resultados de backtesting
+  app.get('/api/performance/backtest/:modelName/:lotteryId', async (req, res) => {
+    const { modelName, lotteryId } = req.params;
+    
+    try {
+      const results = await storage.getBacktestResults(modelName, lotteryId);
+      res.json(results);
+    } catch (error) {
+      console.error('Error fetching backtest results:', error);
+      res.status(500).json({ error: 'Failed to fetch backtest results' });
+    }
+  });
+
+  // Executar backtesting em dados históricos
+  app.post('/api/performance/backtest', async (req, res) => {
+    const { testName, modelName, strategy, lotteryId, testParameters } = req.body;
+    
+    try {
+      // Obter dados históricos
+      const historicalDraws = await storage.getLatestDraws(lotteryId, 100); // últimos 100 sorteios
+      
+      const { performanceService } = await import('./services/performanceService');
+      const metrics = await performanceService.runBacktest(
+        testName,
+        modelName,
+        strategy,
+        lotteryId,
+        historicalDraws,
+        testParameters || {}
+      );
+      
+      res.json({ success: true, metrics });
+    } catch (error) {
+      console.error('Error running backtest:', error);
+      res.status(500).json({ error: 'Failed to run backtest' });
+    }
+  });
+
+  // Avaliar predições manualmente (útil para debug)
+  app.post('/api/performance/evaluate', async (req, res) => {
+    const { lotteryId, contestNumber, actualNumbers } = req.body;
+    
+    try {
+      const { performanceService } = await import('./services/performanceService');
+      await performanceService.evaluatePredictions(lotteryId, contestNumber, actualNumbers);
+      res.json({ success: true, message: 'Predições avaliadas com sucesso' });
+    } catch (error) {
+      console.error('Error evaluating predictions:', error);
+      res.status(500).json({ error: 'Failed to evaluate predictions' });
+    }
+  });
+
   return httpServer;
 }

@@ -1,5 +1,6 @@
 
 import { storage } from "../storage";
+import { performanceService } from "./performanceService";
 import type { LotteryType, NumberFrequency } from "@shared/schema";
 
 interface AnalysisResult {
@@ -418,6 +419,60 @@ class AiService {
 
     // Calculate confidence based on data quality and pattern strength
     const confidence = this.calculateConfidenceScore(enhancedFrequencies, latestDraws, lottery);
+
+    // 📊 REGISTRAR PREDIÇÃO PARA MÉTRICAS DE PERFORMANCE
+    try {
+      // Obter próximo concurso para registrar predição
+      const nextDraw = await storage.getNextDraw(lotteryId);
+      if (nextDraw?.contestNumber) {
+        await performanceService.recordPrediction(
+          lotteryId,
+          nextDraw.contestNumber,
+          'aiService',
+          'balanceada_avancada',
+          primaryPrediction,
+          confidence,
+          {
+            temperature: `hot:${hotNumbers.length}, warm:${warmNumbers.length}, cold:${coldNumbers.length}`,
+            algorithm: 'anti_sequential_optimized',
+            parameters: {
+              hotPercentage: 45,
+              warmPercentage: 35,
+              coldPercentage: 20,
+              dataQuality: frequencies.length / lottery.totalNumbers
+            },
+            dataQuality: frequencies.length / lottery.totalNumbers,
+            confidence_factors: [
+              'frequency_analysis',
+              'pattern_recognition', 
+              'statistical_weighting',
+              'anti_clustering'
+            ]
+          }
+        );
+
+        // Registrar estratégias alternativas também
+        for (const alt of alternatives) {
+          await performanceService.recordPrediction(
+            lotteryId,
+            nextDraw.contestNumber,
+            'aiService',
+            alt.strategy.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+            alt.numbers,
+            confidence * 0.85, // reduzir confiança para alternativas
+            {
+              temperature: 'alternative_strategy',
+              algorithm: alt.strategy,
+              parameters: { baseStrategy: 'primary_alternative' },
+              dataQuality: frequencies.length / lottery.totalNumbers,
+              confidence_factors: ['alternative_strategy']
+            }
+          );
+        }
+      }
+    } catch (error) {
+      console.log('📊 Não foi possível registrar predição para métricas:', error);
+    }
 
     return {
       primaryPrediction,
