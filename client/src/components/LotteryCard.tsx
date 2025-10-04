@@ -60,21 +60,21 @@ export default function LotteryCard({
 
   if (isLoading) {
     return (
-      <Card className="bg-black/25 backdrop-blur-sm animate-pulse">
+      <Card className="bg-black/25 backdrop-blur-sm animate-pulse rounded-3xl">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="h-6 bg-black/20 rounded w-32"></div>
+            <div className="h-6 bg-black/20 rounded-3xl w-32"></div>
             <div className="w-8 h-8 bg-black/20 rounded-full"></div>
           </div>
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="flex justify-between">
-                <div className="h-4 bg-black/20 rounded w-20"></div>
-                <div className="h-4 bg-black/20 rounded w-24"></div>
+                <div className="h-4 bg-black/20 rounded-3xl w-20"></div>
+                <div className="h-4 bg-black/20 rounded-3xl w-24"></div>
               </div>
             ))}
-            <div className="h-16 bg-black/20 rounded"></div>
-            <div className="h-16 bg-black/20 rounded"></div>
+            <div className="h-16 bg-black/20 rounded-3xl"></div>
+            <div className="h-16 bg-black/20 rounded-3xl"></div>
           </div>
         </CardContent>
       </Card>
@@ -83,7 +83,7 @@ export default function LotteryCard({
 
   return (
     <Card 
-      className="bg-black/25 backdrop-blur-md border-white/20 hover:animate-float transition-all duration-300 group"
+      className="bg-black/25 backdrop-blur-md border-white/20 hover:animate-float transition-all duration-300 group rounded-3xl"
       data-testid={`lottery-card-${lotteryName}`}
     >
       <CardContent className="p-6">
