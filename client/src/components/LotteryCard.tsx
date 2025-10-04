@@ -83,7 +83,7 @@ export default function LotteryCard({
 
   return (
     <Card 
-      className="bg-black/30 backdrop-blur-md border-white/20 hover:animate-float transition-all duration-300 group"
+      className="bg-black/20 backdrop-blur-sm hover:animate-float transition-all duration-300 group"
       data-testid={`lottery-card-${lotteryName}`}
     >
       <CardContent className="p-6">
