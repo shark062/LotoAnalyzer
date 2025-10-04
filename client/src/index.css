@@ -174,7 +174,7 @@
   }
 
   .animate-scan {
-    animation: scan 2s linear infinite;
+    animation: none;
   }
 
   .animate-matrix {
@@ -182,7 +182,7 @@
   }
 
   .animate-data-flow {
-    animation: dataFlow 3s ease-in-out infinite;
+    animation: none;
   }
 
   .animate-neon-pulse {
@@ -234,14 +234,6 @@
   }
 }
 
-@keyframes scan {
-  0% { 
-    transform: translateX(-100%); 
-  }
-  100% { 
-    transform: translateX(100%); 
-  }
-}
 
 @keyframes matrix {
   0% {
@@ -260,17 +252,6 @@
   }
 }
 
-@keyframes dataFlow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
 
 @keyframes neonPulse {
   from {
