@@ -661,8 +661,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  return httpServer;
-}
   // 🎓 Endpoint para aprendizado contínuo
   app.post('/api/ai/learn', async (req, res) => {
     try {
@@ -708,3 +706,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to perform ensemble analysis' });
     }
   });
+
+  return httpServer;
+}

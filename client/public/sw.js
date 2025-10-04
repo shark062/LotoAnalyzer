@@ -1,10 +1,10 @@
 // Service Worker para Shark Loterias - Cache offline seguro
-const CACHE_NAME = 'shark-loterias-v1';
+const CACHE_NAME = 'shark-loterias-v2';
 const urlsToCache = [
   '/',
   '/static/js/bundle.js',
   '/static/css/main.css',
-  '/cyberpunk-shark-main.png',
+  '/attached_assets/cyberpunk-shark-icon_1759583934027.png',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap'
 ];
 
