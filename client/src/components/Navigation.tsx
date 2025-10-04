@@ -175,7 +175,7 @@ export default function Navigation() {
           <div className="hidden lg:flex items-center justify-between mt-2 pt-2 border-t border-border/30">
             <div className="flex items-center space-x-2 text-xs text-muted-foreground">
               <div className="flex items-center space-x-1 bg-neon-green/10 text-neon-green px-2 py-1 rounded-full border border-neon-green/30">
-                <div className="w-1.5 h-1.5 bg-neon-green rounded-full animate-pulse"></div>
+                <div className="w-1.5 h-1.5 bg-neon-green rounded-full"></div>
                 <span className="font-mono">Dados Oficiais Caixa</span>
               </div>
               <div className="flex items-center space-x-1 bg-black/20 text-secondary px-2 py-1 rounded-full border border-secondary/30">
@@ -235,7 +235,7 @@ export default function Navigation() {
                   <Link 
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center justify-between p-4 rounded-3xl transition-all duration-300 group ${
+                    className={`flex items-center justify-between p-4 rounded-3xl group ${
                       isActive 
                         ? "text-primary bg-primary/20 border border-primary/50" 
                         : "text-foreground/80 hover:text-primary hover:bg-primary/10 border border-foreground/10 hover:border-primary/30"
@@ -284,7 +284,7 @@ export default function Navigation() {
                 onClick={action.action}
                 variant={action.variant === "primary" ? "default" : action.variant as any}
                 size="sm"
-                className={`w-full shadow-lg transition-all duration-300 group relative rounded-3xl ${
+                className={`w-full shadow-lg group relative rounded-3xl ${
                   action.variant === "primary" 
                     ? "bg-black/25" 
                     : action.variant === "secondary"
@@ -298,7 +298,7 @@ export default function Navigation() {
                 {action.label}
                 
                 {/* Tooltip */}
-                <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-card border border-border/50 rounded-lg px-3 py-2 text-xs text-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap backdrop-blur-sm">
+                <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-card border border-border/50 rounded-lg px-3 py-2 text-xs text-foreground opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap backdrop-blur-sm">
                   {action.tooltip}
                   <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-border/50"></div>
                 </div>
@@ -310,7 +310,7 @@ export default function Navigation() {
           <div className="mt-4 p-3 bg-black/25 border border-border/50 rounded-3xl backdrop-blur-sm">
             <div className="text-xs text-center space-y-1">
               <div className="flex items-center justify-center space-x-1 text-neon-green">
-                <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-neon-green rounded-full"></div>
                 <span>Sistema Online</span>
               </div>
               <div className="text-muted-foreground">
