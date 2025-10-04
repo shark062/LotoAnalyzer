@@ -110,12 +110,12 @@ export default function Navigation() {
     <>
       {/* Header */}
       <header className="relative z-50 bg-transparent text-white">
-        <div className="container mx-auto px-6 py-6 relative">
+        <div className="container mx-auto px-6 py-2 relative">
           <div className="flex items-center justify-between">
             {/* Logo Central */}
-            <div className="flex-1 flex justify-center items-start -mt-4">
+            <div className="flex-1 flex justify-center items-start -mt-2">
               <Link href="/" className="flex items-center justify-center">
-                <div className="w-32 h-32">
+                <div className="w-24 h-24">
                   <img 
                     src={sharkLogo} 
                     alt="Shark Loterias Logo" 
@@ -172,7 +172,7 @@ export default function Navigation() {
           </div>
 
           {/* Secondary Navigation Bar - Desktop Only */}
-          <div className="hidden lg:flex items-center justify-between mt-4 pt-3 border-t border-border/30">
+          <div className="hidden lg:flex items-center justify-between mt-2 pt-2 border-t border-border/30">
             <div className="flex items-center space-x-2 text-xs text-muted-foreground">
               <div className="flex items-center space-x-1 bg-neon-green/10 text-neon-green px-2 py-1 rounded-full border border-neon-green/30">
                 <div className="w-1.5 h-1.5 bg-neon-green rounded-full animate-pulse"></div>

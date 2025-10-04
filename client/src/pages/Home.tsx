@@ -238,10 +238,10 @@ export default function Home() {
 
       <Navigation />
 
-      <main className={`container mx-auto px-4 py-2 relative z-40 ${isMenuOpen ? 'hidden' : ''}`}>
+      <main className={`container mx-auto px-4 py-0 relative z-40 ${isMenuOpen ? 'hidden' : ''}`}>
 
         {/* Quick Actions */}
-        <div className="mb-4 flex flex-wrap gap-4 justify-center lg:hidden">
+        <div className="mb-2 flex flex-wrap gap-2 justify-center lg:hidden">
           <Button 
             onClick={() => {
               performQuickAnalysis();
@@ -274,7 +274,7 @@ export default function Home() {
         </div>
 
         {/* All Lotteries - Complete Dashboard */}
-        <section className="mb-4">
+        <section className="mb-2">
           <AllLotteriesCard />
         </section>
       </main>
