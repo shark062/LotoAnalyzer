@@ -30,6 +30,7 @@ import {
   Settings
 } from "lucide-react";
 import type { UserGame, LotteryType } from "@/types/lottery";
+import BettingPlatformIntegration from "@/components/BettingPlatformIntegration";
 
 const generateGameSchema = z.object({
   lotteryId: z.string().min(1, "Selecione uma modalidade"),
@@ -450,27 +451,28 @@ export default function Generator() {
           </Card>
 
           {/* Generated Games */}
-          <Card className="neon-border bg-black/20 backdrop-blur-sm">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-accent flex items-center">
-                <Dice6 className="h-5 w-5 mr-2" />
-                Jogos Gerados
-              </CardTitle>
-              {generatedGames.length > 0 && (
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={exportGames}
-                    className="hover:bg-primary/20"
-                    data-testid="export-games-button"
-                  >
-                    <Download className="h-4 w-4 mr-1" />
-                    Exportar
-                  </Button>
-                </div>
-              )}
-            </CardHeader>
+          <div className="space-y-4">
+            <Card className="neon-border bg-black/20 backdrop-blur-sm">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-accent flex items-center">
+                  <Dice6 className="h-5 w-5 mr-2" />
+                  Jogos Gerados
+                </CardTitle>
+                {generatedGames.length > 0 && (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={exportGames}
+                      className="hover:bg-primary/20"
+                      data-testid="export-games-button"
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      Exportar
+                    </Button>
+                  </div>
+                )}
+              </CardHeader>
             <CardContent className="space-y-4">
               {generatedGames.length > 0 ? (
                 generatedGames.map((game, index) => {
@@ -526,7 +528,16 @@ export default function Generator() {
                 </div>
               )}
             </CardContent>
-          </Card>
+            </Card>
+
+            {/* Betting Platform Integration */}
+            {generatedGames.length > 0 && selectedLotteryId && (
+              <BettingPlatformIntegration
+                lotteryId={selectedLotteryId}
+                games={generatedGames.map(g => ({ numbers: g.numbers }))}
+              />
+            )}
+          </div>
         </div>
 
         {/* Quick Actions */}

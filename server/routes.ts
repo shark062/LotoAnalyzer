@@ -684,6 +684,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🛒 Endpoints de integração com plataformas de apostas
+  app.get('/api/betting-platforms', async (req, res) => {
+    try {
+      const { bettingPlatformService } = await import('./services/bettingPlatformService');
+      const { lotteryId } = req.query;
+      
+      if (lotteryId) {
+        const platforms = bettingPlatformService.getAvailablePlatforms(lotteryId as string);
+        res.json(platforms);
+      } else {
+        // Retorna todas as plataformas
+        res.json([
+          { id: 'superjogo', name: 'SuperJogo', authRequired: false },
+          { id: 'caixa', name: 'Loterias Caixa', authRequired: true },
+          { id: 'lottoland', name: 'Lottoland', authRequired: false }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error fetching betting platforms:', error);
+      res.status(500).json({ error: 'Failed to fetch betting platforms' });
+    }
+  });
+
+  app.post('/api/betting-platforms/cart-url', async (req, res) => {
+    try {
+      const { bettingPlatformService } = await import('./services/bettingPlatformService');
+      const { platformId, games } = req.body;
+      
+      if (!platformId || !games || !Array.isArray(games)) {
+        res.status(400).json({ error: 'Invalid request parameters' });
+        return;
+      }
+
+      const cartUrl = bettingPlatformService.generateCartUrl(platformId, games);
+      const deepLink = bettingPlatformService.generateDeepLink(platformId, games);
+      
+      res.json({
+        success: true,
+        cartUrl,
+        deepLink,
+        platform: platformId
+      });
+    } catch (error) {
+      console.error('Error generating cart URL:', error);
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to generate cart URL' });
+    }
+  });
+
   // 🤖 Endpoint para análise ensemble completa
   app.get('/api/ai/ensemble/:lotteryId', async (req, res) => {
     try {

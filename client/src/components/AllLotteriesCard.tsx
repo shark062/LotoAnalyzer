@@ -11,7 +11,8 @@ import {
   DollarSign,
   Clock,
   Zap,
-  Target
+  Target,
+  ShoppingCart
 } from "lucide-react";
 import type { LotteryType } from "@/types/lottery";
 
@@ -143,6 +144,16 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
           >
             <Target className="h-3 w-3 mr-1" />
             Mapa
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1 text-xs hover:bg-black/20"
+            onClick={() => window.location.href = `/cart?lottery=${lottery.id}`}
+            data-testid={`quick-cart-${lottery.id}`}
+          >
+            <ShoppingCart className="h-3 w-3 mr-1" />
+            Carrinho
           </Button>
         </div>
       </CardContent>
