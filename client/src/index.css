@@ -184,6 +184,12 @@
     opacity: 0.3;
     filter: blur(2px);
   }
+
+  /* Garantir estabilidade dos cards */
+  .lottery-card-container {
+    min-height: 280px;
+    height: 100%;
+  }
 }
 
 /* Custom scrollbar */
