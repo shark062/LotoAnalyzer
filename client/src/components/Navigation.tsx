@@ -199,19 +199,19 @@ export default function Navigation() {
       {/* Full Screen Menu Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/15 z-[60] backdrop-blur-sm rounded-3xl"
+          className="fixed inset-0 bg-black/95 z-[60] backdrop-blur-md"
           data-testid="menu-overlay"
         >
           <div className="container mx-auto px-4 py-8 h-full overflow-y-auto">
             {/* Menu Header */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-black/25 rounded-3xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-primary/20 rounded-3xl flex items-center justify-center border border-primary/50">
                   <span className="text-xl">🦈</span>
                 </div>
                 <div>
                   <h2 className="text-lg font-bold neon-text text-primary">Shark Loterias</h2>
-                  <p className="text-xs text-muted-foreground">Menu Principal</p>
+                  <p className="text-xs text-foreground/70">Menu Principal</p>
                 </div>
               </div>
               <Button
@@ -237,15 +237,17 @@ export default function Navigation() {
                     href={item.href}
                     className={`flex items-center justify-between p-4 rounded-3xl transition-all duration-300 group ${
                       isActive 
-                        ? "text-primary bg-black/25 border border-primary/30" 
-                        : "text-muted-foreground hover:text-primary hover:bg-black/25 border border-transparent"
+                        ? "text-primary bg-primary/20 border border-primary/50" 
+                        : "text-foreground/80 hover:text-primary hover:bg-primary/10 border border-foreground/10 hover:border-primary/30"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                     data-testid={`nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     <div className="flex items-center space-x-4">
-                      <div className={`w-10 h-10 rounded-3xl flex items-center justify-center ${
-                        isActive ? 'bg-black/25 text-primary-foreground' : 'bg-muted/30 group-hover:bg-black/25'
+                      <div className={`w-10 h-10 rounded-3xl flex items-center justify-center border ${
+                        isActive 
+                          ? 'bg-primary/30 text-primary border-primary/50' 
+                          : 'bg-foreground/10 text-foreground/70 border-foreground/20 group-hover:bg-primary/20 group-hover:text-primary group-hover:border-primary/40'
                       }`}>
                         <Icon className="h-5 w-5" />
                       </div>
