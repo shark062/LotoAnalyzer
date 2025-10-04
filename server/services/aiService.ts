@@ -376,6 +376,20 @@ class AiService {
       frequencies = this.generateFallbackFrequencies(lotteryId, lottery);
       latestDraws = [];
     }
+
+    // 🚀 NOVO: Usar sistema multi-IA se APIs estiverem disponíveis
+    if (process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || process.env.DEEPSEEK_API_KEY || process.env.ANTHROPIC_API_KEY) {
+      try {
+        const { multiAIService } = await import('./multiAIService');
+        const hybridPrediction = await multiAIService.generateHybridPrediction(lotteryId, lottery, latestDraws);
+        
+        console.log(`✨ Previsão híbrida multi-IA gerada para ${lotteryId}`);
+        return hybridPrediction;
+      } catch (error) {
+        console.log('⚠️ Multi-AI não disponível, usando análise padrão:', error);
+        // Continuar com análise padrão abaixo
+      }
+    }
     
     // Advanced frequency analysis with statistical weighting
     const enhancedFrequencies = this.calculateEnhancedFrequencies(frequencies, latestDraws);

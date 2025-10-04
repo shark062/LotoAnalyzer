@@ -663,3 +663,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   return httpServer;
 }
+  // 🎓 Endpoint para aprendizado contínuo
+  app.post('/api/ai/learn', async (req, res) => {
+    try {
+      const { lotteryId, actualNumbers, predictedNumbers } = req.body;
+      
+      const { multiAIService } = await import('./services/multiAIService');
+      const learningResult = await multiAIService.learnFromResults(
+        lotteryId,
+        actualNumbers,
+        predictedNumbers
+      );
+
+      res.json({
+        success: true,
+        ...learningResult,
+        message: `Sistema aprendeu com ${(learningResult.accuracy * 100).toFixed(1)}% de acurácia`
+      });
+    } catch (error) {
+      console.error('Error in learning endpoint:', error);
+      res.status(500).json({ error: 'Failed to process learning' });
+    }
+  });
+
+  // 🤖 Endpoint para análise ensemble completa
+  app.get('/api/ai/ensemble/:lotteryId', async (req, res) => {
+    try {
+      const { lotteryId } = req.params;
+      const latestDraws = await storage.getLatestDraws(lotteryId, 50);
+      
+      const { multiAIService } = await import('./services/multiAIService');
+      const ensembleAnalysis = await multiAIService.performEnsembleAnalysis(lotteryId, latestDraws);
+
+      res.json({
+        id: Date.now(),
+        lotteryId,
+        analysisType: 'ensemble',
+        result: ensembleAnalysis,
+        confidence: Math.round(ensembleAnalysis.confidence * 100),
+        createdAt: DataFormatter.formatToISO(new Date())
+      });
+    } catch (error) {
+      console.error('Error in ensemble analysis:', error);
+      res.status(500).json({ error: 'Failed to perform ensemble analysis' });
+    }
+  });
