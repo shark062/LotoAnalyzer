@@ -82,7 +82,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
   }
 
   return (
-    <Card className="border border-border/30 bg-transparent hover:scale-105 transition-all duration-300 relative overflow-hidden group">
+    <Card className="border border-white/20 bg-black/30 backdrop-blur-md hover:scale-105 transition-all duration-300 relative overflow-hidden group">
       <CardContent className="p-4 relative z-10">
         <div className="text-center mb-3">
           <div className="text-3xl mb-2">{getEmojiForLottery(lottery.id)}</div>
@@ -219,7 +219,7 @@ export default function AllLotteriesCard() {
   }
 
   return (
-    <Card className="bg-transparent border-0">
+    <Card className="bg-black/30 backdrop-blur-md border-white/10">
       <CardHeader>
         <CardTitle className="text-primary flex items-center justify-between">
           <div className="flex items-center">
