@@ -63,25 +63,38 @@ export default function Generator() {
   // Data queries
   const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
 
+  // Estado para selectedLotteryId, inicializado com um valor padrão
+  const [selectedLotteryId, setSelectedLotteryId] = useState<string>('megasena');
+
   // Form setup
   const form = useForm<GenerateGameForm>({
     resolver: zodResolver(generateGameSchema),
     defaultValues: {
-      lotteryId: preselectedLottery || undefined,
+      lotteryId: preselectedLottery || 'megasena', // Usa preselectedLottery ou o padrão
       numbersCount: undefined,
       gamesCount: undefined,
       strategy: undefined,
     },
   });
 
+  // Atualiza o estado local selectedLotteryId sempre que o valor do formulário mudar
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      if (value.lotteryId !== undefined) {
+        setSelectedLotteryId(value.lotteryId);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
+
+
   // Limpar campo dezenas quando trocar de modalidade
   useEffect(() => {
     if (selectedLotteryId) {
       form.setValue('numbersCount', undefined as any);
     }
-  }, [selectedLotteryId]);
+  }, [selectedLotteryId, form]);
 
-  const selectedLotteryId = form.watch('lotteryId');
   const selectedLottery = lotteryTypes?.find(l => l.id === selectedLotteryId);
 
   // Não preenche automaticamente - deixa em branco para o usuário escolher
@@ -245,7 +258,10 @@ export default function Generator() {
                   </Label>
                   <Select
                     value={form.watch('lotteryId')}
-                    onValueChange={(value) => form.setValue('lotteryId', value)}
+                    onValueChange={(value) => {
+                      form.setValue('lotteryId', value);
+                      // O useEffect acima irá capturar essa mudança e atualizar setSelectedLotteryId
+                    }}
                     disabled={lotteriesLoading}
                   >
                     <SelectTrigger data-testid="lottery-selector">
@@ -438,7 +454,7 @@ export default function Generator() {
                 {/* Generate Button */}
                 <Button
                   type="submit"
-                  disabled={isGenerating || !selectedLottery}
+                  disabled={isGenerating || !selectedLotteryId}
                   className="w-full bg-black/20 hover:bg-primary/20 border border-primary/50 text-white"
                   data-testid="generate-games-button"
                 >
@@ -574,7 +590,7 @@ export default function Generator() {
           </div>
         )}
       </main>
-      
+
       {/* Developer Footer */}
       <footer className="text-center py-4 mt-8 border-t border-border/20">
         <p className="text-xs text-muted-foreground">
