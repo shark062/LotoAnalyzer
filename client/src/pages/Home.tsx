@@ -238,12 +238,10 @@ export default function Home() {
 
       <Navigation />
 
-      <main className={`container mx-auto px-4 py-8 relative z-40 ${isMenuOpen ? 'hidden' : ''}`}>
-
-
+      <main className={`container mx-auto px-4 py-4 relative z-40 ${isMenuOpen ? 'hidden' : ''}`}>
 
         {/* Quick Actions */}
-        <div className="mb-8 flex flex-wrap gap-4 justify-center lg:hidden">
+        <div className="mb-6 flex flex-wrap gap-4 justify-center lg:hidden">
           <Button 
             onClick={() => {
               performQuickAnalysis();
@@ -276,34 +274,8 @@ export default function Home() {
         </div>
 
         {/* All Lotteries - Complete Dashboard */}
-        <section className="mb-12">
+        <section className="mb-6">
           <AllLotteriesCard />
-        </section>
-
-
-        {/* All Lotteries Quick Access */}
-        <section className="mb-12">
-          <h3 className="text-xl font-bold text-primary mb-6 flex items-center">
-            <TrendingUp className="h-5 w-5 mr-3 text-muted-foreground" />
-            Todas as Modalidades
-          </h3>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-            {allLotteries.map((lottery) => (
-              <Button
-                key={lottery.id}
-                onClick={() => window.location.href = `/generator?lottery=${lottery.id}`}
-                variant="ghost"
-                className="neon-border h-auto p-4 bg-transparent hover:bg-black/10 transition-all duration-300 group text-center flex-col space-y-3"
-                data-testid={`lottery-button-${lottery.id}`}
-              >
-                <div className={`w-12 h-12 bg-gradient-to-br ${lottery.color} rounded-full flex items-center justify-center mx-auto group-hover:animate-pulse`}>
-                  <span className="text-black text-lg">{lottery.icon}</span>
-                </div>
-                <div className="text-xs font-medium text-foreground">{lottery.name}</div>
-              </Button>
-            ))}
-          </div>
         </section>
       </main>
 
