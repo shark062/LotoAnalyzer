@@ -67,7 +67,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
 
   if (isLoading) {
     return (
-      <Card className="border border-border/30 bg-card/20 backdrop-blur-sm animate-pulse">
+      <Card className="border border-border/30 bg-transparent animate-pulse">
         <CardContent className="p-4">
           <div className="h-24 bg-muted/20 rounded mb-3"></div>
           <div className="h-4 bg-muted/20 rounded mb-2"></div>
@@ -82,8 +82,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
   }
 
   return (
-    <Card className="border border-border/30 bg-black/20 backdrop-blur-sm hover:scale-105 transition-all duration-300 relative overflow-hidden group">
-      <div className="absolute inset-0 bg-black/20"></div>
+    <Card className="border border-border/30 bg-transparent hover:scale-105 transition-all duration-300 relative overflow-hidden group">
       <CardContent className="p-4 relative z-10">
         <div className="text-center mb-3">
           <div className="text-3xl mb-2">{getEmojiForLottery(lottery.id)}</div>
@@ -128,7 +127,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
           <Button
             size="sm"
             variant="outline"
-            className="flex-1 text-xs hover:bg-black/20"
+            className="flex-1 text-xs hover:bg-transparent"
             onClick={() => window.location.href = `/generator?lottery=${lottery.id}`}
             data-testid={`quick-generate-${lottery.id}`}
           >
@@ -138,7 +137,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
           <Button
             size="sm"
             variant="outline"
-            className="flex-1 text-xs hover:bg-black/20"
+            className="flex-1 text-xs hover:bg-transparent"
             onClick={() => window.location.href = `/heat-map?lottery=${lottery.id}`}
             data-testid={`quick-heatmap-${lottery.id}`}
           >
@@ -148,7 +147,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
           <Button
             size="sm"
             variant="outline"
-            className="flex-1 text-xs hover:bg-black/20"
+            className="flex-1 text-xs hover:bg-transparent"
             onClick={() => window.location.href = `/cart?lottery=${lottery.id}`}
             data-testid={`quick-cart-${lottery.id}`}
           >
@@ -166,7 +165,7 @@ export default function AllLotteriesCard() {
 
   if (lotteriesLoading) {
     return (
-      <Card className="bg-black/20 backdrop-blur-sm">
+      <Card className="bg-transparent">
         <CardHeader>
           <CardTitle className="text-primary flex items-center justify-between">
             <div className="flex items-center">
@@ -178,7 +177,7 @@ export default function AllLotteriesCard() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => (
-              <Card key={i} className="bg-black/20 backdrop-blur-sm animate-pulse">
+              <Card key={i} className="bg-transparent animate-pulse">
                 <CardContent className="p-4">
                   <div className="h-24 bg-muted/20 rounded mb-3"></div>
                   <div className="h-4 bg-muted/20 rounded mb-2"></div>
@@ -198,7 +197,7 @@ export default function AllLotteriesCard() {
 
   if (!lotteryTypes || lotteryTypes.length === 0) {
     return (
-      <Card className="bg-black/20 backdrop-blur-sm">
+      <Card className="bg-transparent">
         <CardHeader>
           <CardTitle className="text-primary flex items-center justify-between">
             <div className="flex items-center">
@@ -220,7 +219,7 @@ export default function AllLotteriesCard() {
   }
 
   return (
-    <Card className="bg-black/20 backdrop-blur-sm">
+    <Card className="bg-transparent border-0">
       <CardHeader>
         <CardTitle className="text-primary flex items-center justify-between">
           <div className="flex items-center">

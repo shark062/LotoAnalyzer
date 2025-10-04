@@ -180,51 +180,7 @@ export default function CyberpunkEffects({
 
   const settings = getIntensitySettings(currentIntensity);
 
-  return (
-    <div className={`cyberpunk-effects ${className}`}>
-      <MatrixRain active={settings.matrixActive} />
-      <ScanLines active={settings.scanActive} />
-      <GlitchOverlay active={settings.glitchActive} />
-      
-      {/* Particles Cyberpunk */}
-      <div className="fixed inset-0 pointer-events-none z-15">
-        {Array.from({ length: settings.particleCount }).map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-neon-cyan rounded-full opacity-60"
-            initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-              scale: Math.random() * 0.5 + 0.5
-            }}
-            animate={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-              scale: Math.random() * 0.8 + 0.2,
-              opacity: [0.6, 0.2, 0.6]
-            }}
-            transition={{
-              duration: Math.random() * 10 + 5,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Grid Overlay Cyberpunk */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-5 opacity-10"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(0, 255, 255, 0.2) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 255, 255, 0.2) 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px'
-        }}
-      />
-    </div>
-  );
+  return null;
 }
 
 // Hook para controlar efeitos cyberpunk

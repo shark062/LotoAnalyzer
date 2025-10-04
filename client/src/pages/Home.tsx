@@ -228,50 +228,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground relative">
 
-      {/* Efeitos Cyberpunk */}
-      <CyberpunkEffects 
-        intensity={showSharkMode ? 'high' : 'medium'}
-        glitchActive={cyberpunkEffects.glitchActive}
-        matrixRain={false}
-        scanLines={cyberpunkEffects.scanLines}
-      />
 
       <Navigation />
 
       <main className={`container mx-auto px-4 py-0 relative z-40 ${isMenuOpen ? 'hidden' : ''}`}>
-
-        {/* Quick Actions */}
-        <div className="mb-2 flex flex-wrap gap-2 justify-center lg:hidden">
-          <Button 
-            onClick={() => {
-              performQuickAnalysis();
-              setTimeout(() => window.location.href = '/generator', 500);
-            }}
-            className="bg-black/20 neon-border hover:animate-pulse transition-all duration-300"
-            data-testid="quick-generate-button"
-          >
-            <Zap className="h-4 w-4 mr-2" />
-            Gerar Jogos Rápido
-          </Button>
-          <Button 
-            onClick={() => {
-              window.location.href = '/results';
-            }}
-            className="bg-black/20 neon-border"
-            data-testid="quick-results-button"
-          >
-            <History className="h-4 w-4 mr-2" />
-            Ver Resultados
-          </Button>
-          <Button 
-            onClick={performQuickAnalysis}
-            className="bg-black/20 neon-border hover:bg-neon-cyan/10 text-neon-cyan"
-            data-testid="quick-analysis-button"
-          >
-            <Brain className="h-4 w-4 mr-2" />
-            Análise Shark
-          </Button>
-        </div>
 
         {/* All Lotteries - Complete Dashboard */}
         <section className="mb-2">
