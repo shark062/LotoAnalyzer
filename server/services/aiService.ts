@@ -824,14 +824,14 @@ class AiService {
       return unique.slice(0, count);
     }
 
-    // Adiciona números únicos baseados em seed (timestamp)
+    // Adiciona números únicos com aleatoriedade verdadeira + seed
     const available = Array.from({length: maxNumber}, (_, i) => i + 1)
       .filter(n => !unique.includes(n));
 
-    // Embaralha com seed para garantir variedade
+    // Embaralha com seed + aleatoriedade verdadeira para garantir unicidade total
     const shuffled = available.sort(() => {
-      const x = Math.sin(seed++) * 10000;
-      return x - Math.floor(x) - 0.5;
+      const x = Math.sin(seed++ * Math.random() * 10000) * 10000;
+      return (x - Math.floor(x) - 0.5) * (Math.random() - 0.5);
     });
 
     while (unique.length < count && shuffled.length > 0) {
@@ -1509,24 +1509,24 @@ class AiService {
   private createInitialPopulation(base: number[], count: number, maxNumber: number, size: number, seed: number = Date.now()): number[][] {
     const population: number[][] = [base.slice(0, count)];
 
-    // Função de random com seed
+    // Função de random com seed + aleatoriedade verdadeira
     const seededRandom = (s: number) => {
-      const x = Math.sin(s++) * 10000;
-      return x - Math.floor(x);
+      const x = Math.sin(s++ * Math.random()) * 10000;
+      return (x - Math.floor(x)) * Math.random();
     };
 
     for (let i = 1; i < size; i++) {
       const individual = [...base];
 
-      // Mutação: troca alguns números com seed para variedade
-      const mutations = Math.floor(count * 0.2) + 1;
+      // Mutação: troca alguns números com seed + random para máxima variedade
+      const mutations = Math.floor(count * 0.3) + Math.floor(Math.random() * 3);
       for (let j = 0; j < mutations; j++) {
-        const index = Math.floor(seededRandom(seed + i * 1000 + j) * individual.length);
+        const index = Math.floor(seededRandom(seed + i * 1000 + j + Math.random() * 1000) * individual.length);
         const alternatives = Array.from({length: maxNumber}, (_, idx) => idx + 1)
           .filter(n => !individual.includes(n));
 
         if (alternatives.length > 0) {
-          const altIndex = Math.floor(seededRandom(seed + i * 2000 + j) * alternatives.length);
+          const altIndex = Math.floor(seededRandom(seed + i * 2000 + j + Math.random() * 2000) * alternatives.length);
           individual[index] = alternatives[altIndex];
         }
       }

@@ -74,13 +74,21 @@ export default function Generator() {
     },
   });
 
+  // Limpar campo dezenas quando trocar de modalidade
+  useEffect(() => {
+    if (selectedLotteryId) {
+      form.setValue('numbersCount', undefined as any);
+    }
+  }, [selectedLotteryId]);
+
   const selectedLotteryId = form.watch('lotteryId');
   const selectedLottery = lotteryTypes?.find(l => l.id === selectedLotteryId);
 
-  // Update numbers count when lottery changes
+  // Não preenche automaticamente - deixa em branco para o usuário escolher
   useEffect(() => {
     if (selectedLottery) {
-      form.setValue('numbersCount', selectedLottery.minNumbers);
+      // Remove o preenchimento automático
+      // form.setValue('numbersCount', selectedLottery.minNumbers);
     }
   }, [selectedLottery, form]);
 
