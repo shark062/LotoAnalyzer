@@ -580,6 +580,32 @@ class Storage {
     }
   }
 
+  async getNextDraw(lotteryId: string): Promise<{ contestNumber: number } | null> {
+    try {
+      if (!this.db) {
+        return null;
+      }
+
+      // Buscar o último sorteio e retornar o próximo número
+      const latestDraw = await this.db
+        .select()
+        .from(schema.lotteryDraws)
+        .where(eq(schema.lotteryDraws.lotteryId, lotteryId))
+        .orderBy(desc(schema.lotteryDraws.contestNumber))
+        .limit(1);
+
+      if (latestDraw.length > 0) {
+        return { contestNumber: latestDraw[0].contestNumber + 1 };
+      }
+
+      // Fallback: retornar concurso 1
+      return { contestNumber: 1 };
+    } catch (error) {
+      console.error('Error getting next draw:', error);
+      return null;
+    }
+  }
+
   async getLatestAiAnalysis(lotteryId: string, analysisType: string): Promise<AiAnalysis | null> {
     try {
       if (!this.db) {
