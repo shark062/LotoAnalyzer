@@ -1,4 +1,3 @@
-
 import { storage } from "../storage";
 
 interface BettingPlatform {
@@ -45,36 +44,55 @@ const PLATFORMS: Record<string, BettingPlatform> = {
 };
 
 class BettingPlatformService {
-  
+
   // Gera URL para adicionar ao carrinho
   generateCartUrl(platformId: string, items: CartItem[]): string {
+    if (!platformId) {
+      throw new Error('ID da plataforma não fornecido');
+    }
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      throw new Error('Lista de jogos inválida ou vazia');
+    }
+
     const platform = PLATFORMS[platformId];
     if (!platform) {
       throw new Error(`Plataforma ${platformId} não suportada`);
     }
 
-    // SuperJogo - formato específico
-    if (platformId === 'superjogo') {
-      return this.generateSuperJogoUrl(items);
+    // Validar que todos os jogos têm números
+    const invalidItems = items.filter(item => !item.numbers || item.numbers.length === 0);
+    if (invalidItems.length > 0) {
+      throw new Error('Um ou mais jogos não possuem números válidos');
     }
 
-    // Caixa - formato específico
-    if (platformId === 'caixa') {
-      return this.generateCaixaUrl(items);
-    }
+    try {
+      // SuperJogo - formato específico
+      if (platformId === 'superjogo') {
+        return this.generateSuperJogoUrl(items);
+      }
 
-    // Lottoland - formato específico
-    if (platformId === 'lottoland') {
-      return this.generateLottolandUrl(items);
-    }
+      // Caixa - formato específico
+      if (platformId === 'caixa') {
+        return this.generateCaixaUrl(items);
+      }
 
-    // Formato genérico para outras plataformas
-    return this.generateGenericUrl(platform, items);
+      // Lottoland - formato específico
+      if (platformId === 'lottoland') {
+        return this.generateLottolandUrl(items);
+      }
+
+      // Formato genérico para outras plataformas
+      return this.generateGenericUrl(platform, items);
+    } catch (error) {
+      console.error('Erro ao gerar URL do carrinho:', error);
+      throw new Error('Falha ao processar números dos jogos');
+    }
   }
 
   private generateSuperJogoUrl(items: CartItem[]): string {
     const baseUrl = PLATFORMS.superjogo.baseUrl;
-    
+
     // SuperJogo permite múltiplos jogos na URL
     const gamesParam = items.map(item => {
       const lottery = this.mapLotteryId(item.lotteryId, 'superjogo');
@@ -87,13 +105,13 @@ class BettingPlatformService {
 
   private generateCaixaUrl(items: CartItem[]): string {
     const baseUrl = PLATFORMS.caixa.baseUrl;
-    
+
     // Caixa requer autenticação e adiciona um jogo por vez
     // Retorna URL para login + redirecionamento
     const firstItem = items[0];
     const lottery = this.mapLotteryId(firstItem.lotteryId, 'caixa');
     const numbers = firstItem.numbers.sort((a, b) => a - b).join('-');
-    
+
     return `${baseUrl}/login?redirect=/apostar/${lottery}?numeros=${numbers}`;
   }
 
@@ -102,7 +120,7 @@ class BettingPlatformService {
     const firstItem = items[0];
     const lottery = this.mapLotteryId(firstItem.lotteryId, 'lottoland');
     const numbers = firstItem.numbers.sort((a, b) => a - b).join(',');
-    
+
     return `${baseUrl}/megasena/jogar?numbers=${numbers}`;
   }
 
@@ -114,7 +132,7 @@ class BettingPlatformService {
         numbers: item.numbers
       }));
     });
-    
+
     return `${platform.baseUrl}${platform.cartEndpoint}?${params.toString()}`;
   }
 

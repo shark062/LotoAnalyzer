@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from './use-toast';
 
@@ -14,10 +14,98 @@ interface UseBettingPlatformReturn {
   error: Error | null;
 }
 
-export function useBettingPlatform(): UseBettingPlatformReturn {
+export function useBettingPlatform(lotteryId: string) {
+  const { toast } = useToast();
+
+  const { data: platforms = [], isLoading } = useQuery({
+    queryKey: ['/api/betting-platforms', lotteryId],
+    queryFn: async () => {
+      try {
+        const response = await fetch(`/api/betting-platforms?lotteryId=${lotteryId}`);
+        if (!response.ok) {
+          console.error('Failed to fetch platforms:', response.statusText);
+          return [];
+        }
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        console.error('Error fetching betting platforms:', error);
+        return [];
+      }
+    },
+    staleTime: 30 * 60 * 1000,
+    retry: 2,
+  });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const { toast } = useToast();
+
+  const generateCartUrl = async (platformId: string, games: Array<{numbers: number[]}>) => {
+    try {
+      if (!platformId || !games || games.length === 0) {
+        throw new Error('Dados inválidos para geração de URL');
+      }
+
+      const response = await fetch('/api/betting-platforms/cart-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platformId, games }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate cart URL');
+      }
+
+      const data = await response.json();
+
+      if (!data.success || !data.cartUrl) {
+        throw new Error('URL inválida retornada');
+      }
+
+      return data.cartUrl;
+    } catch (error) {
+      console.error('Error generating cart URL:', error);
+      toast({
+        title: 'Erro',
+        description: error instanceof Error ? error.message : 'Não foi possível gerar o link da plataforma',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
+  const openInPlatform = async (platformId: string, games: Array<{numbers: number[]}>) => {
+    try {
+      if (!platformId) {
+        throw new Error('Plataforma não selecionada');
+      }
+
+      if (!games || games.length === 0) {
+        throw new Error('Nenhum jogo para apostar');
+      }
+
+      const url = await generateCartUrl(platformId, games);
+
+      if (!url) {
+        throw new Error('Não foi possível gerar URL da plataforma');
+      }
+
+      window.open(url, '_blank', 'noopener,noreferrer');
+
+      toast({
+        title: 'Redirecionando',
+        description: 'Abrindo plataforma de apostas...',
+      });
+    } catch (error) {
+      console.error('Error opening platform:', error);
+      toast({
+        title: 'Erro',
+        description: error instanceof Error ? error.message : 'Não foi possível abrir a plataforma',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const addToCart = async (platformId: string, lotteryId: string, games: Game[]) => {
     setLoading(true);
@@ -71,7 +159,7 @@ export function useBettingPlatform(): UseBettingPlatformReturn {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
       setError(err instanceof Error ? err : new Error(errorMessage));
-      
+
       toast({
         title: "Erro ao Adicionar",
         description: errorMessage,
@@ -85,6 +173,9 @@ export function useBettingPlatform(): UseBettingPlatformReturn {
   return {
     addToCart,
     loading,
-    error
+    error,
+    platforms,
+    isLoadingPlatforms: isLoading,
+    openInPlatform
   };
 }

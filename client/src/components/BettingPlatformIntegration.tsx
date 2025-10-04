@@ -1,11 +1,13 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Added useEffect import
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { ExternalLink, ShoppingCart, Smartphone, Globe } from "lucide-react";
+
+// Assuming useBettingPlatform hook exists and is imported
+// import { useBettingPlatform } from "@/hooks/useBettingPlatform"; 
 
 interface BettingPlatformIntegrationProps {
   lotteryId: string;
@@ -19,27 +21,33 @@ interface Platform {
   authRequired: boolean;
 }
 
-export default function BettingPlatformIntegration({ 
-  lotteryId, 
+export default function BettingPlatformIntegration({
+  lotteryId,
   games,
-  onSuccess 
+  onSuccess
 }: BettingPlatformIntegrationProps) {
   const [loading, setLoading] = useState(false);
   const [platforms, setPlatforms] = useState<Platform[]>([]);
   const { toast } = useToast();
 
-  // Busca plataformas disponíveis ao montar
-  useState(() => {
+  // Fetch platforms when the component mounts
+  useEffect(() => { // Changed useState to useEffect for side effects
     fetchPlatforms();
-  });
+  }, []); // Empty dependency array ensures it runs only once on mount
 
   const fetchPlatforms = async () => {
     try {
+      // Using apiRequest for consistency, assuming it handles base URL and errors appropriately
       const response = await apiRequest('GET', `/api/betting-platforms?lotteryId=${lotteryId}`);
       const data = await response.json();
       setPlatforms(data);
     } catch (error) {
       console.error('Error fetching platforms:', error);
+      toast({
+        title: "Erro ao carregar plataformas",
+        description: "Não foi possível buscar as plataformas de aposta. Tente novamente.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -56,21 +64,28 @@ export default function BettingPlatformIntegration({
         platformId,
         games: cartItems
       });
-      
+
       const data = await response.json();
 
       if (data.success) {
         // Abre a URL em nova aba
         window.open(data.cartUrl, '_blank', 'noopener,noreferrer');
-        
+
         toast({
           title: "🎯 Sucesso!",
           description: `Seus jogos foram adicionados ao carrinho do ${platformId === 'superjogo' ? 'SuperJogo' : platformId === 'caixa' ? 'Loterias Caixa' : 'Lottoland'}`,
         });
 
         if (onSuccess) onSuccess();
+      } else {
+        toast({
+          title: "Erro ao adicionar ao carrinho",
+          description: data.message || "Ocorreu um erro inesperado. Tente novamente.",
+          variant: "destructive"
+        });
       }
     } catch (error) {
+      console.error('Error adding to cart:', error);
       toast({
         title: "Erro",
         description: "Não foi possível adicionar ao carrinho. Tente novamente.",
@@ -81,8 +96,31 @@ export default function BettingPlatformIntegration({
     }
   };
 
-  if (games.length === 0) {
-    return null;
+  // Conditional rendering based on loading and platform availability
+  if (loading) { // Renamed from isLoading to loading for consistency with state variable
+    return (
+      <Card className="neon-border bg-black/20 backdrop-blur-sm">
+        <CardContent className="p-6 text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+          <p className="text-sm text-muted-foreground">Processando sua solicitação...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!platforms || platforms.length === 0) {
+    // Render a message if no platforms are available or an error occurred during fetch
+    return (
+      <Card className="neon-border bg-black/20 backdrop-blur-sm">
+        <CardContent className="p-6 text-center">
+          <p className="text-sm text-muted-foreground">Nenhuma plataforma de aposta disponível no momento.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!games || games.length === 0) {
+    return null; // No games to bet on
   }
 
   return (

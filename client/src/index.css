@@ -97,13 +97,27 @@
       sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: url('/cyberpunk-shark-bg.png') center center fixed;
-    background-size: cover;
-    background-repeat: no-repeat;
+    background-color: hsl(240, 15%, 3%);
     position: relative;
+    min-height: 100vh;
   }
 
   body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/cyberpunk-shark-neon.png') center center no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    opacity: 0.15;
+    z-index: -2;
+    pointer-events: none;
+  }
+
+  body::after {
     content: '';
     position: fixed;
     top: 0;
