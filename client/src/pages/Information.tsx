@@ -376,7 +376,7 @@ export default function Information() {
         </Card>
 
         {/* Informações das Loterias */}
-        <Card className="neon-border bg-black/20 backdrop-blur-sm mb-8">
+        <Card className="neon-border bg-black/20 mb-8">
           <CardHeader>
             <CardTitle className="text-accent flex items-center">
               <BookOpen className="h-6 w-6 mr-2" />

@@ -241,7 +241,7 @@ export default function Generator() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Generator Form */}
-          <Card className="neon-border bg-black/20 backdrop-blur-sm">
+          <Card className="neon-border bg-black/20">
             <CardHeader>
               <CardTitle className="text-primary flex items-center">
                 <Settings className="h-5 w-5 mr-2" />
@@ -476,7 +476,7 @@ export default function Generator() {
 
           {/* Generated Games */}
           <div className="space-y-4">
-            <Card className="neon-border bg-black/20 backdrop-blur-sm">
+            <Card className="neon-border bg-black/20">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-accent flex items-center">
                   <Dice6 className="h-5 w-5 mr-2" />

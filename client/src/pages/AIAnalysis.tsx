@@ -258,7 +258,7 @@ export default function AIAnalysis() {
         <div className="space-y-6">
           {/* Pattern Analysis */}
           {activeTab === 'pattern' && (
-            <Card className="neon-border bg-black/20 backdrop-blur-sm">
+            <Card className="neon-border bg-black/20">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-primary flex items-center">
                   <Eye className="h-5 w-5 mr-2" />
@@ -337,7 +337,7 @@ export default function AIAnalysis() {
 
           {/* Prediction Analysis */}
           {activeTab === 'prediction' && (
-            <Card className="neon-border bg-black/20 backdrop-blur-sm">
+            <Card className="neon-border bg-black/20">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-secondary flex items-center">
                   <Brain className="h-5 w-5 mr-2" />
@@ -474,7 +474,7 @@ export default function AIAnalysis() {
 
           {/* Strategy Analysis */}
           {activeTab === 'strategy' && (
-            <Card className="neon-border bg-black/20 backdrop-blur-sm">
+            <Card className="neon-border bg-black/20">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-accent flex items-center">
                   <Target className="h-5 w-5 mr-2" />
