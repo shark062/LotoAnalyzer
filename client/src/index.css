@@ -93,7 +93,7 @@
   body {
     @apply text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background: url('/src/../attached_assets/cyberpunk-shark-icon_1759593221276.png');
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/attached_assets/cyberpunk-shark-icon_1759593221276.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
