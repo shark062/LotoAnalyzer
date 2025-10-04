@@ -93,11 +93,17 @@
   body {
     @apply text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background: linear-gradient(135deg, 
-      hsl(240, 15%, 3%) 0%, 
-      hsl(240, 20%, 8%) 50%, 
-      hsl(240, 15%, 3%) 100%
-    );
+    background: 
+      linear-gradient(135deg, 
+        rgba(0, 0, 0, 0.7) 0%, 
+        rgba(0, 0, 0, 0.5) 50%, 
+        rgba(0, 0, 0, 0.7) 100%
+      ),
+      url('/src/../attached_assets/cyberpunk-shark-icon_1759593221276.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
     min-height: 100vh;
   }
 

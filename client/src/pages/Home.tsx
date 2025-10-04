@@ -232,7 +232,7 @@ export default function Home() {
       <CyberpunkEffects 
         intensity={showSharkMode ? 'high' : 'medium'}
         glitchActive={cyberpunkEffects.glitchActive}
-        matrixRain={cyberpunkEffects.matrixRain}
+        matrixRain={false}
         scanLines={cyberpunkEffects.scanLines}
       />
 
