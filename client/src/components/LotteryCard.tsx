@@ -52,7 +52,7 @@ export default function LotteryCard({
         gradient: "from-neon-gold/20 to-accent/20" 
       },
     };
-    
+
     return colorMap[color] || colorMap.cyan;
   };
 
@@ -95,7 +95,7 @@ export default function LotteryCard({
             <span className="text-black text-sm">{icon}</span>
           </div>
         </div>
-        
+
         <div className="space-y-3">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Concurso:</span>
@@ -115,7 +115,7 @@ export default function LotteryCard({
               20:00
             </span>
           </div>
-          
+
           {/* Countdown Timer */}
           <div className="bg-muted/30 rounded-3xl p-3 text-center">
             <div className="text-xs text-muted-foreground mb-1">Tempo Restante</div>
@@ -126,7 +126,7 @@ export default function LotteryCard({
               {formatTimeRemaining(nextDraw?.timeRemaining)}
             </div>
           </div>
-          
+
           {/* Prize Amount */}
           <div className={`bg-gradient-to-r ${colorClasses.gradient} rounded-3xl p-3 text-center`}>
             <div className="text-xs text-muted-foreground mb-1">Prêmio Estimado</div>
