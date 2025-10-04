@@ -117,7 +117,7 @@ export default function LotteryCard({
           </div>
           
           {/* Countdown Timer */}
-          <div className="bg-muted/30 rounded-lg p-3 text-center">
+          <div className="bg-muted/30 rounded-2xl p-3 text-center">
             <div className="text-xs text-muted-foreground mb-1">Tempo Restante</div>
             <div 
               className={`font-mono text-lg ${colorClasses.text} neon-text`}
@@ -128,7 +128,7 @@ export default function LotteryCard({
           </div>
           
           {/* Prize Amount */}
-          <div className={`bg-gradient-to-r ${colorClasses.gradient} rounded-lg p-3 text-center`}>
+          <div className={`bg-gradient-to-r ${colorClasses.gradient} rounded-2xl p-3 text-center`}>
             <div className="text-xs text-muted-foreground mb-1">Prêmio Estimado</div>
             <div 
               className={`font-bold text-xl ${colorClasses.text} neon-text`}
