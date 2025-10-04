@@ -787,27 +787,29 @@ class AiService {
 
       console.log(`🤖 Iniciando análise de IA avançada para ${lotteryId}...`);
 
-      // Análise multi-dimensional avançada
+      // 🎲 Seed único baseado em timestamp + aleatoriedade verdadeira
+      const uniqueSeed = Date.now() * Math.random() * 1000000;
+
+      // Análise multi-dimensional avançada com variação
       const deepAnalysis = this.performDeepAnalysis(frequencies, latestDraws, maxNumber, lotteryId);
       const predictionModel = this.buildPredictionModel(deepAnalysis, latestDraws, maxNumber);
       const probabilityMatrix = this.calculateProbabilityMatrix(predictionModel, maxNumber);
 
-      // Aplicar algoritmos de machine learning simulado
-      const neuralNetworkOutput = this.simulateNeuralNetwork(probabilityMatrix, count, maxNumber);
-      const patternRecognition = this.applyPatternRecognition(latestDraws, neuralNetworkOutput, maxNumber);
-      const temporalAnalysis = this.applyTemporalAnalysis(latestDraws, patternRecognition, lotteryId);
+      // Aplicar algoritmos de machine learning simulado COM VARIAÇÃO
+      const neuralNetworkOutput = this.simulateNeuralNetwork(probabilityMatrix, count, maxNumber, uniqueSeed);
+      const patternRecognition = this.applyPatternRecognition(latestDraws, neuralNetworkOutput, maxNumber, uniqueSeed);
+      const temporalAnalysis = this.applyTemporalAnalysis(latestDraws, patternRecognition, lotteryId, uniqueSeed);
 
-      // Seleção final com algoritmo genético simulado + timestamp para unicidade
-      const timestamp = Date.now();
-      let finalNumbers = this.applyGeneticAlgorithm(temporalAnalysis, count, maxNumber, lotteryId, timestamp);
+      // Seleção final com algoritmo genético simulado + seed único
+      let finalNumbers = this.applyGeneticAlgorithm(temporalAnalysis, count, maxNumber, lotteryId, uniqueSeed);
 
-      // Validação e otimização final
-      finalNumbers = this.optimizeWithAdvancedValidation(finalNumbers, deepAnalysis, count, maxNumber, lotteryId);
+      // Validação e otimização final COM DIVERSIDADE
+      finalNumbers = this.optimizeWithAdvancedValidation(finalNumbers, deepAnalysis, count, maxNumber, lotteryId, uniqueSeed);
 
-      // Garante unicidade adicionando ruído baseado em timestamp
-      finalNumbers = this.ensureUniqueness(finalNumbers, count, maxNumber, timestamp);
+      // Garante unicidade TOTAL com múltiplas fontes de aleatoriedade
+      finalNumbers = this.ensureUniqueness(finalNumbers, count, maxNumber, uniqueSeed);
 
-      console.log(`🎯 IA gerou ${finalNumbers.length} números únicos com alta precisão analítica`);
+      console.log(`🎯 IA gerou ${finalNumbers.length} números ÚNICOS (seed: ${uniqueSeed.toFixed(0)})`);
       return finalNumbers.sort((a, b) => a - b);
 
     } catch (error) {
@@ -824,18 +826,25 @@ class AiService {
       return unique.slice(0, count);
     }
 
-    // Adiciona números únicos com aleatoriedade verdadeira + seed
+    // Adiciona números únicos com MÁXIMA VARIAÇÃO
     const available = Array.from({length: maxNumber}, (_, i) => i + 1)
       .filter(n => !unique.includes(n));
 
-    // Embaralha com seed + aleatoriedade verdadeira para garantir unicidade total
+    // Tripla camada de aleatoriedade para garantir ZERO repetição
     const shuffled = available.sort(() => {
-      const x = Math.sin(seed++ * Math.random() * 10000) * 10000;
-      return (x - Math.floor(x) - 0.5) * (Math.random() - 0.5);
+      const random1 = Math.random();
+      const random2 = Math.random();
+      const seedRandom = Math.sin(seed++ * random1 * random2 * 10000) * 10000;
+      const timeRandom = Math.sin(Date.now() * random1) * 1000;
+      const finalRandom = (seedRandom - Math.floor(seedRandom)) + (timeRandom - Math.floor(timeRandom));
+      return (finalRandom - 1) * (random1 - 0.5) * (random2 - 0.5);
     });
 
     while (unique.length < count && shuffled.length > 0) {
-      unique.push(shuffled.shift()!);
+      const nextNum = shuffled.shift()!;
+      if (!unique.includes(nextNum)) {
+        unique.push(nextNum);
+      }
     }
 
     return unique.slice(0, count);
@@ -1748,23 +1757,33 @@ class AiService {
     return probabilities;
   }
 
-  private simulateNeuralNetwork(probabilityMatrix: number[], count: number, maxNumber: number): number[] {
-    // Simula a saída de uma rede neural (seleção ponderada)
+  private simulateNeuralNetwork(probabilityMatrix: number[], count: number, maxNumber: number, seed?: number): number[] {
+    // Simula a saída de uma rede neural com VARIAÇÃO baseada em seed
     const selectedNumbers: number[] = [];
     const pool = Array.from({length: maxNumber}, (_, i) => i + 1);
-    const weightedPool = pool.map((num, index) => ({ number: num, weight: probabilityMatrix[index] }));
+    const weightedPool = pool.map((num, index) => ({ 
+      number: num, 
+      weight: probabilityMatrix[index] * (seed ? Math.sin(seed * num) + 1.5 : 1)
+    }));
 
-    // Seleciona os 'count' números com maior probabilidade
-    weightedPool.sort((a, b) => b.weight - a.weight);
+    // Embaralha com seed para diversidade
+    if (seed) {
+      weightedPool.sort(() => Math.sin(seed++ * Math.random()) * 2 - 1);
+    }
+
+    // Seleciona com ponderação + aleatoriedade
+    weightedPool.sort((a, b) => b.weight * Math.random() - a.weight * Math.random());
 
     for (let i = 0; i < count && i < weightedPool.length; i++) {
-      selectedNumbers.push(weightedPool[i].number);
+      if (!selectedNumbers.includes(weightedPool[i].number)) {
+        selectedNumbers.push(weightedPool[i].number);
+      }
     }
 
     return selectedNumbers;
   }
 
-  private applyPatternRecognition(latestDraws: any[], nnOutput: number[], maxNumber: number): number[] {
+  private applyPatternRecognition(latestDraws: any[], nnOutput: number[], maxNumber: number, seed?: number): number[] {
     // Identifica e aplica padrões conhecidos (ex: sequências, gaps)
     const patterns = this.analyzeCyclicPatterns(latestDraws);
     const numbers: number[] = [];
@@ -1791,18 +1810,45 @@ class AiService {
     return numbers;
   }
 
-  private applyTemporalAnalysis(latestDraws: any[], patternRecognitionOutput: number[], lotteryId: string): number[] {
-    // Refina a seleção com base em análise temporal (ex: evitar números recentes de forma agressiva)
-    const recentNumbers = new Set(this.getRecentNumbers(latestDraws, 5)); // Números dos últimos 5 sorteios
-    const finalSelection = patternRecognitionOutput.filter((num: number) => !recentNumbers.has(num));
+  private applyTemporalAnalysis(latestDraws: any[], patternRecognitionOutput: number[], lotteryId: string, seed?: number): number[] {
+    // Refina a seleção com base em análise temporal COM VARIAÇÃO
+    const avoidRecent = seed ? Math.random() > 0.3 : true; // 70% chance de evitar recentes
+    const recentNumbers = avoidRecent ? new Set(this.getRecentNumbers(latestDraws, 5)) : new Set();
+    
+    let finalSelection = patternRecognitionOutput.filter((num: number) => !recentNumbers.has(num));
 
-    // Se a filtragem remover muitos números, preenche com base na análise temporal
+    // Adiciona variação na quantidade a evitar
+    const maxNumber = Math.max(...patternRecognitionOutput, 60);
+    const count = patternRecognitionOutput.length;
+
+    // Se a filtragem remover muitos números, preenche com DIVERSIDADE
     const needed = count - finalSelection.length;
     if (needed > 0) {
-      const temporalPredictions = this.generateCyclicPatternNumbers(needed + 5, maxNumber, latestDraws); // Gera mais para ter opção
+      const temporalPredictions = this.generateCyclicPatternNumbers(needed + 5, maxNumber, latestDraws);
+      
+      // Embaralha com seed para máxima variação
+      if (seed) {
+        temporalPredictions.sort(() => Math.sin(seed++ * Math.random()) - 0.5);
+      }
+      
       for (const num of temporalPredictions) {
         if (finalSelection.length < count && !finalSelection.includes(num) && !recentNumbers.has(num)) {
           finalSelection.push(num);
+        }
+      }
+    }
+
+    // Adiciona ruído para garantir variação entre jogos
+    if (seed && finalSelection.length > 0) {
+      const swapCount = Math.floor(finalSelection.length * 0.2); // Troca 20% dos números
+      for (let i = 0; i < swapCount; i++) {
+        const idx = Math.floor(Math.random() * finalSelection.length);
+        const alternatives = Array.from({length: maxNumber}, (_, i) => i + 1)
+          .filter(n => !finalSelection.includes(n) && !recentNumbers.has(n));
+        
+        if (alternatives.length > 0) {
+          const newNum = alternatives[Math.floor(Math.random() * alternatives.length)];
+          finalSelection[idx] = newNum;
         }
       }
     }
@@ -1812,7 +1858,7 @@ class AiService {
 
   // Os métodos applyGeneticAlgorithm foram duplicados. Manterei a versão atualizada.
 
-  private optimizeWithAdvancedValidation(numbers: number[], deepAnalysis: any, count: number, maxNumber: number, lotteryId: string): number[] {
+  private optimizeWithAdvancedValidation(numbers: number[], deepAnalysis: any, count: number, maxNumber: number, lotteryId: string, seed?: number): number[] {
     // Validações adicionais baseadas na análise profunda
     let validatedNumbers = [...numbers];
 
