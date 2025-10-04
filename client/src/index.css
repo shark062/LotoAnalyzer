@@ -117,7 +117,6 @@
         hsl(180, 100%, 50%)
       ) border-box;
     border-radius: 32px;
-    animation: scan 3s linear infinite;
   }
 
   .neon-text {
