@@ -267,7 +267,7 @@ export default function Generator() {
                       type="number"
                       min={selectedLottery?.minNumbers || 1}
                       max={selectedLottery?.maxNumbers || 60}
-                      placeholder="Ex: 6"
+                      placeholder=""
                       {...form.register('numbersCount', { valueAsNumber: true })}
                       className="bg-input border-border"
                       data-testid="numbers-count-input"
@@ -288,7 +288,7 @@ export default function Generator() {
                       type="number"
                       min={1}
                       max={100}
-                      placeholder="Ex: 3"
+                      placeholder=""
                       {...form.register('gamesCount', { valueAsNumber: true })}
                       className="bg-input border-border"
                       data-testid="games-count-input"

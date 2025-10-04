@@ -788,7 +788,7 @@ class AiService {
       console.log(`🤖 Iniciando análise de IA avançada para ${lotteryId}...`);
 
       // Análise multi-dimensional avançada
-      const deepAnalysis = await this.performDeepAnalysis(frequencies, latestDraws, maxNumber, lotteryId);
+      const deepAnalysis = this.performDeepAnalysis(frequencies, latestDraws, maxNumber, lotteryId);
       const predictionModel = this.buildPredictionModel(deepAnalysis, latestDraws, maxNumber);
       const probabilityMatrix = this.calculateProbabilityMatrix(predictionModel, maxNumber);
 
@@ -1498,8 +1498,8 @@ class AiService {
   // Métodos específicos do Algoritmo Genético e Unicidade
 
   private applyGeneticAlgorithm(temporalOutput: number[], count: number, maxNumber: number, lotteryId: string, seed?: number): number[] {
-    // Simula algoritmo genético para otimização final com seed para unicidade
-    const actualSeed = seed || Date.now();
+    // Simula algoritmo genético para otimização final com seed único
+    const actualSeed = seed || (Date.now() * Math.random() * 1000);
     const population = this.createInitialPopulation(temporalOutput, count, maxNumber, 10, actualSeed);
     const evolved = this.evolvePopulation(population, count, maxNumber, lotteryId, 5);
 
@@ -1710,7 +1710,7 @@ class AiService {
     // Cria um modelo preditivo baseado nas análises
     // Simplificado: combina scores de diferentes métricas
     const model: any[] = [];
-    const baseFrequencies = deepAnalysis.frequencyAnalysis;
+    const frequencies = deepAnalysis.frequencyAnalysis; // Acessa a análise de frequência
 
     for (let num = 1; num <= maxNumber; num++) {
       let score = 0;
@@ -1810,14 +1810,7 @@ class AiService {
     return finalSelection.slice(0, count);
   }
 
-  private applyGeneticAlgorithm(temporalOutput: number[], count: number, maxNumber: number, lotteryId: string, seed?: number): number[] {
-    // Simula algoritmo genético para otimização final com seed para unicidade
-    const actualSeed = seed || Date.now();
-    const population = this.createInitialPopulation(temporalOutput, count, maxNumber, 10, actualSeed);
-    const evolved = this.evolvePopulation(population, count, maxNumber, lotteryId, 5);
-
-    return evolved[0]; // Retorna o melhor indivíduo
-  }
+  // Os métodos applyGeneticAlgorithm foram duplicados. Manterei a versão atualizada.
 
   private optimizeWithAdvancedValidation(numbers: number[], deepAnalysis: any, count: number, maxNumber: number, lotteryId: string): number[] {
     // Validações adicionais baseadas na análise profunda
