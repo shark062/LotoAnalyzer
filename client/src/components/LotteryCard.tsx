@@ -60,7 +60,7 @@ export default function LotteryCard({
 
   if (isLoading) {
     return (
-      <Card className="bg-black/25 backdrop-blur-sm animate-pulse rounded-3xl">
+      <Card className="bg-black/25 backdrop-blur-sm animate-pulse">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="h-6 bg-black/20 rounded w-32"></div>
@@ -83,7 +83,7 @@ export default function LotteryCard({
 
   return (
     <Card 
-      className="bg-black/25 backdrop-blur-md border-white/20 hover:animate-float transition-all duration-300 group rounded-3xl"
+      className="bg-black/25 backdrop-blur-md border-white/20 hover:animate-float transition-all duration-300 group"
       data-testid={`lottery-card-${lotteryName}`}
     >
       <CardContent className="p-6">

@@ -67,7 +67,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
 
   if (isLoading) {
     return (
-      <Card className="border border-border/30 bg-transparent animate-pulse">
+      <Card className="border border-white/20 bg-black/25 backdrop-blur-md animate-pulse">
         <CardContent className="p-4">
           <div className="h-24 bg-muted/20 rounded mb-3"></div>
           <div className="h-4 bg-muted/20 rounded mb-2"></div>
@@ -82,7 +82,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
   }
 
   return (
-    <Card className="border border-white/20 bg-black/25 backdrop-blur-md hover:scale-105 transition-all duration-300 relative overflow-hidden group rounded-3xl">
+    <Card className="border border-white/20 bg-black/25 backdrop-blur-md hover:scale-105 transition-all duration-300 relative overflow-hidden group">
       <CardContent className="p-4 relative z-10">
         <div className="text-center mb-3">
           <div className="text-3xl mb-2">{getEmojiForLottery(lottery.id)}</div>
@@ -165,7 +165,7 @@ export default function AllLotteriesCard() {
 
   if (lotteriesLoading) {
     return (
-      <Card className="bg-transparent">
+      <Card className="bg-black/25 backdrop-blur-md border-white/10">
         <CardHeader>
           <CardTitle className="text-primary flex items-center justify-between">
             <div className="flex items-center">
@@ -177,7 +177,7 @@ export default function AllLotteriesCard() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => (
-              <Card key={i} className="bg-transparent animate-pulse">
+              <Card key={i} className="bg-black/25 backdrop-blur-md border-white/10 animate-pulse">
                 <CardContent className="p-4">
                   <div className="h-24 bg-muted/20 rounded mb-3"></div>
                   <div className="h-4 bg-muted/20 rounded mb-2"></div>
@@ -197,7 +197,7 @@ export default function AllLotteriesCard() {
 
   if (!lotteryTypes || lotteryTypes.length === 0) {
     return (
-      <Card className="bg-transparent">
+      <Card className="bg-black/25 backdrop-blur-md border-white/10">
         <CardHeader>
           <CardTitle className="text-primary flex items-center justify-between">
             <div className="flex items-center">
@@ -219,14 +219,14 @@ export default function AllLotteriesCard() {
   }
 
   return (
-    <Card className="bg-black/25 backdrop-blur-md border-white/10 rounded-3xl">
+    <Card className="bg-black/25 backdrop-blur-md border-white/10">
       <CardHeader>
         <CardTitle className="text-primary flex items-center justify-between">
           <div className="flex items-center">
             <Trophy className="h-5 w-5 mr-2 text-accent" />
             Todas as Modalidades
           </div>
-          <Badge variant="secondary" className="text-xs">
+          <Badge variant="secondary" className="text-xs rounded-3xl">
             {lotteryTypes.length} modalidades
           </Badge>
         </CardTitle>

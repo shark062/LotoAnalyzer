@@ -199,7 +199,7 @@ export default function Navigation() {
       {/* Full Screen Menu Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/15 z-[60] backdrop-blur-sm"
+          className="fixed inset-0 bg-black/15 z-[60] backdrop-blur-sm rounded-3xl"
           data-testid="menu-overlay"
         >
           <div className="container mx-auto px-4 py-8 h-full overflow-y-auto">
@@ -218,7 +218,7 @@ export default function Navigation() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-white hover:text-primary text-2xl font-bold"
+                className="text-white hover:text-primary text-2xl font-bold rounded-3xl"
                 data-testid="menu-close-button"
               >
                 ✕
