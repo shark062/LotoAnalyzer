@@ -109,13 +109,13 @@
 @layer components {
   .neon-border {
     border: 1px solid transparent;
-    background: rgba(0, 0, 0, 0.2) padding-box,
+    background: rgba(0, 0, 0, 0.25) padding-box,
       linear-gradient(90deg, 
         hsl(180, 100%, 50%),
         hsl(280, 100%, 50%),
         hsl(180, 100%, 50%)
       ) border-box;
-    border-radius: 24px;
+    border-radius: 32px;
     animation: scan 3s linear infinite;
   }
 

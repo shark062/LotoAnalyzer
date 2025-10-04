@@ -199,14 +199,14 @@ export default function Navigation() {
       {/* Full Screen Menu Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/98 z-[60] backdrop-blur-sm"
+          className="fixed inset-0 bg-black/15 z-[60] backdrop-blur-sm"
           data-testid="menu-overlay"
         >
           <div className="container mx-auto px-4 py-8 h-full overflow-y-auto">
             {/* Menu Header */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-black/20 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-black/25 rounded-3xl flex items-center justify-center">
                   <span className="text-xl">🦈</span>
                 </div>
                 <div>
@@ -235,17 +235,17 @@ export default function Navigation() {
                   <Link 
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center justify-between p-4 rounded-xl transition-all duration-300 group ${
+                    className={`flex items-center justify-between p-4 rounded-3xl transition-all duration-300 group ${
                       isActive 
-                        ? "text-primary bg-black/20 border border-primary/30" 
-                        : "text-muted-foreground hover:text-primary hover:bg-black/20 border border-transparent"
+                        ? "text-primary bg-black/25 border border-primary/30" 
+                        : "text-muted-foreground hover:text-primary hover:bg-black/25 border border-transparent"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                     data-testid={`nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     <div className="flex items-center space-x-4">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        isActive ? 'bg-black/20 text-primary-foreground' : 'bg-muted/30 group-hover:bg-black/20'
+                      <div className={`w-10 h-10 rounded-3xl flex items-center justify-center ${
+                        isActive ? 'bg-black/25 text-primary-foreground' : 'bg-muted/30 group-hover:bg-black/25'
                       }`}>
                         <Icon className="h-5 w-5" />
                       </div>
@@ -282,12 +282,12 @@ export default function Navigation() {
                 onClick={action.action}
                 variant={action.variant === "primary" ? "default" : action.variant as any}
                 size="sm"
-                className={`w-full shadow-lg transition-all duration-300 group relative ${
+                className={`w-full shadow-lg transition-all duration-300 group relative rounded-3xl ${
                   action.variant === "primary" 
-                    ? "bg-black/20" 
+                    ? "bg-black/25" 
                     : action.variant === "secondary"
-                    ? "bg-black/20"
-                    : "border-2 border-dashed border-primary/30 hover:border-primary hover:bg-black/20"
+                    ? "bg-black/25"
+                    : "border-2 border-dashed border-primary/30 hover:border-primary hover:bg-black/25"
                 }`}
                 data-testid={`quick-action-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
                 title={action.tooltip}
@@ -305,7 +305,7 @@ export default function Navigation() {
           })}
           
           {/* Status Indicator */}
-          <div className="mt-4 p-3 bg-black/20 border border-border/50 rounded-lg backdrop-blur-sm">
+          <div className="mt-4 p-3 bg-black/25 border border-border/50 rounded-3xl backdrop-blur-sm">
             <div className="text-xs text-center space-y-1">
               <div className="flex items-center justify-center space-x-1 text-neon-green">
                 <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>

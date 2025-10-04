@@ -60,7 +60,7 @@ export default function LotteryCard({
 
   if (isLoading) {
     return (
-      <Card className="bg-black/20 backdrop-blur-sm animate-pulse">
+      <Card className="bg-black/25 backdrop-blur-sm animate-pulse rounded-3xl">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="h-6 bg-black/20 rounded w-32"></div>
@@ -83,7 +83,7 @@ export default function LotteryCard({
 
   return (
     <Card 
-      className="bg-black/30 backdrop-blur-md border-white/20 hover:animate-float transition-all duration-300 group"
+      className="bg-black/25 backdrop-blur-md border-white/20 hover:animate-float transition-all duration-300 group rounded-3xl"
       data-testid={`lottery-card-${lotteryName}`}
     >
       <CardContent className="p-6">
@@ -117,7 +117,7 @@ export default function LotteryCard({
           </div>
           
           {/* Countdown Timer */}
-          <div className="bg-muted/30 rounded-2xl p-3 text-center">
+          <div className="bg-muted/30 rounded-3xl p-3 text-center">
             <div className="text-xs text-muted-foreground mb-1">Tempo Restante</div>
             <div 
               className={`font-mono text-lg ${colorClasses.text} neon-text`}
@@ -128,7 +128,7 @@ export default function LotteryCard({
           </div>
           
           {/* Prize Amount */}
-          <div className={`bg-gradient-to-r ${colorClasses.gradient} rounded-2xl p-3 text-center`}>
+          <div className={`bg-gradient-to-r ${colorClasses.gradient} rounded-3xl p-3 text-center`}>
             <div className="text-xs text-muted-foreground mb-1">Prêmio Estimado</div>
             <div 
               className={`font-bold text-xl ${colorClasses.text} neon-text`}
