@@ -2564,6 +2564,28 @@ class LotteryService {
 
     return prizeTable[lotteryId]?.[matches] || "0.00";
   }
+
+  // Função que foi corrigida: selectRandom
+  private selectRandom(pool: number[], count: number, gameIndex: number = 0): number[] {
+    const selected: number[] = [];
+    const available = [...pool];
+
+    // 🎲 Seed único por jogo para garantir variação
+    const seed = Date.now() * (gameIndex + 1) * Math.random();
+
+    // Função de random com seed
+    const seededRandom = () => {
+      const x = Math.sin(seed * selected.length + gameIndex) * 10000;
+      return (x - Math.floor(x)) * Math.random();
+    };
+
+    while (selected.length < count && available.length > 0) {
+      const randomIndex = Math.floor(seededRandom() * available.length);
+      selected.push(available.splice(randomIndex, 1)[0]);
+    }
+
+    return selected.sort((a, b) => a - b);
+  }
 }
 
 

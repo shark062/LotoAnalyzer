@@ -788,8 +788,8 @@ class AiService {
 
       console.log(`🤖 Iniciando análise de IA avançada para ${lotteryId} (jogo #${gameIndex})...`);
 
-      // 🎲 Seed ÚNICO baseado em timestamp + aleatoriedade + índice do jogo
-      const uniqueSeed = Date.now() * Math.random() * 1000000 + (gameIndex * 999999);
+      // 🎲 Seed ÚNICO com múltiplas fontes de aleatoriedade
+      const uniqueSeed = Date.now() * Math.random() * 1000000 + (gameIndex * 999999) + Math.random() * gameIndex;
 
       // Análise multi-dimensional avançada com variação
       const deepAnalysis = this.performDeepAnalysis(frequencies, latestDraws, maxNumber, lotteryId);
