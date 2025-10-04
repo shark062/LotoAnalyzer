@@ -113,15 +113,6 @@ export default function CelebrationAnimation({
               className="text-center"
             >
               <motion.div
-                animate={{ 
-                  scale: [1, 1.1, 1],
-                  rotate: [0, 5, -5, 0] 
-                }}
-                transition={{ 
-                  duration: 2, 
-                  repeat: Infinity,
-                  ease: "easeInOut" 
-                }}
                 className="text-8xl mb-4"
               >
                 🎉

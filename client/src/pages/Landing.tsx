@@ -131,7 +131,7 @@ export default function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="neon-border bg-black/20 backdrop-blur-sm hover:animate-float transition-all duration-300">
+              <Card key={index} className="neon-border bg-black/20 backdrop-blur-sm transition-all duration-300">
                 <CardContent className="p-6 text-center">
                   <div className="mb-4 flex justify-center">
                     {feature.icon}
