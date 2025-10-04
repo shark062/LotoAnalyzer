@@ -453,20 +453,21 @@ class LotteryService {
 
       const games: InsertUserGame[] = [];
 
+      // Generate games based on strategy
       for (let i = 0; i < params.gamesCount; i++) {
-        let numbers: number[];
+        let selectedNumbers: number[];
 
-        // Generate numbers based on strategy using real frequency data
         if (params.strategy === 'ai') {
-          numbers = await this.generateAINumbers(params.lotteryId, params.numbersCount, lottery.totalNumbers);
+          // Passar índice único para cada jogo
+          selectedNumbers = await this.generateAINumbers(params.lotteryId, params.numbersCount, lottery.totalNumbers, i);
         } else {
-          numbers = await this.generateStrategyNumbers(params.lotteryId, params.strategy, params.numbersCount, lottery.totalNumbers);
+          selectedNumbers = await this.generateNumbers(params.lotteryId, params.numbersCount, params.strategy, lottery, i);
         }
 
         const game: InsertUserGame = {
           userId: params.userId,
           lotteryId: params.lotteryId,
-          selectedNumbers: numbers.sort((a, b) => a - b),
+          selectedNumbers: selectedNumbers.sort((a, b) => a - b),
           contestNumber: nextDraw.contestNumber,
           strategy: params.strategy,
           matches: 0, // Will be updated when draw results are available
@@ -486,47 +487,61 @@ class LotteryService {
     }
   }
 
-  private async generateStrategyNumbers(lotteryId: string, strategy: string, count: number, maxNumber: number): Promise<number[]> {
+  private async generateNumbers(lotteryId: string, count: number, strategy: 'hot' | 'cold' | 'mixed', config: any, gameIndex: number = 0): Promise<number[]> {
     try {
       const frequencies = await storage.getNumberFrequencies(lotteryId);
       const latestDraws = await storage.getLatestDraws(lotteryId, 50);
 
       if (frequencies.length === 0) {
         console.log(`No frequency data for ${lotteryId}, using intelligent random generation`);
-        return this.generateIntelligentRandomNumbers(count, maxNumber, lotteryId);
+        return this.generateIntelligentRandomNumbers(count, config.totalNumbers, lotteryId);
       }
 
       // Análise estatística avançada
-      const statisticalAnalysis = this.performStatisticalAnalysis(frequencies, latestDraws, maxNumber);
-      const patternAnalysis = this.analyzeNumberPatterns(latestDraws, maxNumber);
-      const cyclicalAnalysis = this.analyzeCyclicalTrends(latestDraws, maxNumber);
+      const statisticalAnalysis = this.performStatisticalAnalysis(frequencies, latestDraws, config.totalNumbers);
+      const patternAnalysis = this.analyzeNumberPatterns(latestDraws, config.totalNumbers);
+      const cyclicalAnalysis = this.analyzeCyclicalTrends(latestDraws, config.totalNumbers);
 
       let numbers: number[] = [];
 
       switch (strategy) {
         case 'hot':
-          numbers = await this.generateHotStrategy(statisticalAnalysis, patternAnalysis, count, maxNumber);
+          // Select from hot numbers com variação baseada no gameIndex
+          const selectedHot = this.selectRandom(statisticalAnalysis.hot.map((f: any) => f.number), count, gameIndex);
+          numbers.push(...selectedHot);
           break;
+
         case 'cold':
-          numbers = await this.generateColdStrategy(statisticalAnalysis, cyclicalAnalysis, count, maxNumber);
+          // Select from cold numbers com variação baseada no gameIndex
+          const selectedCold = this.selectRandom(statisticalAnalysis.cold.map((f: any) => f.number), count, gameIndex);
+          numbers.push(...selectedCold);
           break;
+
         case 'mixed':
-          numbers = await this.generateMixedStrategy(statisticalAnalysis, patternAnalysis, cyclicalAnalysis, count, maxNumber);
-          break;
         default:
-          numbers = await this.generateIntelligentRandomNumbers(count, maxNumber, lotteryId);
+          // Mix hot, warm, and cold numbers (40% hot, 35% warm, 25% cold)
+          const hotCount = Math.floor(count * 0.40);
+          const warmCount = Math.floor(count * 0.35);
+          const coldCount = count - hotCount - warmCount;
+
+          const mixedHot = this.selectRandom(statisticalAnalysis.hot.map((f: any) => f.number), hotCount, gameIndex);
+          const mixedWarm = this.selectRandom(statisticalAnalysis.warm.map((f: any) => f.number), warmCount, gameIndex + 1);
+          const mixedCold = this.selectRandom(statisticalAnalysis.cold.map((f: any) => f.number), coldCount, gameIndex + 2);
+
+          numbers.push(...mixedHot, ...mixedWarm, ...mixedCold);
+          break;
       }
 
       // Aplicar filtros anti-padrões impossíveis
-      numbers = this.applyIntelligentFilters(numbers, latestDraws, maxNumber, lotteryId);
+      numbers = this.applyIntelligentFilters(numbers, latestDraws, config.totalNumbers, lotteryId);
 
       // Verificação de qualidade final
-      numbers = this.validateNumberQuality(numbers, statisticalAnalysis, count, maxNumber);
+      numbers = this.validateNumberQuality(numbers, statisticalAnalysis, count, config.totalNumbers);
 
       return numbers.sort((a, b) => a - b);
     } catch (error) {
       console.error('Error generating strategy numbers:', error);
-      return this.generateIntelligentRandomNumbers(count, maxNumber, lotteryId);
+      return this.generateIntelligentRandomNumbers(count, config.totalNumbers, lotteryId);
     }
   }
 
@@ -559,17 +574,8 @@ class LotteryService {
     const frequencyScore = frequency.frequency / 100;
     const recencyScore = Math.max(0, 1 - recency / 20);
     const balanceScore = this.calculateBalanceScore(frequency.number);
-    
-    return (frequencyScore * 0.4) + (recencyScore * 0.3) + (balanceScore * 0.3);
-  }
 
-  private calculateBalanceScore(number: number): number {
-    // Score baseado no balanceamento par/ímpar e distribuição por dezena
-    const isEven = number % 2 === 0;
-    const decade = Math.floor(number / 10);
-    
-    // Favorece números que criam melhor balanceamento
-    return 0.5 + (isEven ? 0.1 : -0.1) + (decade * 0.05);
+    return (frequencyScore * 0.4) + (recencyScore * 0.3) + (balanceScore * 0.3);
   }
 
   private calculateBalanceScore(number: number): number {
@@ -577,7 +583,7 @@ class LotteryService {
     const isEven = number % 2 === 0 ? 1 : 0;
     const digitSum = number.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
     const isSequential = this.isSequentialNumber(number);
-    
+
     return (isEven * 0.3) + (digitSum / 20) + (isSequential ? -0.2 : 0.2);
   }
 
@@ -596,7 +602,7 @@ class LotteryService {
     latestDraws.slice(0, 10).forEach(draw => {
       if (draw.drawnNumbers) {
         draw.drawnNumbers.forEach((num: number) => recentNumbers.add(num));
-        
+
         // Análise de pares frequentes
         for (let i = 0; i < draw.drawnNumbers.length - 1; i++) {
           for (let j = i + 1; j < draw.drawnNumbers.length; j++) {
@@ -623,7 +629,7 @@ class LotteryService {
 
   private analyzeCyclicalTrends(latestDraws: any[], maxNumber: number) {
     const cycles = new Map<number, number[]>();
-    
+
     // Analisa ciclos de aparição de números
     latestDraws.forEach((draw, index) => {
       if (draw.drawnNumbers) {
@@ -702,7 +708,7 @@ class LotteryService {
     while (selected.length < count) {
       const remaining = Array.from({ length: maxNumber }, (_, i) => i + 1)
         .filter(n => !used.has(n));
-      
+
       if (remaining.length === 0) break;
 
       const smartChoice = this.chooseSmartNumber(remaining, selected, maxNumber);
@@ -736,7 +742,7 @@ class LotteryService {
     const candidateIsPar = candidate % 2 === 0;
     const newParCount = candidateIsPar ? parCount + 1 : parCount;
     const totalCount = selected.length + 1;
-    
+
     if (newParCount > totalCount * 0.7 || newParCount < totalCount * 0.3) return false;
 
     return true;
@@ -753,12 +759,12 @@ class LotteryService {
 
   private calculateDistributionScore(selected: number[], candidate: number, maxNumber: number): number {
     const withCandidate = [...selected, candidate];
-    
+
     // Pontuação baseada em distribuição equilibrada
     const groupDistribution = this.getGroupDistribution(withCandidate);
     const parityBalance = this.getParityBalance(withCandidate);
     const spreadScore = this.getSpreadScore(withCandidate, maxNumber);
-    
+
     return groupDistribution + parityBalance + spreadScore;
   }
 
@@ -768,7 +774,7 @@ class LotteryService {
       const group = Math.floor(n / 10);
       groups.set(group, (groups.get(group) || 0) + 1);
     });
-    
+
     // Penaliza concentração excessiva
     const maxGroupSize = Math.max(...Array.from(groups.values()));
     return maxGroupSize > numbers.length / 3 ? -0.5 : 0.3;
@@ -782,22 +788,22 @@ class LotteryService {
 
   private getSpreadScore(numbers: number[], maxNumber: number): number {
     if (numbers.length < 2) return 0;
-    
+
     const sorted = [...numbers].sort((a, b) => a - b);
     const range = sorted[sorted.length - 1] - sorted[0];
     const idealRange = maxNumber * 0.7;
-    
+
     return Math.abs(range - idealRange) / idealRange < 0.3 ? 0.2 : -0.1;
   }
 
   private applyIntelligentFilters(numbers: number[], latestDraws: any[], maxNumber: number, lotteryId: string): number[] {
     // Remove combinações que nunca saíram ou são estatisticamente impossíveis
-    
+
     // Filtro 1: Evita repetição exata de jogos recentes
     const recentCombinations = latestDraws.slice(0, 5).map(draw => 
       draw.drawnNumbers ? draw.drawnNumbers.sort((a: number, b: number) => a - b).join(',') : ''
     );
-    
+
     const currentCombination = [...numbers].sort((a, b) => a - b).join(',');
     if (recentCombinations.includes(currentCombination)) {
       // Substitui 1-2 números por outros inteligentes
@@ -816,22 +822,22 @@ class LotteryService {
   private getSmartSubstitutions(numbers: number[], maxNumber: number, latestDraws: any[]): number[] {
     const result = [...numbers];
     const toReplace = Math.min(2, Math.floor(numbers.length * 0.3));
-    
+
     for (let i = 0; i < toReplace; i++) {
       const replaceIndex = Math.floor(Math.random() * result.length);
       const oldNumber = result[replaceIndex];
-      
+
       // Encontra um substituto inteligente
       const candidates = Array.from({ length: maxNumber }, (_, i) => i + 1)
         .filter(n => !result.includes(n))
         .filter(n => Math.abs(n - oldNumber) > 5) // Evita números muito próximos
         .sort((a, b) => this.calculateSubstitutionScore(a, result, oldNumber) - this.calculateSubstitutionScore(b, result, oldNumber));
-      
+
       if (candidates.length > 0) {
         result[replaceIndex] = candidates[0];
       }
     }
-    
+
     return result;
   }
 
@@ -840,41 +846,41 @@ class LotteryService {
     const distanceFromReplaced = Math.abs(candidate - replacing);
     const groupBalance = this.calculateGroupBalanceImpact(candidate, currentNumbers, replacing);
     const parityBalance = this.calculateParityBalanceImpact(candidate, currentNumbers, replacing);
-    
+
     return distanceFromReplaced * 0.3 + groupBalance * 0.4 + parityBalance * 0.3;
   }
 
   private calculateGroupBalanceImpact(candidate: number, numbers: number[], replacing: number): number {
     const candidateGroup = Math.floor(candidate / 10);
     const replacingGroup = Math.floor(replacing / 10);
-    
+
     const currentGroupCounts = new Map<number, number>();
     numbers.filter(n => n !== replacing).forEach(n => {
       const group = Math.floor(n / 10);
       currentGroupCounts.set(group, (currentGroupCounts.get(group) || 0) + 1);
     });
-    
+
     const candidateGroupCount = currentGroupCounts.get(candidateGroup) || 0;
     const maxDesiredPerGroup = Math.ceil(numbers.length / 4);
-    
+
     return candidateGroupCount >= maxDesiredPerGroup ? 10 : 0;
   }
 
   private calculateParityBalanceImpact(candidate: number, numbers: number[], replacing: number): number {
     const candidateIsPar = candidate % 2 === 0;
     const replacingIsPar = replacing % 2 === 0;
-    
+
     const currentParCount = numbers.filter(n => n !== replacing && n % 2 === 0).length;
     const newParCount = candidateIsPar ? currentParCount + 1 : currentParCount;
     const total = numbers.length;
-    
+
     const idealPars = Math.round(total * 0.5);
     return Math.abs(newParCount - idealPars);
   }
 
   private isImpossiblePattern(numbers: number[], lotteryId: string): boolean {
     // Padrões específicos por modalidade que nunca saíram
-    
+
     if (lotteryId === 'megasena' || lotteryId === 'duplasena') {
       // Evita todos os números em uma única dezena
       const groups = new Map<number, number>();
@@ -882,9 +888,9 @@ class LotteryService {
         const group = Math.floor(n / 10);
         groups.set(group, (groups.get(group) || 0) + 1);
       });
-      
+
       if (Math.max(...Array.from(groups.values())) >= numbers.length) return true;
-      
+
       // Evita sequências muito longas
       const sorted = [...numbers].sort((a, b) => a - b);
       let consecutive = 1;
@@ -899,7 +905,7 @@ class LotteryService {
       // Para lotofácil, evita concentração excessiva nas extremidades
       const lowNumbers = numbers.filter(n => n <= 8).length;
       const highNumbers = numbers.filter(n => n >= 18).length;
-      
+
       if (lowNumbers > 10 || highNumbers > 10) return true;
     }
 
@@ -910,7 +916,7 @@ class LotteryService {
     // Corrige padrões impossíveis substituindo alguns números
     const result = [...numbers];
     const problematicIndices: number[] = [];
-    
+
     // Identifica números problemáticos
     if (lotteryId === 'megasena' || lotteryId === 'duplasena') {
       const sorted = result.sort((a, b) => a - b);
@@ -920,25 +926,25 @@ class LotteryService {
         }
       }
     }
-    
+
     // Substitui números problemáticos
     problematicIndices.forEach(index => {
       const alternatives = Array.from({ length: maxNumber }, (_, i) => i + 1)
         .filter(n => !result.includes(n))
         .filter(n => !this.wouldCreateNewProblem(n, result, index));
-      
+
       if (alternatives.length > 0) {
         result[index] = alternatives[Math.floor(Math.random() * alternatives.length)];
       }
     });
-    
+
     return result;
   }
 
   private wouldCreateNewProblem(candidate: number, numbers: number[], replaceIndex: number): boolean {
     const testNumbers = [...numbers];
     testNumbers[replaceIndex] = candidate;
-    
+
     // Testa se criaria um novo padrão problemático
     const sorted = testNumbers.sort((a, b) => a - b);
     let consecutive = 1;
@@ -947,7 +953,7 @@ class LotteryService {
       else consecutive = 1;
       if (consecutive > 3) return true;
     }
-    
+
     return false;
   }
 
@@ -957,39 +963,39 @@ class LotteryService {
       console.log(`Adjusting number count from ${numbers.length} to ${count}`);
       return this.adjustNumberCount(numbers, count, maxNumber, statistical);
     }
-    
+
     // Remove duplicatas (se houver)
     const unique = [...new Set(numbers)];
     if (unique.length !== numbers.length) {
       return this.adjustNumberCount(unique, count, maxNumber, statistical);
     }
-    
+
     return numbers;
   }
 
   private adjustNumberCount(numbers: number[], targetCount: number, maxNumber: number, statistical: any): number[] {
     const result = [...numbers];
-    
+
     if (result.length < targetCount) {
       // Adiciona números faltantes
       const available = Array.from({ length: maxNumber }, (_, i) => i + 1)
         .filter(n => !result.includes(n));
-      
+
       const needed = targetCount - result.length;
       const smartChoices = available
         .sort((a, b) => this.calculateSmartScore(a, result, statistical) - this.calculateSmartScore(b, result, statistical))
         .slice(0, needed);
-      
+
       result.push(...smartChoices);
     } else if (result.length > targetCount) {
       // Remove números excedentes (os menos prováveis)
       const sorted = result
         .sort((a, b) => this.calculateSmartScore(b, result, statistical) - this.calculateSmartScore(a, result, statistical))
         .slice(0, targetCount);
-      
+
       return sorted;
     }
-    
+
     return result;
   }
 
@@ -997,7 +1003,7 @@ class LotteryService {
     const item = statistical.weightedFrequencies?.find((f: any) => f.number === number);
     const baseScore = item?.probabilityScore || 0;
     const distributionScore = this.calculateDistributionScore(context.filter(n => n !== number), number, 60);
-    
+
     return baseScore + distributionScore * 0.3;
   }
 
@@ -1006,16 +1012,16 @@ class LotteryService {
     const numbers: number[] = [];
     const groupLimits = this.getGroupLimitsForLottery(lotteryId, maxNumber);
     const groupCounts = new Map<number, number>();
-    
+
     // Inicializa contadores de grupos
     for (let i = 0; i <= Math.floor(maxNumber / 10); i++) {
       groupCounts.set(i, 0);
     }
-    
+
     while (numbers.length < count) {
       let candidate: number;
       let attempts = 0;
-      
+
       do {
         candidate = Math.floor(Math.random() * maxNumber) + 1;
         attempts++;
@@ -1024,7 +1030,7 @@ class LotteryService {
          !this.isValidForIntelligentRandom(candidate, numbers, groupCounts, groupLimits, maxNumber)) 
         && attempts < 50
       );
-      
+
       if (attempts < 50) {
         numbers.push(candidate);
         const group = Math.floor(candidate / 10);
@@ -1041,14 +1047,14 @@ class LotteryService {
         }
       }
     }
-    
+
     return numbers;
   }
 
   private getGroupLimitsForLottery(lotteryId: string, maxNumber: number): Map<number, number> {
     const limits = new Map<number, number>();
     const totalGroups = Math.ceil(maxNumber / 10);
-    
+
     // Define limites específicos por modalidade
     switch (lotteryId) {
       case 'megasena':
@@ -1067,7 +1073,7 @@ class LotteryService {
           limits.set(i, Math.ceil(maxNumber / (totalGroups * 2)));
         }
     }
-    
+
     return limits;
   }
 
@@ -1081,24 +1087,24 @@ class LotteryService {
     const group = Math.floor(candidate / 10);
     const currentGroupCount = groupCounts.get(group) || 0;
     const limit = groupLimits.get(group) || Math.ceil(maxNumber / 20);
-    
+
     // Verifica limite do grupo
     if (currentGroupCount >= limit) return false;
-    
+
     // Verifica sequências muito longas
     if (selected.length > 0) {
       const consecutive = selected.filter(n => Math.abs(n - candidate) === 1).length;
       if (consecutive > 2) return false;
     }
-    
+
     // Verifica equilíbrio par/ímpar
     const parCount = selected.filter(n => n % 2 === 0).length;
     const candidateIsPar = candidate % 2 === 0;
     const newParCount = candidateIsPar ? parCount + 1 : parCount;
     const totalCount = selected.length + 1;
-    
+
     if (newParCount > totalCount * 0.75 || newParCount < totalCount * 0.25) return false;
-    
+
     return true;
   }
 
@@ -1116,7 +1122,7 @@ class LotteryService {
     return numbers.sort((a, b) => a - b);
   }
 
-  private async generateAINumbers(lotteryId: string, count: number, maxNumber: number): Promise<number[]> {
+  private async generateAINumbers(lotteryId: string, count: number, maxNumber: number, gameIndex: number = 0): Promise<number[]> {
     try {
       const frequencies = await storage.getNumberFrequencies(lotteryId);
       const latestDraws = await storage.getLatestDraws(lotteryId, 100); // Mais histórico para IA
@@ -1231,7 +1237,7 @@ class LotteryService {
 
       if (appearances.length > 1) {
         const intervals = appearances.slice(1).map((pos, i) => pos - appearances[i]);
-        
+
         // Classifica em ciclos
         intervals.forEach(interval => {
           if (interval <= 10) {
@@ -1273,10 +1279,10 @@ class LotteryService {
     // Cálculos estatísticos avançados
     const frequencies_array = frequencies.map(f => f.frequency);
     const mean = frequencies_array.reduce((sum, f) => sum + f, 0) / frequencies_array.length;
-    
+
     properties.variance = frequencies_array.reduce((sum, f) => sum + Math.pow(f - mean, 2), 0) / frequencies_array.length;
     properties.standardDeviation = Math.sqrt(properties.variance);
-    
+
     // Entropia de Shannon
     const total = frequencies_array.reduce((sum, f) => sum + f, 0);
     if (total > 0) {
@@ -1443,7 +1449,7 @@ class LotteryService {
       // Finaliza cálculos
       const finalWeight = factors > 0 ? totalWeight / factors : 0.5;
       model.weights.set(num, finalWeight);
-      
+
       // Calcula bias baseado em tendência recente
       const recentAppearances = draws.slice(0, 10).filter(draw => 
         draw.drawnNumbers && draw.drawnNumbers.includes(num)
@@ -1473,7 +1479,7 @@ class LotteryService {
     for (let num = 1; num <= maxNumber; num++) {
       const individual = model.predictions.get(num) || 0;
       const conditional = new Map<number, number>();
-      
+
       // Calcula probabilidades condicionais
       for (let other = 1; other <= maxNumber; other++) {
         if (num !== other) {
@@ -1497,11 +1503,11 @@ class LotteryService {
     const weight1 = model.weights.get(num1) || 0.5;
     const weight2 = model.weights.get(num2) || 0.5;
     const avgWeight = (weight1 + weight2) / 2;
-    
+
     // Penaliza números muito próximos (reduz sequências óbvias)
     const distance = Math.abs(num1 - num2);
     const distancePenalty = distance < 3 ? 0.3 : (distance < 6 ? 0.1 : 0);
-    
+
     // Bonus para números em grupos diferentes
     const group1 = Math.floor(num1 / 10);
     const group2 = Math.floor(num2 / 10);
@@ -1524,7 +1530,7 @@ class LotteryService {
     // Segunda camada: ajuste por contexto
     const contextAdjusted = candidates.map(candidate => {
       let contextScore = candidate.score;
-      
+
       // Ajuste baseado em probabilidades condicionais
       probabilityMatrix.get(candidate.number)?.conditional.forEach((condScore, otherNumber) => {
         const otherCandidate = candidates.find(c => c.number === otherNumber);
@@ -1545,7 +1551,7 @@ class LotteryService {
 
     for (const candidate of sortedCandidates) {
       if (selected.length >= count) break;
-      
+
       if (this.enhancesDiversity(candidate.number, selected, maxNumber)) {
         selected.push(candidate.number);
       }
@@ -1556,7 +1562,7 @@ class LotteryService {
       const remaining = sortedCandidates
         .filter(c => !selected.includes(c.number))
         .sort((a, b) => b.score - a.score);
-      
+
       if (remaining.length === 0) break;
       selected.push(remaining[0].number);
     }
@@ -1577,14 +1583,14 @@ class LotteryService {
 
     const maxGroupSize = Math.max(...Array.from(groupCounts.values()));
     const candidateGroupSize = groupCounts.get(candidateGroup) || 0;
-    
+
     if (candidateGroupSize >= maxGroupSize && maxGroupSize >= 3) return false;
 
     // Verifica diversidade de paridade
     const parCount = selected.filter(n => n % 2 === 0).length;
     const candidateIsPar = candidate % 2 === 0;
     const newParRatio = (parCount + (candidateIsPar ? 1 : 0)) / (selected.length + 1);
-    
+
     if (newParRatio > 0.75 || newParRatio < 0.25) return false;
 
     // Verifica sequências
@@ -1601,7 +1607,7 @@ class LotteryService {
 
     // Verifica se o output atual contém padrões problemáticos
     const currentPattern = this.analyzeCurrentPattern(recognized);
-    
+
     if (this.matchesProblematicPattern(currentPattern, problematicPatterns)) {
       return this.adjustForPatternAvoidance(recognized, problematicPatterns, maxNumber);
     }
@@ -1611,13 +1617,13 @@ class LotteryService {
 
   private identifyProblematicPatterns(draws: any[], maxNumber: number): string[] {
     const patterns: string[] = [];
-    
+
     // Padrões que nunca apareceram em 100+ sorteios
     const allSequential = Array.from({length: 6}, (_, i) => i + 1).join(',');
     const allEven = [2,4,6,8,10,12].join(',');
     const allOdd = [1,3,5,7,9,11].join(',');
     const singleGroup = [10,11,12,13,14,15].join(','); // Todos em uma dezena
-    
+
     patterns.push(allSequential, allEven, allOdd, singleGroup);
 
     // Analisa draws para identificar outros padrões que nunca saíram
@@ -1642,7 +1648,7 @@ class LotteryService {
     return problematic.some(pattern => {
       const currentNums = current.split(',').map(Number);
       const patternNums = pattern.split(',').map(Number);
-      
+
       const matches = currentNums.filter(num => patternNums.includes(num)).length;
       return matches >= Math.min(4, patternNums.length * 0.8); // 80% de correspondência
     });
@@ -1651,12 +1657,12 @@ class LotteryService {
   private adjustForPatternAvoidance(numbers: number[], problematic: string[], maxNumber: number): number[] {
     const adjusted = [...numbers];
     const toReplace = Math.floor(numbers.length * 0.3); // Substitui 30%
-    
+
     for (let i = 0; i < toReplace && i < adjusted.length; i++) {
       const alternatives = Array.from({length: maxNumber}, (_, idx) => idx + 1)
         .filter(n => !adjusted.includes(n))
         .filter(n => this.isGoodAlternative(n, adjusted, i));
-      
+
       if (alternatives.length > 0) {
         const bestAlternative = alternatives.sort((a, b) => 
           this.calculateAlternativeScore(a, adjusted, i) - this.calculateAlternativeScore(b, adjusted, i)
@@ -1664,17 +1670,17 @@ class LotteryService {
         adjusted[i] = bestAlternative;
       }
     }
-    
+
     return adjusted;
   }
 
   private isGoodAlternative(candidate: number, current: number[], replaceIndex: number): boolean {
     const temp = [...current];
     temp[replaceIndex] = candidate;
-    
+
     // Verifica se não cria novos problemas
     const sorted = temp.sort((a, b) => a - b);
-    
+
     // Não deve criar sequências muito longas
     let consecutive = 1;
     let maxConsecutive = 1;
@@ -1686,17 +1692,17 @@ class LotteryService {
         consecutive = 1;
       }
     }
-    
+
     return maxConsecutive <= 3;
   }
 
   private calculateAlternativeScore(candidate: number, current: number[], replaceIndex: number): number {
     // Menor score = melhor alternativa
     const original = current[replaceIndex];
-    
+
     // Distância do original (preferir mudanças maiores)
     const distanceScore = Math.abs(candidate - original) / 60;
-    
+
     // Diversidade de grupo
     const candidateGroup = Math.floor(candidate / 10);
     const groupCounts = new Map<number, number>();
@@ -1707,14 +1713,14 @@ class LotteryService {
       }
     });
     const groupDiversityScore = (groupCounts.get(candidateGroup) || 0) / current.length;
-    
+
     return distanceScore + groupDiversityScore;
   }
 
   private applyTemporalAnalysis(draws: any[], patternOutput: number[], lotteryId: string): number[] {
     // Análise temporal considerando tendências recentes vs históricas
     const temporal = [...patternOutput];
-    
+
     if (draws.length < 10) return temporal;
 
     // Analisa tendência dos últimos 5 sorteios vs últimos 20
@@ -1728,9 +1734,9 @@ class LotteryService {
     temporal.forEach((num, index) => {
       const recentFreq = this.getNumberFrequencyInPeriod(num, recent);
       const historicalFreq = this.getNumberFrequencyInPeriod(num, historical);
-      
+
       const trend = recentFreq - (historicalFreq / 4); // Normaliza por período
-      
+
       // Se tendência recente é muito diferente da histórica, considera substituição
       if (Math.abs(trend) > 0.5 && Math.random() < 0.3) {
         const alternatives = this.getTemporalAlternatives(num, recentTrends, historicalTrends, temporal);
@@ -1745,7 +1751,7 @@ class LotteryService {
 
   private calculateTrends(draws: any[]): Map<number, number> {
     const trends = new Map<number, number>();
-    
+
     draws.forEach(draw => {
       if (draw.drawnNumbers) {
         draw.drawnNumbers.forEach((num: number) => {
@@ -1765,13 +1771,13 @@ class LotteryService {
 
   private getTemporalAlternatives(original: number, recent: Map<number, number>, historical: Map<number, number>, current: number[]): number[] {
     const alternatives: number[] = [];
-    
+
     // Procura números com tendência temporal oposta
     recent.forEach((recentFreq, num) => {
       const historicalFreq = historical.get(num) || 0;
       const originalRecentFreq = recent.get(original) || 0;
       const originalHistoricalFreq = historical.get(original) || 0;
-      
+
       // Se original está "quente" recentemente, procura "frios" recentemente mas "quentes" historicamente
       if (originalRecentFreq > originalHistoricalFreq && recentFreq < historicalFreq && !current.includes(num)) {
         alternatives.push(num);
@@ -1787,50 +1793,50 @@ class LotteryService {
     // Simula algoritmo genético para otimização final
     const population = this.createInitialPopulation(temporalOutput, count, maxNumber, 10);
     const evolved = this.evolvePopulation(population, count, maxNumber, lotteryId, 5);
-    
+
     return evolved[0]; // Retorna o melhor indivíduo
   }
 
   private createInitialPopulation(base: number[], count: number, maxNumber: number, size: number): number[][] {
     const population: number[][] = [base.slice(0, count)];
-    
+
     for (let i = 1; i < size; i++) {
       const individual = [...base];
-      
+
       // Mutação: troca alguns números
       const mutations = Math.floor(count * 0.2) + 1;
       for (let j = 0; j < mutations; j++) {
         const index = Math.floor(Math.random() * individual.length);
         const alternatives = Array.from({length: maxNumber}, (_, idx) => idx + 1)
           .filter(n => !individual.includes(n));
-        
+
         if (alternatives.length > 0) {
           individual[index] = alternatives[Math.floor(Math.random() * alternatives.length)];
         }
       }
-      
+
       population.push(individual.slice(0, count));
     }
-    
+
     return population;
   }
 
   private evolvePopulation(population: number[][], count: number, maxNumber: number, lotteryId: string, generations: number): number[][] {
     let current = [...population];
-    
+
     for (let gen = 0; gen < generations; gen++) {
       // Avaliação de fitness
       const fitness = current.map(individual => 
         this.calculateFitness(individual, maxNumber, lotteryId)
       );
-      
+
       // Seleção dos melhores
       const selected = current
         .map((individual, index) => ({individual, fitness: fitness[index]}))
         .sort((a, b) => b.fitness - a.fitness)
         .slice(0, Math.ceil(current.length / 2))
         .map(item => item.individual);
-      
+
       // Crossover e mutação
       const newGeneration = [...selected];
       while (newGeneration.length < population.length) {
@@ -1840,15 +1846,15 @@ class LotteryService {
         const mutated = this.mutate(child, maxNumber, 0.1);
         newGeneration.push(mutated);
       }
-      
+
       current = newGeneration;
     }
-    
+
     // Retorna população final ordenada por fitness
     const finalFitness = current.map(individual => 
       this.calculateFitness(individual, maxNumber, lotteryId)
     );
-    
+
     return current
       .map((individual, index) => ({individual, fitness: finalFitness[index]}))
       .sort((a, b) => b.fitness - a.fitness)
@@ -1857,7 +1863,7 @@ class LotteryService {
 
   private calculateFitness(individual: number[], maxNumber: number, lotteryId: string): number {
     let fitness = 0;
-    
+
     // Diversidade de grupos
     const groups = new Map<number, number>();
     individual.forEach(num => {
@@ -1866,19 +1872,19 @@ class LotteryService {
     });
     const groupVariance = this.calculateVariance(Array.from(groups.values()));
     fitness += Math.max(0, 1 - groupVariance); // Menor variância = melhor
-    
+
     // Balanceamento par/ímpar
     const parCount = individual.filter(n => n % 2 === 0).length;
     const parityBalance = Math.abs(parCount / individual.length - 0.5);
     fitness += Math.max(0, 1 - parityBalance * 2);
-    
+
     // Distribuição no range
     const sorted = [...individual].sort((a, b) => a - b);
     const range = sorted[sorted.length - 1] - sorted[0];
     const idealRange = maxNumber * 0.7;
     const rangeScore = 1 - Math.abs(range - idealRange) / idealRange;
     fitness += Math.max(0, rangeScore);
-    
+
     // Evita sequências muito longas
     let maxSequence = 1;
     let currentSequence = 1;
@@ -1891,7 +1897,7 @@ class LotteryService {
       }
     }
     fitness += maxSequence <= 3 ? 0.5 : 0;
-    
+
     return fitness;
   }
 
@@ -1907,85 +1913,85 @@ class LotteryService {
       ...parent1.slice(0, crossoverPoint),
       ...parent2.slice(crossoverPoint)
     ];
-    
+
     // Remove duplicatas
     const unique = [...new Set(child)];
-    
+
     // Completa se necessário
     while (unique.length < count) {
       const available = Array.from({length: maxNumber}, (_, i) => i + 1)
         .filter(n => !unique.includes(n));
-      
+
       if (available.length === 0) break;
       unique.push(available[Math.floor(Math.random() * available.length)]);
     }
-    
+
     return unique.slice(0, count);
   }
 
   private mutate(individual: number[], maxNumber: number, mutationRate: number): number[] {
     const mutated = [...individual];
-    
+
     mutated.forEach((num, index) => {
       if (Math.random() < mutationRate) {
         const alternatives = Array.from({length: maxNumber}, (_, i) => i + 1)
           .filter(n => !mutated.includes(n));
-        
+
         if (alternatives.length > 0) {
           mutated[index] = alternatives[Math.floor(Math.random() * alternatives.length)];
         }
       }
     });
-    
+
     return mutated;
   }
 
   private optimizeWithAdvancedValidation(numbers: number[], analysis: any, count: number, maxNumber: number, lotteryId: string): number[] {
     let optimized = [...numbers];
-    
+
     // Validação de qualidade final
     const qualityScore = this.calculateQualityScore(optimized, analysis, lotteryId);
-    
+
     if (qualityScore < 0.7) {
       console.log(`⚠️  Qualidade baixa (${qualityScore.toFixed(2)}), aplicando otimização final...`);
-      
+
       // Otimização por substituição inteligente
       const improvements = this.findImprovementOpportunities(optimized, analysis, maxNumber);
       improvements.forEach(({index, replacement}) => {
         optimized[index] = replacement;
       });
     }
-    
+
     // Validação final
     optimized = this.ensureFinalValidation(optimized, count, maxNumber, lotteryId);
-    
+
     return optimized;
   }
 
   private calculateQualityScore(numbers: number[], analysis: any, lotteryId: string): number {
     let score = 0;
     let factors = 0;
-    
+
     // Score de diversidade
     const diversityScore = this.calculateDiversityScore(numbers);
     score += diversityScore;
     factors++;
-    
+
     // Score de probabilidade (baseado na análise)
     const probabilityScore = this.calculateProbabilityScore(numbers, analysis);
     score += probabilityScore;
     factors++;
-    
+
     // Score de padrões
     const patternScore = this.calculatePatternScore(numbers, lotteryId);
     score += patternScore;
     factors++;
-    
+
     // Score de balance
     const balanceScore = this.calculateBalanceScore(numbers[0]); // Reutiliza função existente
     score += balanceScore;
     factors++;
-    
+
     return factors > 0 ? score / factors : 0.5;
   }
 
@@ -2006,19 +2012,19 @@ class LotteryService {
 
   private findImprovementOpportunities(numbers: number[], analysis: any, maxNumber: number): Array<{index: number, replacement: number}> {
     const improvements: Array<{index: number, replacement: number}> = [];
-    
+
     numbers.forEach((num, index) => {
       // Procura alternativas melhores
       const alternatives = Array.from({length: maxNumber}, (_, i) => i + 1)
         .filter(n => !numbers.includes(n))
         .filter(n => this.wouldImproveQuality(n, num, numbers, index, analysis));
-      
+
       if (alternatives.length > 0) {
         const bestAlternative = alternatives[0]; // Simplificado
         improvements.push({index, replacement: bestAlternative});
       }
     });
-    
+
     return improvements.slice(0, 2); // Máximo 2 melhorias por vez
   }
 
@@ -2026,7 +2032,7 @@ class LotteryService {
     // Implementação simplificada - na prática seria mais robusta
     const candidateGroup = Math.floor(candidate / 10);
     const originalGroup = Math.floor(original / 10);
-    
+
     // Melhora se move para grupo menos representado
     const groupCounts = new Map<number, number>();
     numbers.forEach((n, i) => {
@@ -2035,37 +2041,37 @@ class LotteryService {
         groupCounts.set(group, (groupCounts.get(group) || 0) + 1);
       }
     });
-    
+
     const candidateGroupCount = groupCounts.get(candidateGroup) || 0;
     const originalGroupCount = groupCounts.get(originalGroup) || 0;
-    
+
     return candidateGroupCount < originalGroupCount;
   }
 
   private ensureFinalValidation(numbers: number[], count: number, maxNumber: number, lotteryId: string): number[] {
     let final = [...numbers];
-    
+
     // Garantir contagem correta
     final = final.slice(0, count);
     if (final.length < count) {
       final = this.adjustNumberCount(final, count, maxNumber, {weightedFrequencies: []});
     }
-    
+
     // Remover duplicatas
     final = [...new Set(final)];
     if (final.length < count) {
       final = this.adjustNumberCount(final, count, maxNumber, {weightedFrequencies: []});
     }
-    
+
     // Aplicar filtros finais específicos da modalidade
     final = this.applyLotterySpecificFilters(final, lotteryId, maxNumber);
-    
+
     return final.sort((a, b) => a - b);
   }
 
   private applyLotterySpecificFilters(numbers: number[], lotteryId: string, maxNumber: number): number[] {
     let filtered = [...numbers];
-    
+
     switch (lotteryId) {
       case 'megasena':
         // Mega-Sena: evitar mais de 3 números em sequência
@@ -2084,7 +2090,7 @@ class LotteryService {
         filtered = this.limitSuperSeteColumns(filtered);
         break;
     }
-    
+
     return filtered;
   }
 
@@ -2092,7 +2098,7 @@ class LotteryService {
     const sorted = [...numbers].sort((a, b) => a - b);
     const result: number[] = [];
     let consecutiveCount = 1;
-    
+
     for (let i = 0; i < sorted.length; i++) {
       if (i === 0 || sorted[i] !== sorted[i-1] + 1) {
         consecutiveCount = 1;
@@ -2105,13 +2111,13 @@ class LotteryService {
         const alternatives = Array.from({length: maxNumber}, (_, idx) => idx + 1)
           .filter(n => !result.includes(n) && !sorted.includes(n))
           .filter(n => Math.abs(n - sorted[i]) > 2);
-        
+
         if (alternatives.length > 0) {
           result.push(alternatives[0]);
         }
       }
     }
-    
+
     return result;
   }
 
@@ -2119,66 +2125,66 @@ class LotteryService {
     const low = numbers.filter(n => n <= 8);
     const high = numbers.filter(n => n >= 18);
     const middle = numbers.filter(n => n > 8 && n < 18);
-    
+
     // Se muito desequilibrado, ajusta
     if (low.length > 8 || high.length > 8) {
       const result = [...middle];
       result.push(...low.slice(0, 7));
       result.push(...high.slice(0, 7));
-      
+
       // Completa com números do meio
       while (result.length < numbers.length) {
         const available = Array.from({length: maxNumber}, (_, i) => i + 1)
           .filter(n => !result.includes(n) && n > 8 && n < 18);
-        
+
         if (available.length === 0) break;
         result.push(available[0]);
       }
-      
+
       return result;
     }
-    
+
     return numbers;
   }
 
   private distributeQuinaGroups(numbers: number[], maxNumber: number): number[] {
     // Distribui números da Quina pelos grupos de dezenas (0-9, 10-19, etc.)
     const groups = new Map<number, number[]>();
-    
+
     numbers.forEach(num => {
       const group = Math.floor(num / 10);
       if (!groups.has(group)) groups.set(group, []);
       groups.get(group)!.push(num);
     });
-    
+
     // Limita a 2 números por grupo
     const result: number[] = [];
     groups.forEach(groupNumbers => {
       result.push(...groupNumbers.slice(0, 2));
     });
-    
+
     // Completa se necessário
     while (result.length < numbers.length) {
       const available = Array.from({length: maxNumber}, (_, i) => i + 1)
         .filter(n => !result.includes(n));
-      
+
       if (available.length === 0) break;
-      
+
       // Prefere números de grupos menos representados
       const groupCounts = new Map<number, number>();
       result.forEach(n => {
         const group = Math.floor(n / 10);
         groupCounts.set(group, (groupCounts.get(group) || 0) + 1);
       });
-      
+
       const bestOption = available.find(n => {
         const group = Math.floor(n / 10);
         return (groupCounts.get(group) || 0) < 2;
       }) || available[0];
-      
+
       result.push(bestOption);
     }
-    
+
     return result;
   }
 
@@ -2186,12 +2192,12 @@ class LotteryService {
     // Super Sete tem 7 colunas de 0-9
     // Evita repetição excessiva do mesmo dígito
     const digitCounts = new Map<number, number>();
-    
+
     numbers.forEach(num => {
       const digit = num % 10;
       digitCounts.set(digit, (digitCounts.get(digit) || 0) + 1);
     });
-    
+
     // Se algum dígito aparece mais de 3 vezes, substitui
     const result = [...numbers];
     digitCounts.forEach((count, digit) => {
@@ -2199,35 +2205,35 @@ class LotteryService {
         const indices = result
           .map((num, idx) => num % 10 === digit ? idx : -1)
           .filter(idx => idx !== -1);
-        
+
         // Substitui os excedentes
         for (let i = 3; i < indices.length; i++) {
           const index = indices[i];
           const alternatives = [0,1,2,3,4,5,6,7,8,9]
             .filter(d => (digitCounts.get(d) || 0) < 2)
             .filter(d => !result.some(n => n % 10 === d));
-          
+
           if (alternatives.length > 0) {
             result[index] = alternatives[0];
           }
         }
       }
     });
-    
+
     return result;
   }
 
   private generateAdvancedAlgorithmicNumbers(count: number, maxNumber: number, lotteryId: string): number[] {
     // Fallback inteligente quando dados são insuficientes
     console.log(`🔬 Usando algoritmos matemáticos avançados para ${lotteryId}`);
-    
+
     const algorithms = [
       () => this.generateGoldenRatioBasedNumbers(count, maxNumber),
       () => this.generateFibonacciBasedNumbers(count, maxNumber),
       () => this.generatePrimeBasedNumbers(count, maxNumber),
       () => this.generateMathematicalSequenceNumbers(count, maxNumber)
     ];
-    
+
     // Usa diferentes algoritmos baseado no lotteryId
     const algorithmIndex = lotteryId.charCodeAt(0) % algorithms.length;
     return algorithms[algorithmIndex]();
@@ -2236,23 +2242,23 @@ class LotteryService {
   private generateGoldenRatioBasedNumbers(count: number, maxNumber: number): number[] {
     const phi = (1 + Math.sqrt(5)) / 2;
     const numbers: number[] = [];
-    
+
     for (let i = 1; numbers.length < count && i <= maxNumber; i++) {
       const goldenTest = (i * phi) % 1;
       if (goldenTest > 0.3 && goldenTest < 0.7) { // "Sweet spot" da golden ratio
         numbers.push(i);
       }
     }
-    
+
     // Completa se necessário
     while (numbers.length < count) {
       const available = Array.from({length: maxNumber}, (_, i) => i + 1)
         .filter(n => !numbers.includes(n));
-      
+
       if (available.length === 0) break;
       numbers.push(available[Math.floor(Math.random() * available.length)]);
     }
-    
+
     return numbers;
   }
 
@@ -2262,17 +2268,17 @@ class LotteryService {
       const next = fibonacci[fibonacci.length - 1] + fibonacci[fibonacci.length - 2];
       fibonacci.push(next);
     }
-    
+
     const fibNumbers = fibonacci.filter(f => f <= maxNumber);
     const numbers: number[] = [];
-    
+
     // Seleciona números próximos aos de Fibonacci
     fibNumbers.forEach(fib => {
       if (numbers.length < count) {
         numbers.push(fib);
       }
     });
-    
+
     // Completa com números relacionados
     while (numbers.length < count) {
       const available = Array.from({length: maxNumber}, (_, i) => i + 1)
@@ -2282,11 +2288,11 @@ class LotteryService {
           const bDist = Math.min(...fibNumbers.map(f => Math.abs(b - f)));
           return aDist - bDist;
         });
-      
+
       if (available.length === 0) break;
       numbers.push(available[0]);
     }
-    
+
     return numbers;
   }
 
@@ -2295,21 +2301,21 @@ class LotteryService {
     for (let i = 2; i <= maxNumber; i++) {
       if (this.isPrime(i)) primes.push(i);
     }
-    
+
     const numbers: number[] = [];
-    
+
     // Seleciona alguns primos
     const primeCount = Math.min(Math.ceil(count * 0.4), primes.length);
     for (let i = 0; i < primeCount && i < primes.length; i += Math.ceil(primes.length / primeCount)) {
       numbers.push(primes[i]);
     }
-    
+
     // Completa com números compostos balanceados
     while (numbers.length < count) {
       const available = Array.from({length: maxNumber}, (_, i) => i + 1)
         .filter(n => !numbers.includes(n))
         .filter(n => !this.isPrime(n)); // Só compostos para balance
-      
+
       if (available.length === 0) {
         // Se só restaram primos, usa eles
         const availablePrimes = primes.filter(p => !numbers.includes(p));
@@ -2318,10 +2324,10 @@ class LotteryService {
         }
         break;
       }
-      
+
       numbers.push(available[Math.floor(Math.random() * available.length)]);
     }
-    
+
     return numbers;
   }
 
@@ -2332,38 +2338,38 @@ class LotteryService {
       triangular: [],
       pentagonal: []
     };
-    
+
     // Números triangulares: n(n+1)/2
     for (let i = 1; i * (i + 1) / 2 <= maxNumber; i++) {
       sequences.triangular.push(i * (i + 1) / 2);
     }
-    
+
     // Números pentagonais: n(3n-1)/2
     for (let i = 1; i * (3 * i - 1) / 2 <= maxNumber; i++) {
       sequences.pentagonal.push(i * (3 * i - 1) / 2);
     }
-    
+
     const allSequenceNumbers = [
       ...sequences.squares,
       ...sequences.triangular,
       ...sequences.pentagonal
     ].filter((n, index, arr) => arr.indexOf(n) === index && n <= maxNumber);
-    
+
     const numbers: number[] = [];
-    
+
     // Seleciona de diferentes sequências
     const sequenceCount = Math.min(Math.ceil(count * 0.5), allSequenceNumbers.length);
     allSequenceNumbers.slice(0, sequenceCount).forEach(n => numbers.push(n));
-    
+
     // Completa aleatoriamente
     while (numbers.length < count) {
       const available = Array.from({length: maxNumber}, (_, i) => i + 1)
         .filter(n => !numbers.includes(n));
-      
+
       if (available.length === 0) break;
       numbers.push(available[Math.floor(Math.random() * available.length)]);
     }
-    
+
     return numbers;
   }
 
@@ -2379,7 +2385,7 @@ class LotteryService {
     if (n < 2) return false;
     if (n === 2) return true;
     if (n % 2 === 0) return false;
-    
+
     for (let i = 3; i <= Math.sqrt(n); i += 2) {
       if (n % i === 0) return false;
     }

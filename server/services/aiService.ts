@@ -403,29 +403,30 @@ class AiService {
       hotNumbers,
       warmNumbers,
       coldNumbers,
-      latestDraws
+      latestDraws,
+      0 // gameIndex para predição principal
     );
 
-    // Generate alternatives with different advanced strategies
+    // Generate alternatives with different advanced strategies - cada um com seed único
     const alternatives = [
       {
-        numbers: this.generateGoldenRatioNumbers(lottery.minNumbers, lottery.totalNumbers, enhancedFrequencies),
+        numbers: this.generateGoldenRatioNumbers(lottery.minNumbers, lottery.totalNumbers, enhancedFrequencies, 1),
         strategy: 'Proporção Áurea Avançada',
       },
       {
-        numbers: this.generateFibonacciBasedNumbers(lottery.minNumbers, lottery.totalNumbers),
+        numbers: this.generateFibonacciBasedNumbers(lottery.minNumbers, lottery.totalNumbers, 2),
         strategy: 'Sequência Fibonacci',
       },
       {
-        numbers: this.generateStatisticalOptimizedNumbers(lottery.minNumbers, lottery.totalNumbers, enhancedFrequencies),
+        numbers: this.generateStatisticalOptimizedNumbers(lottery.minNumbers, lottery.totalNumbers, enhancedFrequencies, 3),
         strategy: 'Otimização Estatística',
       },
       {
-        numbers: this.generatePrimeBasedNumbers(lottery.minNumbers, lottery.totalNumbers),
+        numbers: this.generatePrimeBasedNumbers(lottery.minNumbers, lottery.totalNumbers, 4),
         strategy: 'Números Primos Distribuídos',
       },
       {
-        numbers: this.generateCyclicPatternNumbers(lottery.minNumbers, lottery.totalNumbers, latestDraws),
+        numbers: this.generateCyclicPatternNumbers(lottery.minNumbers, lottery.totalNumbers, latestDraws, 5),
         strategy: 'Padrões Cíclicos',
       },
     ];
@@ -775,20 +776,20 @@ class AiService {
 
   // ADVANCED NUMBER GENERATION METHODS
 
-  private async generateAINumbers(lotteryId: string, count: number, maxNumber: number): Promise<number[]> {
+  private async generateAINumbers(lotteryId: string, count: number, maxNumber: number, gameIndex: number = 0): Promise<number[]> {
     try {
       const frequencies = await storage.getNumberFrequencies(lotteryId);
       const latestDraws = await storage.getLatestDraws(lotteryId, 100);
 
       if (frequencies.length === 0) {
         console.log('Insufficient frequency data for AI, using advanced algorithmic generation');
-        return this.generateAdvancedAlgorithmicNumbers(count, maxNumber, lotteryId);
+        return this.generateAdvancedAlgorithmicNumbers(count, maxNumber, lotteryId, gameIndex);
       }
 
-      console.log(`🤖 Iniciando análise de IA avançada para ${lotteryId}...`);
+      console.log(`🤖 Iniciando análise de IA avançada para ${lotteryId} (jogo #${gameIndex})...`);
 
-      // 🎲 Seed único baseado em timestamp + aleatoriedade verdadeira
-      const uniqueSeed = Date.now() * Math.random() * 1000000;
+      // 🎲 Seed ÚNICO baseado em timestamp + aleatoriedade + índice do jogo
+      const uniqueSeed = Date.now() * Math.random() * 1000000 + (gameIndex * 999999);
 
       // Análise multi-dimensional avançada com variação
       const deepAnalysis = this.performDeepAnalysis(frequencies, latestDraws, maxNumber, lotteryId);
@@ -809,13 +810,13 @@ class AiService {
       // Garante unicidade TOTAL com múltiplas fontes de aleatoriedade
       finalNumbers = this.ensureUniqueness(finalNumbers, count, maxNumber, uniqueSeed);
 
-      console.log(`🎯 IA gerou ${finalNumbers.length} números ÚNICOS (seed: ${uniqueSeed.toFixed(0)})`);
+      console.log(`🎯 IA gerou ${finalNumbers.length} números ÚNICOS para jogo #${gameIndex} (seed: ${uniqueSeed.toFixed(0)})`);
       return finalNumbers.sort((a, b) => a - b);
 
     } catch (error) {
       console.error('Error in advanced AI generation:', error);
       console.log('Falling back to advanced algorithmic generation');
-      return this.generateAdvancedAlgorithmicNumbers(count, maxNumber, lotteryId);
+      return this.generateAdvancedAlgorithmicNumbers(count, maxNumber, lotteryId, gameIndex);
     }
   }
 
@@ -905,7 +906,8 @@ class AiService {
     hot: any[],
     warm: any[],
     cold: any[],
-    latestDraws: any[]
+    latestDraws: any[],
+    gameIndex: number = 0
   ): number[] {
     const numbers: number[] = [];
     const recentNumbers = this.getRecentNumbers(latestDraws, 8); // Últimos 8 sorteios
@@ -990,13 +992,14 @@ class AiService {
     return optimized.slice(0, targetCount).sort((a, b) => a - b);
   }
 
-  private generateGoldenRatioNumbers(count: number, maxNumber: number, frequencies: any[]): number[] {
+  private generateGoldenRatioNumbers(count: number, maxNumber: number, frequencies: any[], gameIndex: number = 0): number[] {
     const numbers: number[] = [];
     const phi = 1.618033988749; // Golden ratio
+    const offset = (gameIndex * 0.1) % 1; // Offset baseado no índice do jogo
 
     // Use golden ratio to distribute numbers across range
     for (let i = 0; i < count; i++) {
-      const position = (i / count) * phi;
+      const position = ((i / count) + offset) * phi;
       const baseNumber = Math.floor((position % 1) * maxNumber) + 1;
 
       // Find nearest available number with good frequency
@@ -1007,34 +1010,35 @@ class AiService {
     return this.enforceMinimumDistance(numbers, maxNumber, count);
   }
 
-  private generateFibonacciBasedNumbers(count: number, maxNumber: number): number[] {
+  private generateFibonacciBasedNumbers(count: number, maxNumber: number, gameIndex: number = 0): number[] {
     const fibonacci = this.generateFibonacci(maxNumber);
     const numbers: number[] = [];
 
-    // Select fibonacci numbers and their multiples
+    // Select fibonacci numbers and their multiples com offset baseado no gameIndex
+    const offset = gameIndex % fibonacci.length;
     const step = Math.floor(fibonacci.length / count);
 
-    for (let i = 0; i < count && i * step < fibonacci.length; i++) {
-      const fibNum = fibonacci[i * step];
+    for (let i = 0; i < count && (i * step + offset) < fibonacci.length; i++) {
+      const fibNum = fibonacci[(i * step + offset) % fibonacci.length];
       if (fibNum <= maxNumber) {
         numbers.push(fibNum);
       } else {
         // Use fibonacci ratio for larger numbers
         const ratio = fibNum / fibonacci[fibonacci.length - 1];
-        numbers.push(Math.floor(ratio * maxNumber) + 1);
+        numbers.push(Math.floor(ratio * maxNumber) + 1 + (gameIndex % 10));
       }
     }
 
     return this.enforceMinimumDistance(numbers, maxNumber, count);
   }
 
-  private generateStatisticalOptimizedNumbers(count: number, maxNumber: number, frequencies: any[]): number[] {
+  private generateStatisticalOptimizedNumbers(count: number, maxNumber: number, frequencies: any[], gameIndex: number = 0): number[] {
     // Sort by enhanced frequency and select with statistical distribution
     const sortedFreqs = frequencies.sort((a, b) => b.enhancedFrequency - a.enhancedFrequency);
     const numbers: number[] = [];
 
-    // Use normal distribution curve for selection
-    const mean = maxNumber / 2;
+    // Use normal distribution curve for selection com variação
+    const mean = maxNumber / 2 + (gameIndex * 2);
     const stdDev = maxNumber / 6;
 
     for (let i = 0; i < count; i++) {
@@ -1049,15 +1053,16 @@ class AiService {
     return numbers.sort((a, b) => a - b);
   }
 
-  private generatePrimeBasedNumbers(count: number, maxNumber: number): number[] {
+  private generatePrimeBasedNumbers(count: number, maxNumber: number, gameIndex: number = 0): number[] {
     const primes = this.generatePrimes(maxNumber);
     const numbers: number[] = [];
 
-    // Distribute primes across the range
+    // Distribute primes across the range com offset
+    const offset = gameIndex % Math.max(1, primes.length / count);
     const step = Math.max(1, Math.floor(primes.length / count));
 
-    for (let i = 0; i < count && i * step < primes.length; i++) {
-      numbers.push(primes[i * step]);
+    for (let i = 0; i < count && (i * step + offset) < primes.length; i++) {
+      numbers.push(primes[(i * step + offset) % primes.length]);
     }
 
     // Fill remaining with composite numbers that maintain distance
@@ -1070,7 +1075,7 @@ class AiService {
     return numbers.sort((a, b) => a - b);
   }
 
-  private generateCyclicPatternNumbers(count: number, maxNumber: number, latestDraws: any[]): number[] {
+  private generateCyclicPatternNumbers(count: number, maxNumber: number, latestDraws: any[], gameIndex: number = 0): number[] {
     if (!latestDraws || latestDraws.length === 0) {
       return this.generateDistributedNumbers(count, maxNumber);
     }
@@ -2759,11 +2764,14 @@ class AiService {
     return latestDraws.length; // Se nunca foi sorteado, retorna o número total de sorteios
   }
 
-  private generateAdvancedAlgorithmicNumbers(count: number, maxNumber: number, lotteryId: string): number[] {
+  private generateAdvancedAlgorithmicNumbers(count: number, maxNumber: number, lotteryId: string, gameIndex: number = 0): number[] {
     // Implementação de um gerador algorítmico avançado (fallback)
     // Usa uma combinação de distribuições e regras heurísticas
     const numbers: number[] = [];
     const available = Array.from({length: maxNumber}, (_, i) => i + 1);
+    
+    // Seed baseado no gameIndex para garantir variação
+    const seed = Date.now() + (gameIndex * 777777);
 
     // Tenta selecionar números com boa distribuição e distância
     while (numbers.length < count && available.length > 0) {
@@ -2771,8 +2779,9 @@ class AiService {
       if (selected > 0 && !numbers.includes(selected)) {
         numbers.push(selected);
       } else {
-        // Fallback para seleção aleatória se não encontrar um número ideal
-        const randomIndex = Math.floor(Math.random() * available.length);
+        // Fallback para seleção aleatória COM SEED se não encontrar um número ideal
+        const randomFactor = Math.sin(seed + numbers.length * 1000) * 10000;
+        const randomIndex = Math.floor(Math.abs(randomFactor - Math.floor(randomFactor)) * available.length);
         numbers.push(available.splice(randomIndex, 1)[0]);
       }
     }
