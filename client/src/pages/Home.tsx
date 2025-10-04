@@ -30,7 +30,7 @@ import {
   Star,
   Shield,
   Gamepad2,
-  
+
   Coins,
   Award,
   Wifi,
@@ -97,12 +97,12 @@ export default function Home() {
   // Data queries
   const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
   const { data: userStats, isLoading: statsLoading } = useUserStats();
-  
+
   // Get next draw info for main lotteries
   const megasenaNextDraw = useNextDrawInfo('megasena');
   const lotofacilNextDraw = useNextDrawInfo('lotofacil');
   const quinaNextDraw = useNextDrawInfo('quina');
-  
+
   // Get frequency data for Mega-Sena heat map preview
   const { data: megasenaFrequencies, isLoading: frequenciesLoading } = useNumberFrequencies('megasena');
 
@@ -135,7 +135,7 @@ export default function Home() {
         parseFloat(game.prizeWon || "0") > 0 && 
         new Date(game.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000 // Last 24 hours
       );
-      
+
       if (latestWin && !showCelebration) {
         setCelebrationPrize(`R$ ${latestWin.prizeWon}`);
         setShowCelebration(true);
@@ -150,7 +150,7 @@ export default function Home() {
       const randomNumbers = [1, 15, 23, 35, 44, 58]; // Exemplo
       const analysis = sharkAI.analyzeNumbers(randomNumbers, 'megasena', megasenaFrequencies);
       setSharkAIMessage(analysis.message);
-      
+
       // Registrar análise na gamificação
       gamification.onAnalysisPerformed('megasena', 0.75);
     }
@@ -168,18 +168,18 @@ export default function Home() {
   const activateSharkMode = () => {
     setShowSharkMode(true);
     cyberpunkEffects.activateSharkMode();
-    
+
     // IA Shark em modo agressivo
     const aggressiveAnalysis = sharkAI.analyzeStrategy('aggressive', recentGames || []);
     setSharkAIMessage(aggressiveAnalysis.message);
-    
+
     setTimeout(() => setShowSharkMode(false), 5000);
   };
 
   const performQuickAnalysis = () => {
     gamification.onAnalysisPerformed('megasena', Math.random());
     cyberpunkEffects.triggerGlitch(1000);
-    
+
     const numbers = Array.from({length: 6}, () => Math.floor(Math.random() * 60) + 1);
     const analysis = sharkAI.analyzeNumbers(numbers, 'megasena', megasenaFrequencies);
     setSharkAIMessage(analysis.message);
@@ -227,7 +227,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground relative">
-      
+
       {/* Efeitos Cyberpunk */}
       <CyberpunkEffects 
         intensity={showSharkMode ? 'high' : 'medium'}
@@ -235,38 +235,12 @@ export default function Home() {
         matrixRain={cyberpunkEffects.matrixRain}
         scanLines={cyberpunkEffects.scanLines}
       />
-      
-      <Navigation />
-      
-      <main className={`container mx-auto px-4 py-8 relative z-40 ${isMenuOpen ? 'hidden' : ''}`}>
-        
-        
 
-        {/* Status Indicators Principais */}
-        <div className="text-center mb-6">
-          <p className="text-lg text-muted-foreground mb-4">
-            Central de Comando • Análise Inteligente das Loterias Federais
-          </p>
-          
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            <div className="flex items-center gap-1 text-sm bg-neon-green/10 text-neon-green px-3 py-1.5 rounded-full border border-neon-green/30">
-              <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
-              <span className="font-mono font-semibold">Dados Oficiais Caixa</span>
-            </div>
-            <div className="flex items-center gap-1 text-sm bg-black/20 text-secondary px-3 py-1.5 rounded-full border border-secondary/30">
-              <Brain className="w-4 h-4" />
-              <span className="font-mono font-semibold">IA Shark Ativa</span>
-            </div>
-            <div className="flex items-center gap-1 text-sm bg-black/20 text-accent px-3 py-1.5 rounded-full border border-accent/30">
-              <Activity className="w-4 h-4" />
-              <span className="font-mono font-semibold">Análise Tempo Real</span>
-            </div>
-            <div className="flex items-center gap-1 text-sm bg-black/20 text-primary px-3 py-1.5 rounded-full border border-primary/30">
-              <Gamepad2 className="w-4 h-4" />
-              <span className="font-mono font-semibold">Modo Gamificação</span>
-            </div>
-          </div>
-        </div>
+      <Navigation />
+
+      <main className={`container mx-auto px-4 py-8 relative z-40 ${isMenuOpen ? 'hidden' : ''}`}>
+
+
 
         {/* Quick Actions */}
         <div className="mb-8 flex flex-wrap gap-4 justify-center lg:hidden">
@@ -313,7 +287,7 @@ export default function Home() {
             <TrendingUp className="h-5 w-5 mr-3 text-muted-foreground" />
             Todas as Modalidades
           </h3>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
             {allLotteries.map((lottery) => (
               <Button
