@@ -47,7 +47,7 @@ export default function AIMetrics() {
   const { data: metaAnalysis, isLoading: loadingMeta } = useMetaReasoningAnalysis(selectedLottery);
   const { data: optimalCombination } = useOptimalCombination(selectedLottery);
 
-  // Dados mockados de performance dos modelos
+  // Dados mockados de performance dos modelos com valores realistas
   const mockModelPerformance = [
     { name: 'DeepSeek', accuracy: 28.5, confidence: 82.3, successRate: 24.1, total: 150 },
     { name: 'OpenAI GPT-4', accuracy: 26.8, confidence: 79.5, successRate: 22.3, total: 145 },
@@ -55,13 +55,16 @@ export default function AIMetrics() {
     { name: 'Claude 3', accuracy: 24.9, confidence: 75.2, successRate: 20.8, total: 138 }
   ];
 
-  const modelPerformanceData = metaAnalysis?.rankings?.map((model: any) => ({
-    name: model.modelName,
-    accuracy: (model.accuracy * 100).toFixed(1),
-    confidence: (model.confidence * 100).toFixed(1),
-    successRate: (model.successRate * 100).toFixed(1),
-    total: model.totalPredictions
-  })) || mockModelPerformance;
+  // Usar dados reais se disponíveis, senão usar mock
+  const modelPerformanceData = metaAnalysis?.rankings && metaAnalysis.rankings.length > 0
+    ? metaAnalysis.rankings.map((model: any) => ({
+        name: model.modelName,
+        accuracy: parseFloat((model.accuracy * 100).toFixed(1)),
+        confidence: parseFloat((model.confidence * 100).toFixed(1)),
+        successRate: parseFloat((model.successRate * 100).toFixed(1)),
+        total: model.totalPredictions
+      }))
+    : mockModelPerformance;
 
   const mockRadarData = [
     { subject: 'DeepSeek', A: 28.5, B: 82.3, fullMark: 100 },
@@ -70,12 +73,14 @@ export default function AIMetrics() {
     { subject: 'Claude 3', A: 24.9, B: 75.2, fullMark: 100 }
   ];
 
-  const radarData = metaAnalysis?.rankings?.slice(0, 4).map((model: any) => ({
-    subject: model.modelName,
-    A: model.accuracy * 100,
-    B: model.confidence * 100,
-    fullMark: 100
-  })) || mockRadarData;
+  const radarData = metaAnalysis?.rankings && metaAnalysis.rankings.length > 0
+    ? metaAnalysis.rankings.slice(0, 4).map((model: any) => ({
+        subject: model.modelName,
+        A: parseFloat((model.accuracy * 100).toFixed(1)),
+        B: parseFloat((model.confidence * 100).toFixed(1)),
+        fullMark: 100
+      }))
+    : mockRadarData;
 
   const timelineData = Array.from({ length: 10 }, (_, i) => ({
     day: `Dia ${i + 1}`,
@@ -421,12 +426,16 @@ export default function AIMetrics() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {(metaAnalysis?.recommendations || [
-                  'Utilizar ensemble com peso majoritário em DeepSeek para maior precisão',
-                  'Combinar análise temporal do OpenAI GPT-4 com padrões do DeepSeek',
-                  'Aplicar validação cruzada com Gemini Pro para confirmar tendências',
-                  'Usar Claude 3 para identificar padrões raros e outliers'
-                ]).map((recommendation: string, index: number) => (
+                {(metaAnalysis?.recommendations && metaAnalysis.recommendations.length > 0
+                  ? metaAnalysis.recommendations
+                  : [
+                      '✨ Utilizar ensemble com peso majoritário em DeepSeek para maior precisão',
+                      '🎯 Combinar análise temporal do OpenAI GPT-4 com padrões do DeepSeek',
+                      '📊 Aplicar validação cruzada com Gemini Pro para confirmar tendências',
+                      '🔍 Usar Claude 3 para identificar padrões raros e outliers',
+                      '⚡ Atualizar pesos dos modelos automaticamente com base em performance recente'
+                    ]
+                ).map((recommendation: string, index: number) => (
                   <div 
                     key={index} 
                     className="p-4 bg-slate-700/30 rounded-lg border border-purple-500/20"
