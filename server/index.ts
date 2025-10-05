@@ -1,22 +1,28 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { rateLimiter, sanitizeInput, secureCORS } from "./middleware/security";
 
 // Configurar Express para confiar em proxies (importante para Replit)
 const app = express();
 app.set('trust proxy', true);
 app.disable('x-powered-by');
 
+// Segurança: CORS, Rate Limiting e Sanitização
+app.use(secureCORS);
+app.use(rateLimiter(200, 60000)); // 200 requests por minuto
+app.use(sanitizeInput);
+
 // Middleware para garantir headers consistentes
 app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   next();
 });
 
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 app.use((req, res, next) => {
   const start = Date.now();
