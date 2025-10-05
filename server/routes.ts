@@ -272,11 +272,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { lotteryId } = req.params;
       const { type } = req.query;
 
-      // Validar apenas o lotteryId sem usar DataValidator.validateDraw
+      // Validar apenas o lotteryId
       const config = getLotteryConfig(lotteryId);
       if (!config) {
-        throw new Error(`Configuração não encontrada para loteria: ${lotteryId}`);
+        return res.status(404).json({ error: `Configuração não encontrada para loteria: ${lotteryId}` });
       }
+
+      // Buscar dados reais da loteria
+      const frequencies = await storage.getNumberFrequencies(lotteryId);
+      const latestDraws = await storage.getLatestDraws(lotteryId, 50);
 
       // Usar IA avançada baseada no tipo
       let analysis;
@@ -291,23 +295,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
           analysis = await advancedAI.performEnsembleAnalysis(lotteryId);
           break;
         case 'pattern':
-          // Análise de padrões
-          analysis = {
-            patterns: [
-              {
-                pattern: 'Sequência Crescente',
-                frequency: 23,
-                lastOccurrence: '15 dias atrás',
-                predictedNext: [7, 12, 18, 25, 33, 41]
-              },
-              {
-                pattern: 'Números Pares/Ímpares Balanceados',
-                frequency: 67,
-                lastOccurrence: '3 dias atrás',
-                predictedNext: [4, 15, 22, 31, 38, 45]
-              }
-            ]
-          };
+          // Análise de padrões com dados reais
+          const patternData = latestDraws.slice(0, 20);
+          const patterns = [];
+          
+          // Padrão de sequências consecutivas
+          const consecutivePattern = patternData.filter(d => {
+            if (!d.drawnNumbers || d.drawnNumbers.length < 2) return false;
+            const sorted = [...d.drawnNumbers].sort((a, b) => a - b);
+            for (let i = 0; i < sorted.length - 1; i++) {
+              if (sorted[i + 1] === sorted[i] + 1) return true;
+            }
+            return false;
+          });
+          
+          if (consecutivePattern.length > 0) {
+            const topNumbers = frequencies.filter(f => f.frequency > 0)
+              .sort((a, b) => b.frequency - a.frequency)
+              .slice(0, config.minNumbers)
+              .map(f => f.number);
+            
+            patterns.push({
+              pattern: 'Sequências Consecutivas',
+              frequency: Math.round((consecutivePattern.length / patternData.length) * 100),
+              lastOccurrence: consecutivePattern[0]?.drawDate ? 
+                `${Math.floor((Date.now() - new Date(consecutivePattern[0].drawDate).getTime()) / (1000 * 60 * 60 * 24))} dias atrás` : 
+                'Recente',
+              predictedNext: topNumbers
+            });
+          }
+          
+          // Padrão de paridade balanceada
+          const balancedPattern = patternData.filter(d => {
+            if (!d.drawnNumbers) return false;
+            const pares = d.drawnNumbers.filter(n => n % 2 === 0).length;
+            const impares = d.drawnNumbers.length - pares;
+            return Math.abs(pares - impares) <= 2;
+          });
+          
+          if (balancedPattern.length > 0) {
+            const balancedNumbers = frequencies
+              .sort((a, b) => b.frequency - a.frequency)
+              .slice(0, config.minNumbers * 2)
+              .sort(() => Math.random() - 0.5)
+              .slice(0, config.minNumbers)
+              .map(f => f.number);
+            
+            patterns.push({
+              pattern: 'Números Pares/Ímpares Balanceados',
+              frequency: Math.round((balancedPattern.length / patternData.length) * 100),
+              lastOccurrence: balancedPattern[0]?.drawDate ? 
+                `${Math.floor((Date.now() - new Date(balancedPattern[0].drawDate).getTime()) / (1000 * 60 * 60 * 24))} dias atrás` : 
+                'Recente',
+              predictedNext: balancedNumbers.sort((a, b) => a - b)
+            });
+          }
+          
+          analysis = { patterns: patterns.length > 0 ? patterns : [{
+            pattern: 'Análise em Progresso',
+            frequency: 0,
+            lastOccurrence: 'Aguardando dados',
+            predictedNext: Array.from({length: config.minNumbers}, (_, i) => i + 1)
+          }]};
           break;
         case 'prediction':
           // Predições com números específicos

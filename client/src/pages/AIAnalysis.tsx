@@ -89,26 +89,41 @@ export default function AIAnalysis() {
   const { data: lotteryTypes } = useLotteryTypes();
   const { data: userStats } = useUserStats();
 
-  // AI Analysis queries
+  // AI Analysis queries - sempre busca dados reais da API
   const { data: patternAnalysis, isLoading: patternLoading, refetch: refetchPattern } = useQuery<AIAnalysisResult>({
-    queryKey: [`/api/ai/analysis/${selectedLottery}`, { type: 'pattern' }],
-    queryFn: () => fetch(`/api/ai/analysis/${selectedLottery}?type=pattern`).then(res => res.json()),
-    enabled: !!selectedLottery,
-    staleTime: 5 * 60 * 1000,
+    queryKey: [`/api/ai/analysis/${selectedLottery}/pattern`],
+    queryFn: async () => {
+      const res = await fetch(`/api/ai/analysis/${selectedLottery}?type=pattern`);
+      if (!res.ok) throw new Error('Failed to fetch pattern analysis');
+      return res.json();
+    },
+    enabled: !!selectedLottery && activeTab === 'pattern',
+    staleTime: 2 * 60 * 1000, // 2 minutos
+    refetchOnMount: true,
   });
 
   const { data: predictionAnalysis, isLoading: predictionLoading, refetch: refetchPrediction } = useQuery<AIAnalysisResult>({
-    queryKey: [`/api/ai/analysis/${selectedLottery}`, { type: 'prediction' }],
-    queryFn: () => fetch(`/api/ai/analysis/${selectedLottery}?type=prediction`).then(res => res.json()),
-    enabled: !!selectedLottery,
-    staleTime: 5 * 60 * 1000,
+    queryKey: [`/api/ai/analysis/${selectedLottery}/prediction`],
+    queryFn: async () => {
+      const res = await fetch(`/api/ai/analysis/${selectedLottery}?type=prediction`);
+      if (!res.ok) throw new Error('Failed to fetch prediction analysis');
+      return res.json();
+    },
+    enabled: !!selectedLottery && activeTab === 'prediction',
+    staleTime: 2 * 60 * 1000,
+    refetchOnMount: true,
   });
 
   const { data: strategyAnalysis, isLoading: strategyLoading, refetch: refetchStrategy } = useQuery<AIAnalysisResult>({
-    queryKey: [`/api/ai/analysis/${selectedLottery}`, { type: 'strategy' }],
-    queryFn: () => fetch(`/api/ai/analysis/${selectedLottery}?type=strategy`).then(res => res.json()),
-    enabled: !!selectedLottery,
-    staleTime: 5 * 60 * 1000,
+    queryKey: [`/api/ai/analysis/${selectedLottery}/strategy`],
+    queryFn: async () => {
+      const res = await fetch(`/api/ai/analysis/${selectedLottery}?type=strategy`);
+      if (!res.ok) throw new Error('Failed to fetch strategy analysis');
+      return res.json();
+    },
+    enabled: !!selectedLottery && activeTab === 'strategy',
+    staleTime: 2 * 60 * 1000,
+    refetchOnMount: true,
   });
 
   // Mock AI analysis data for demonstration purposes if needed
@@ -206,16 +221,16 @@ export default function AIAnalysis() {
                 <div className="text-2xl font-bold text-primary neon-text" data-testid="learning-progress">
                   {aiLearningProgress}%
                 </div>
-                <div className="text-sm text-muted-foreground">Aprendizado</div>
+                <div className="text-sm text-muted-foreground">Aprendizado ({userStats?.totalGames || 0} jogos)</div>
                 <Progress value={aiLearningProgress} className="mt-2 h-2" />
               </div>
 
               <div className="text-center">
                 <Target className="h-12 w-12 mx-auto mb-3 text-accent" />
                 <div className="text-2xl font-bold text-accent neon-text" data-testid="accuracy-improvement">
-                  +{userStats?.accuracy || 0}%
+                  {userStats?.winRate ? `${userStats.winRate.toFixed(1)}%` : '0%'}
                 </div>
-                <div className="text-sm text-muted-foreground">Melhoria</div>
+                <div className="text-sm text-muted-foreground">Taxa de Acerto</div>
               </div>
             </div>
           </CardContent>
@@ -224,17 +239,19 @@ export default function AIAnalysis() {
         {/* Controls */}
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8">
           <Select value={selectedLottery} onValueChange={setSelectedLottery}>
-              <SelectTrigger className="w-64 data-[placeholder]:text-muted-foreground">
-                <SelectValue placeholder="Selecione a modalidade" />
-              </SelectTrigger>
-              <SelectContent>
-                {lotteryTypes?.map((lottery) => (
-                  <SelectItem key={lottery.id} value={lottery.id}>
-                    {lottery.displayName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SelectTrigger className="w-64 bg-slate-800/50 border-purple-500/20 text-white">
+              <SelectValue>
+                {lotteryTypes?.find(l => l.id === selectedLottery)?.displayName || "Selecione a modalidade"}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {lotteryTypes?.map((lottery) => (
+                <SelectItem key={lottery.id} value={lottery.id}>
+                  {lottery.displayName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <div className="flex gap-2">
             {(['pattern', 'prediction', 'strategy'] as const).map((tab) => (
@@ -242,7 +259,7 @@ export default function AIAnalysis() {
                 key={tab}
                 variant={activeTab === tab ? "default" : "outline"}
                 onClick={() => setActiveTab(tab)}
-                className={activeTab === tab ? "bg-black/20" : ""}
+                className={activeTab === tab ? "bg-primary/20 border-primary" : ""}
                 data-testid={`tab-${tab}`}
               >
                 {tab === 'pattern' && <Eye className="h-4 w-4 mr-2" />}
