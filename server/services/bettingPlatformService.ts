@@ -19,7 +19,7 @@ interface CartItem {
 const PLATFORMS: Record<string, BettingPlatform> = {
   superjogo: {
     id: 'superjogo',
-    name: 'SuperJogo',
+    name: 'Lotogiro',
     baseUrl: 'https://superjogo.loteriabr.com',
     cartEndpoint: '/carrinho/adicionar',
     authRequired: false,
@@ -67,7 +67,7 @@ class BettingPlatformService {
     }
 
     try {
-      // SuperJogo - formato específico
+      // Lotogiro - formato específico
       if (platformId === 'superjogo') {
         return this.generateSuperJogoUrl(items);
       }
@@ -93,7 +93,7 @@ class BettingPlatformService {
   private generateSuperJogoUrl(items: CartItem[]): string {
     const baseUrl = PLATFORMS.superjogo.baseUrl;
 
-    // SuperJogo permite múltiplos jogos na URL
+    // Lotogiro permite múltiplos jogos na URL
     const gamesParam = items.map(item => {
       const lottery = this.mapLotteryId(item.lotteryId, 'superjogo');
       const numbers = item.numbers.sort((a, b) => a - b).join(',');
@@ -187,7 +187,7 @@ class BettingPlatformService {
   generateDeepLink(platformId: string, items: CartItem[]): string | null {
     const deeplinks: Record<string, string> = {
       'caixa': 'loteriasonline://cart',
-      'superjogo': 'superjogo://cart'
+      'superjogo': 'lotogiro://cart'
     };
 
     return deeplinks[platformId] || null;

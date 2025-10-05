@@ -135,7 +135,7 @@ export function useBettingPlatform(lotteryId: string) {
 
         // Feedback de sucesso
         const platformNames: Record<string, string> = {
-          superjogo: 'SuperJogo',
+          superjogo: 'Lotogiro',
           caixa: 'Loterias Caixa',
           lottoland: 'Lottoland'
         };
