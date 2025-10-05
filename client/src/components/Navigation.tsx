@@ -39,7 +39,7 @@ export default function Navigation() {
   const navItems = [
     { 
       href: "/", 
-      label: "Dashboard", 
+      label: "Página Inicial", 
       icon: Home, 
       emoji: "🏠",
       description: "Painel principal com visão geral"

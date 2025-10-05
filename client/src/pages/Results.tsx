@@ -58,7 +58,7 @@ export default function Results() {
   }, []);
 
   const { data: userGames, isLoading: gamesLoading, refetch: refetchGames } = useQuery({
-    queryKey: ["/api/games", "limit=50"],
+    queryKey: ["/api/games?limit=50"],
     staleTime: 2 * 60 * 1000,
     refetchInterval: 30000, // Refetch every 30 seconds
   });

@@ -239,27 +239,27 @@ export default function AIAnalysis() {
         {/* Controls */}
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8">
           <Select value={selectedLottery} onValueChange={setSelectedLottery}>
-            <SelectTrigger className="w-64 bg-slate-800/50 border-purple-500/20 text-white">
+            <SelectTrigger className="w-64 neon-border bg-black/20 text-white">
               <SelectValue>
                 {lotteryTypes?.find(l => l.id === selectedLottery)?.displayName || "Selecione a modalidade"}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="neon-border bg-black/95">
               {lotteryTypes?.map((lottery) => (
-                <SelectItem key={lottery.id} value={lottery.id}>
+                <SelectItem key={lottery.id} value={lottery.id} className="text-white hover:bg-primary/20">
                   {lottery.displayName}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {(['pattern', 'prediction', 'strategy'] as const).map((tab) => (
               <Button
                 key={tab}
                 variant={activeTab === tab ? "default" : "outline"}
                 onClick={() => setActiveTab(tab)}
-                className={activeTab === tab ? "bg-primary/20 border-primary" : ""}
+                className={activeTab === tab ? "neon-border bg-primary/30 text-white border-primary" : "neon-border bg-black/20 text-white hover:bg-primary/20"}
                 data-testid={`tab-${tab}`}
               >
                 {tab === 'pattern' && <Eye className="h-4 w-4 mr-2" />}

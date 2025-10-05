@@ -70,7 +70,7 @@ export default function HeatMapGrid({
       </CardHeader>
       <CardContent>
         {/* Numbers Grid */}
-        <div className="grid grid-cols-10 gap-2 mb-6">
+        <div className="grid grid-cols-10 gap-1.5 mb-6">
           {Array.from({ length: maxNumbers }, (_, i) => {
             const number = i + 1;
             const freq = frequencies.find(f => f.number === number);
@@ -80,7 +80,7 @@ export default function HeatMapGrid({
               <button
                 key={number}
                 onClick={() => onNumberClick?.(number)}
-                className={`aspect-square ${style} rounded-lg flex items-center justify-center font-bold shadow-lg hover:scale-110 transition-all duration-200 cursor-pointer border-2`}
+                className={`aspect-square ${style} rounded-2xl flex items-center justify-center font-bold text-sm shadow-md hover:scale-105 transition-all duration-200 cursor-pointer border-2`}
                 title={`Número ${number} - ${freq?.frequency || 0} vezes - ${freq?.temperature || 'cold'}`}
                 data-testid={`number-${number}`}
                 data-temperature={freq?.temperature || 'cold'}
