@@ -235,9 +235,9 @@ export default function AllLotteriesCard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="flex flex-col gap-4">
           {lotteryTypes.map((lottery) => (
-            <div key={lottery.id} className="h-full">
+            <div key={lottery.id} className="w-full">
               <SingleLotteryCard lottery={lottery} />
             </div>
           ))}
