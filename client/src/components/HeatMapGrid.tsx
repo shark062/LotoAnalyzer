@@ -9,22 +9,22 @@ interface HeatMapGridProps {
   onNumberClick?: (number: number) => void;
 }
 
-export default function HeatMapGrid({ 
-  frequencies, 
-  maxNumbers, 
+export default function HeatMapGrid({
+  frequencies,
+  maxNumbers,
   isLoading,
-  onNumberClick 
+  onNumberClick
 }: HeatMapGridProps) {
   const getNumberStyle = (number: number) => {
     const freq = frequencies.find(f => f.number === number);
     const temperature = freq?.temperature || 'cold';
-    
+
     const styles = {
       hot: "bg-red-500/80 text-white border-red-400 hover:bg-red-600/90",
-      warm: "bg-yellow-500/80 text-white border-yellow-400 hover:bg-yellow-600/90", 
+      warm: "bg-yellow-500/80 text-white border-yellow-400 hover:bg-yellow-600/90",
       cold: "bg-blue-500/80 text-white border-blue-400 hover:bg-blue-600/90"
     };
-    
+
     return styles[temperature];
   };
 
@@ -49,7 +49,7 @@ export default function HeatMapGrid({
         <CardContent>
           <div className="grid grid-cols-10 gap-2 mb-4">
             {[...Array(60)].map((_, i) => (
-              <div 
+              <div
                 key={i}
                 className="aspect-square bg-black/20 rounded-lg animate-pulse"
               />
@@ -75,7 +75,7 @@ export default function HeatMapGrid({
             const number = i + 1;
             const freq = frequencies.find(f => f.number === number);
             const style = getNumberStyle(number);
-            
+
             return (
               <button
                 key={number}
@@ -90,7 +90,7 @@ export default function HeatMapGrid({
             );
           })}
         </div>
-        
+
         {/* Legend */}
         <div className="flex justify-center space-x-6 text-sm">
           <div className="flex items-center space-x-2">
@@ -118,7 +118,7 @@ export default function HeatMapGrid({
             </span>
           </div>
         </div>
-        
+
         {/* Statistics */}
         {frequencies.length > 0 && (
           <div className="mt-6 grid grid-cols-3 gap-4 text-center">

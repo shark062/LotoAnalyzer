@@ -41,7 +41,7 @@ import {
 } from "recharts";
 
 export default function AIMetrics() {
-  const [selectedLottery, setSelectedLottery] = useState<string>("megasena");
+  const [selectedLottery, setSelectedLottery] = useState<string>("");
   
   const { data: lotteryTypes } = useLotteryTypes();
   const { data: metaAnalysis, isLoading: loadingMeta } = useMetaReasoningAnalysis(selectedLottery);

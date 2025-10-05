@@ -37,7 +37,7 @@ export default function HeatMap() {
 
   const handleUpdateFrequencies = async () => {
     if (!selectedLottery) return;
-    
+
     setIsUpdating(true);
     try {
       await apiRequest('POST', `/api/lotteries/${selectedLottery}/update-frequency`);
@@ -63,7 +63,7 @@ export default function HeatMap() {
 
   const getTemperatureStats = () => {
     if (!frequencies) return { hot: 0, warm: 0, cold: 0 };
-    
+
     return {
       hot: frequencies.filter(f => f.temperature === 'hot').length,
       warm: frequencies.filter(f => f.temperature === 'warm').length,
@@ -92,7 +92,7 @@ export default function HeatMap() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -278,7 +278,7 @@ export default function HeatMap() {
                        '❄️ Frio'}
                     </Badge>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Frequência:</span>
@@ -327,7 +327,7 @@ export default function HeatMap() {
               <Zap className="h-4 w-4 mr-2" />
               Ir para Gerador
             </Button>
-            
+
             <Button 
               onClick={() => window.location.href = '/ai-analysis'}
               variant="outline"
@@ -340,7 +340,7 @@ export default function HeatMap() {
           </div>
         </div>
       </main>
-      
+
       {/* Developer Footer */}
       <footer className="text-center py-4 mt-8 border-t border-border/20">
         <p className="text-xs text-muted-foreground">

@@ -31,10 +31,11 @@ export default function Results() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationPrize, setCelebrationPrize] = useState<string>();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [selectedLottery, setSelectedLottery] = useState<string>('');
 
   // Data queries
   const { data: lotteryTypes } = useLotteryTypes();
-  
+
   const { data: userStats, isLoading: statsLoading } = useQuery({
     queryKey: ['user-stats'],
     queryFn: async () => {

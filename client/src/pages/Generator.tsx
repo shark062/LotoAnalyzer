@@ -63,14 +63,14 @@ export default function Generator() {
   // Data queries
   const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
 
-  // Estado para selectedLotteryId, inicializado com um valor padrão
-  const [selectedLotteryId, setSelectedLotteryId] = useState<string>('megasena');
+  // Estado para selectedLotteryId, inicializado vazio
+  const [selectedLotteryId, setSelectedLotteryId] = useState<string>('');
 
   // Form setup
   const form = useForm<GenerateGameForm>({
     resolver: zodResolver(generateGameSchema),
     defaultValues: {
-      lotteryId: preselectedLottery || 'megasena', // Usa preselectedLottery ou o padrão
+      lotteryId: preselectedLottery || '', // Inicia vazio
       numbersCount: undefined,
       gamesCount: undefined,
       strategy: undefined,

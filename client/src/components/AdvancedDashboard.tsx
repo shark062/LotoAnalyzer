@@ -1,4 +1,3 @@
-
 /**
  * 🌟 FASE 4 - UX: Dashboard Avançado com Melhorias de Experiência
  * 
@@ -26,6 +25,13 @@ import {
   Clock,
   Sparkles
 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface QualityMetrics {
   dataConsistency: number;
@@ -44,6 +50,7 @@ interface AIInsight {
 
 export default function AdvancedDashboard() {
   const [selectedMetric, setSelectedMetric] = useState<string>('overview');
+  const [selectedLottery, setSelectedLottery] = useState<string>('');
 
   // 📊 Métricas de qualidade em tempo real
   const { data: qualityMetrics, isLoading: loadingMetrics } = useQuery({
@@ -468,7 +475,7 @@ function InsightCard({ insight }: { insight: AIInsight }) {
 
 function QualityMetric({ label, value, target }: { label: string; value: number; target: number }) {
   const isGood = value >= target;
-  
+
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
