@@ -2,6 +2,18 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+// Configurar Express para confiar em proxies (importante para Replit)
+const app = express();
+app.set('trust proxy', true);
+app.disable('x-powered-by');
+
+// Middleware para garantir headers consistentes
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+});
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
