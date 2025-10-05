@@ -264,8 +264,8 @@ export default function Generator() {
                     }}
                     disabled={lotteriesLoading}
                   >
-                    <SelectTrigger data-testid="lottery-selector">
-                      <SelectValue placeholder="Escolha a modalidade" />
+                    <SelectTrigger className="w-full data-[placeholder]:text-muted-foreground">
+                      <SelectValue placeholder="Selecione a modalidade" />
                     </SelectTrigger>
                     <SelectContent>
                       {lotteryTypes?.map((lottery) => (

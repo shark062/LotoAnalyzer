@@ -113,8 +113,8 @@ export default function AIMetrics() {
 
           {/* Lottery Selector */}
           <Select value={selectedLottery} onValueChange={setSelectedLottery}>
-            <SelectTrigger className="w-64 bg-slate-800/50 border-purple-500/20 text-white">
-              <SelectValue placeholder="Selecione a loteria" />
+            <SelectTrigger className="w-64 bg-slate-800/50 border-purple-500/20 text-white data-[placeholder]:text-muted-foreground">
+              <SelectValue placeholder="Selecione a modalidade" />
             </SelectTrigger>
             <SelectContent>
               {lotteryTypes?.map((lottery) => (

@@ -224,17 +224,17 @@ export default function AIAnalysis() {
         {/* Controls */}
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8">
           <Select value={selectedLottery} onValueChange={setSelectedLottery}>
-            <SelectTrigger className="w-48" data-testid="lottery-selector">
-              <SelectValue placeholder="Selecione a modalidade" />
-            </SelectTrigger>
-            <SelectContent>
-              {lotteryTypes?.map((lottery) => (
-                <SelectItem key={lottery.id} value={lottery.id}>
-                  {lottery.displayName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+              <SelectTrigger className="w-64 data-[placeholder]:text-muted-foreground">
+                <SelectValue placeholder="Selecione a modalidade" />
+              </SelectTrigger>
+              <SelectContent>
+                {lotteryTypes?.map((lottery) => (
+                  <SelectItem key={lottery.id} value={lottery.id}>
+                    {lottery.displayName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
           <div className="flex gap-2">
             {(['pattern', 'prediction', 'strategy'] as const).map((tab) => (
@@ -633,7 +633,7 @@ export default function AIAnalysis() {
           </div>
         </div>
       </main>
-      
+
       {/* Developer Footer */}
       <footer className="text-center py-4 mt-8 border-t border-border/20">
         <p className="text-xs text-muted-foreground">
