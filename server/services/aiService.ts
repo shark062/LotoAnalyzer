@@ -1,8 +1,8 @@
 import { storage } from "../storage";
 import { performanceService } from "./performanceService";
 import type { LotteryType, NumberFrequency } from "@shared/schema";
-import { getLotteryConfig } from '../config'; // Assumindo que getLotteryConfig existe e é importável
-import { deepAnalysis } from './deepAnalysis'; // Assumindo que deepAnalysis é importável
+import { getLotteryConfig } from '../../shared/lotteryConstants';
+import { deepAnalysis } from './deepAnalysis';
 
 interface AnalysisResult {
   id: number;
