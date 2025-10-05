@@ -757,6 +757,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🧠 META-REASONING ENDPOINTS
+
+  // Analisar performance de todos os modelos
+  app.get('/api/meta-reasoning/analyze/:lotteryId', async (req, res) => {
+    try {
+      const { lotteryId } = req.params;
+      const { metaReasoning } = await import('./services/metaReasoningService');
+      
+      const analysis = await metaReasoning.analyzeModelsPerformance(lotteryId);
+      
+      res.json({
+        success: true,
+        lotteryId,
+        ...analysis,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error in meta-reasoning analysis:', error);
+      res.status(500).json({ error: 'Failed to perform meta-reasoning analysis' });
+    }
+  });
+
+  // Processar feedback de resultado real
+  app.post('/api/meta-reasoning/feedback', async (req, res) => {
+    try {
+      const { lotteryId, contestNumber, actualNumbers } = req.body;
+      const { metaReasoning } = await import('./services/metaReasoningService');
+      
+      const result = await metaReasoning.processFeedback(
+        lotteryId,
+        contestNumber,
+        actualNumbers
+      );
+      
+      res.json({
+        success: true,
+        ...result,
+        message: 'Feedback processado e modelos atualizados'
+      });
+    } catch (error) {
+      console.error('Error processing feedback:', error);
+      res.status(500).json({ error: 'Failed to process feedback' });
+    }
+  });
+
+  // Prever combinação ótima de modelos
+  app.get('/api/meta-reasoning/optimal-combination/:lotteryId', async (req, res) => {
+    try {
+      const { lotteryId } = req.params;
+      const { metaReasoning } = await import('./services/metaReasoningService');
+      
+      const prediction = await metaReasoning.predictOptimalCombination(lotteryId);
+      
+      res.json({
+        success: true,
+        lotteryId,
+        ...prediction,
+        recommendation: `Use ${prediction.primaryModel} como modelo principal com suporte de ${prediction.supportingModels.join(', ')}`
+      });
+    } catch (error) {
+      console.error('Error predicting optimal combination:', error);
+      res.status(500).json({ error: 'Failed to predict optimal combination' });
+    }
+  });
+
   // === ROTAS DE ANÁLISE AVANÇADA ===
 
   // Gerar heatmap de posições
