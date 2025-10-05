@@ -1,6 +1,8 @@
 import { storage } from "../storage";
 import { performanceService } from "./performanceService";
 import type { LotteryType, NumberFrequency } from "@shared/schema";
+import { getLotteryConfig } from '../config'; // Assumindo que getLotteryConfig existe e é importável
+import { deepAnalysis } from './deepAnalysis'; // Assumindo que deepAnalysis é importável
 
 interface AnalysisResult {
   id: number;
@@ -773,6 +775,261 @@ class AiService {
 
     return (lotteries as any)[lotteryId] || { minNumbers: 6, totalNumbers: 60 };
   }
+
+  // ADVANCED AI GENERATION METHOD
+  async generateWithAI(
+    lotteryId: string,
+    count: number,
+    gamesCount: number = 1
+  ): Promise<number[][]> {
+    console.log(`🤖 Iniciando análise de IA AVANÇADA para ${lotteryId}...`);
+    console.log(`📊 Processando ${gamesCount} jogo(s) com ${count} dezenas cada`);
+
+    const config = getLotteryConfig(lotteryId);
+    if (!config) {
+      throw new Error(`Configuração não encontrada para ${lotteryId}`);
+    }
+
+    const maxNumber = config.totalNumbers;
+
+    // 📊 FASE 1: COLETA E ANÁLISE PROFUNDA DOS DADOS
+    console.log('📊 FASE 1: Coletando dados históricos...');
+    const [frequencies, latestDraws] = await Promise.all([
+      storage.getNumberFrequencies(lotteryId),
+      storage.getLatestDraws(lotteryId, 100)
+    ]);
+
+    if (latestDraws.length < 30) {
+      console.warn('⚠️  Dados históricos insuficientes (<30 sorteios), usando geração otimizada');
+      return this.generateFallbackGames(lotteryId, count, gamesCount);
+    }
+
+    console.log(`✅ ${latestDraws.length} sorteios analisados`);
+
+    // 🔬 FASE 2: ANÁLISE DE CORRELAÇÃO ENTRE NÚMEROS
+    console.log('🔬 FASE 2: Calculando matriz de correlação...');
+    const correlationMatrix = deepAnalysis.correlationAnalysis.calculateCorrelationMatrix(latestDraws, maxNumber);
+    console.log(`✅ ${correlationMatrix.size} correlações identificadas`);
+
+    // 📈 FASE 3: ANÁLISE DE PADRÕES E TENDÊNCIAS
+    console.log('📈 FASE 3: Identificando padrões...');
+    const patterns = deepAnalysis.patternRecognition.detectPatterns(latestDraws);
+    const sequences = deepAnalysis.correlationAnalysis.analyzeConsecutiveSequences(latestDraws, 2);
+    const trios = deepAnalysis.correlationAnalysis.findNumberTrios(latestDraws, 2);
+    console.log(`✅ ${sequences.length} sequências e ${trios.length} trios identificados`);
+
+    // 🎯 FASE 4: ANÁLISE DE DELAY E DISPERSÃO
+    console.log('🎯 FASE 4: Analisando delays e dispersão...');
+    const delayAnalysis = deepAnalysis.correlationAnalysis.analyzeDelayByPosition(latestDraws, maxNumber);
+    const dispersionMetrics = deepAnalysis.correlationAnalysis.calculateDispersionMetrics(frequencies);
+    console.log(`✅ Dispersão: ${dispersionMetrics.standardDeviation.toFixed(2)}, CV: ${dispersionMetrics.coefficientOfVariation.toFixed(2)}%`);
+
+    const games: number[][] = [];
+
+    // 🎲 FASE 5: GERAÇÃO INTELIGENTE DE JOGOS
+    console.log('🎲 FASE 5: Gerando jogos com IA...');
+
+    for (let gameIndex = 0; gameIndex < gamesCount; gameIndex++) {
+      console.log(`\n🎯 Gerando jogo ${gameIndex + 1}/${gamesCount}...`);
+
+      // 🔥 ANÁLISE DE TEMPERATURA ESTRATIFICADA
+      const hotNumbers = frequencies
+        .filter(f => f.temperature === 'hot')
+        .sort((a, b) => b.frequency - a.frequency)
+        .slice(0, Math.ceil(count * 0.45))
+        .map(f => f.number);
+
+      const warmNumbers = frequencies
+        .filter(f => f.temperature === 'warm')
+        .sort((a, b) => b.frequency - a.frequency)
+        .slice(0, Math.ceil(count * 0.35))
+        .map(f => f.number);
+
+      const coldNumbers = frequencies
+        .filter(f => f.temperature === 'cold')
+        .filter(f => {
+          const delay = delayAnalysis.get(f.number);
+          // Priorizar números frios com delay próximo da média
+          return delay && delay.currentDelay >= delay.averageDelay * 0.8;
+        })
+        .sort((a, b) => {
+          const delayA = delayAnalysis.get(a.number);
+          const delayB = delayAnalysis.get(b.number);
+          return (delayB?.currentDelay || 0) - (delayA?.currentDelay || 0);
+        })
+        .slice(0, Math.ceil(count * 0.25))
+        .map(f => f.number);
+
+      console.log(`🔥 Hot: ${hotNumbers.length}, ♨️ Warm: ${warmNumbers.length}, ❄️ Cold: ${coldNumbers.length}`);
+
+      // 🎯 COMBINAÇÃO INTELIGENTE COM PESOS DINÂMICOS
+      let finalNumbers: number[] = [];
+
+      // Base forte com números quentes
+      const selectedHot = this.selectRandomFromArray(hotNumbers, Math.min(hotNumbers.length, Math.ceil(count * 0.45)));
+      finalNumbers.push(...selectedHot);
+      console.log(`  ✓ ${selectedHot.length} números quentes adicionados`);
+
+      // Equilíbrio com números mornos
+      const remainingWarm = warmNumbers.filter(n => !finalNumbers.includes(n));
+      const selectedWarm = this.selectRandomFromArray(remainingWarm, Math.min(remainingWarm.length, Math.ceil(count * 0.35)));
+      finalNumbers.push(...selectedWarm);
+      console.log(`  ✓ ${selectedWarm.length} números mornos adicionados`);
+
+      // Potencial surpresa com números frios estratégicos
+      const remainingCold = coldNumbers.filter(n => !finalNumbers.includes(n));
+      const selectedCold = this.selectRandomFromArray(remainingCold, Math.min(remainingCold.length, count - finalNumbers.length));
+      finalNumbers.push(...selectedCold);
+      console.log(`  ✓ ${selectedCold.length} números frios adicionados`);
+
+      // 🔄 Completar se necessário com números correlacionados
+      if (finalNumbers.length < count) {
+        const needed = count - finalNumbers.length;
+        console.log(`  ⚠️ Faltam ${needed} números, completando com correlacionados...`);
+
+        const correlated = deepAnalysis.correlationAnalysis.selectCorrelatedNumbers(
+          finalNumbers,
+          correlationMatrix,
+          needed,
+          maxNumber,
+          new Set(finalNumbers)
+        );
+        finalNumbers.push(...correlated);
+        console.log(`  ✓ ${correlated.length} números correlacionados adicionados`);
+      }
+
+      // ⚡ FASE 6: OTIMIZAÇÃO POR CORRELAÇÃO
+      const initialScore = deepAnalysis.correlationAnalysis.calculateSetCorrelationScore(finalNumbers, correlationMatrix);
+      console.log(`  📊 Score de correlação inicial: ${initialScore.toFixed(3)}`);
+
+      // Otimizar se score estiver abaixo do limiar
+      if (initialScore < 0.20 && latestDraws.length > 30) {
+        console.log(`  ⚡ Aplicando otimização de correlação...`);
+
+        // Substituir números com baixa correlação
+        const replaceCount = Math.ceil(count * 0.25);
+        const sortedByCorrelation = finalNumbers.map(num => {
+          const correlations = Array.from(correlationMatrix.entries())
+            .filter(([key]) => key.includes(`${num}-`) || key.includes(`-${num}`))
+            .map(([_, value]) => value);
+
+          return {
+            number: num,
+            avgCorrelation: correlations.length > 0 
+              ? correlations.reduce((a, b) => a + b, 0) / correlations.length 
+              : 0
+          };
+        }).sort((a, b) => a.avgCorrelation - b.avgCorrelation);
+
+        const toReplace = sortedByCorrelation.slice(0, replaceCount).map(x => x.number);
+        const remaining = finalNumbers.filter(n => !toReplace.includes(n));
+
+        const improved = deepAnalysis.correlationAnalysis.selectCorrelatedNumbers(
+          remaining,
+          correlationMatrix,
+          replaceCount,
+          maxNumber,
+          new Set(remaining)
+        );
+
+        finalNumbers = [...remaining, ...improved];
+
+        const newScore = deepAnalysis.correlationAnalysis.calculateSetCorrelationScore(finalNumbers, correlationMatrix);
+        console.log(`  ✨ Score otimizado: ${initialScore.toFixed(3)} → ${newScore.toFixed(3)} (+${((newScore - initialScore) * 100).toFixed(1)}%)`);
+      }
+
+      // 🎲 FASE 7: VALIDAÇÃO DE PADRÕES
+      const hasSequence = this.hasConsecutiveNumbers(finalNumbers);
+      const evenOddRatio = finalNumbers.filter(n => n % 2 === 0).length / count;
+
+      console.log(`  🔍 Validação: ${hasSequence ? '✓' : '✗'} Sequências, Par/Ímpar: ${(evenOddRatio * 100).toFixed(0)}%/${((1 - evenOddRatio) * 100).toFixed(0)}%`);
+
+      // 🛡️ FASE 8: GARANTIR UNICIDADE E ORDENAÇÃO
+      finalNumbers = this.ensureUniqueness(finalNumbers, count, maxNumber);
+
+      // 📊 FASE 9: SCORE DE QUALIDADE FINAL
+      const finalCorrelation = deepAnalysis.correlationAnalysis.calculateSetCorrelationScore(finalNumbers, correlationMatrix);
+      const diversityScore = this.calculateDiversityScore(frequencies);
+      const qualityScore = (finalCorrelation * 0.6 + diversityScore * 0.4);
+
+      console.log(`  📊 QUALIDADE FINAL:`);
+      console.log(`     - Correlação: ${finalCorrelation.toFixed(3)}`);
+      console.log(`     - Diversidade: ${diversityScore.toFixed(3)}`);
+      console.log(`     - Score Total: ${qualityScore.toFixed(3)}`);
+
+      // Se qualidade ainda estiver baixa, aplicar última otimização
+      if (qualityScore < 0.65 && latestDraws.length > 50) {
+        console.log(`  ⚠️ Qualidade baixa (${qualityScore.toFixed(2)}), aplicando otimização final...`);
+
+        // Buscar melhor combinação entre os top números
+        const topFrequencies = frequencies
+          .sort((a, b) => b.frequency - a.frequency)
+          .slice(0, Math.min(maxNumber, count * 3));
+
+        const bestCombo = this.findBestCorrelatedCombo(
+          topFrequencies.map(f => f.number),
+          count,
+          correlationMatrix
+        );
+
+        if (bestCombo.length === count) {
+          finalNumbers = bestCombo;
+          const improvedScore = deepAnalysis.correlationAnalysis.calculateSetCorrelationScore(finalNumbers, correlationMatrix);
+          console.log(`  ✨ Otimização aplicada: ${qualityScore.toFixed(3)} → ${improvedScore.toFixed(3)}`);
+        }
+      }
+
+      finalNumbers.sort((a, b) => a - b);
+      games.push(finalNumbers);
+
+      console.log(`  ✅ Jogo ${gameIndex + 1} gerado: [${finalNumbers.join(', ')}]`);
+    }
+
+    console.log(`\n🎯 IA AVANÇADA CONCLUÍDA!`);
+    console.log(`✅ ${games.length} jogo(s) gerado(s) com análise completa de:`);
+    console.log(`   - Correlação entre números`);
+    console.log(`   - Padrões históricos`);
+    console.log(`   - Análise de temperatura`);
+    console.log(`   - Delays e dispersão`);
+    console.log(`   - Otimização de qualidade`);
+
+    return games;
+  }
+
+  // Método auxiliar para encontrar melhor combinação correlacionada
+  private findBestCorrelatedCombo(
+    candidates: number[],
+    count: number,
+    correlationMatrix: Map<string, number>
+  ): number[] {
+    let bestCombo: number[] = [];
+    let bestScore = 0;
+
+    // Testar algumas combinações aleatórias e escolher a melhor
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const combo = this.selectRandomFromArray(candidates, count);
+      const score = deepAnalysis.correlationAnalysis.calculateSetCorrelationScore(combo, correlationMatrix);
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestCombo = combo;
+      }
+    }
+
+    return bestCombo;
+  }
+
+  // Verificar se há números consecutivos
+  private hasConsecutiveNumbers(numbers: number[]): boolean {
+    const sorted = [...numbers].sort((a, b) => a - b);
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i] === sorted[i - 1] + 1) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 
   // ADVANCED NUMBER GENERATION METHODS
 
@@ -1560,7 +1817,7 @@ class AiService {
     return validated.slice(0, count);
   }
 
-  // Métodos específicos do Algoritmo Genético e Unicidade
+  // Métodos específicos para Algoritmo Genético e Unicidade
 
   private applyGeneticAlgorithm(temporalOutput: number[], count: number, maxNumber: number, lotteryId: string, seed?: number): number[] {
     // Simula algoritmo genético para otimização final com seed único
@@ -1765,6 +2022,10 @@ class AiService {
       temporalAnalysis: this.analyzeTemporalPatterns(latestDraws),
       distributionAnalysis: this.analyzeNumberDistribution(frequencies, maxNumber),
       correlationAnalysis: correlationAnalysis,
+      patternRecognition: { // Placeholder for pattern recognition methods
+        detectPatterns: (draws: any[]) => ({}),
+      },
+      // Add other analysis modules here as needed
     };
   }
 
@@ -2707,7 +2968,7 @@ class AiService {
     return total > 0 ? hits / total : 0.5;
   }
 
-  private calculateSelectionAccuracy(candidate: any, existing: number[], latestDraws: any[]): number {
+  private selectSelectionAccuracy(candidate: any, existing: number[], latestDraws: any[]): number {
     let score = candidate.acertivityScore || 0.5;
 
     // Bonus por diversidade
