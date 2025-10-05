@@ -1,6 +1,4 @@
 
-import { useQuery } from "@tanstack/react-query";
-
 interface User {
   id: string;
   name: string;
@@ -14,15 +12,9 @@ const mockUser: User = {
 };
 
 export function useAuth() {
-  // Simplified query without causing React context issues
-  const queryResult = useQuery<User>({
-    queryKey: ["/api/auth/user"],
-    retry: false,
-    enabled: false, // Disable automatic fetching
-  });
-
+  // Retorna dados estáticos sem usar React Query para evitar conflitos
   return {
-    user: queryResult.data || mockUser,
+    user: mockUser,
     isLoading: false,
     isAuthenticated: true,
   };

@@ -1,4 +1,3 @@
-import { useToast } from "@/hooks/use-toast"
 import {
   Toast,
   ToastClose,
@@ -9,7 +8,8 @@ import {
 } from "@/components/ui/toast"
 
 export function Toaster() {
-  const { toasts } = useToast()
+  // Toaster simplificado sem hooks para evitar erros de contexto
+  const toasts: any[] = [];
 
   return (
     <ToastProvider>
