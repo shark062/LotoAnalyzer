@@ -9,6 +9,7 @@ import HeatMap from "@/pages/HeatMap";
 import Generator from "@/pages/Generator";
 import Results from "@/pages/Results";
 import AIAnalysis from "@/pages/AIAnalysis";
+import AIMetrics from "@/pages/AIMetrics";
 import Information from "@/pages/Information";
 import AdvancedDashboard from "@/components/AdvancedDashboard";
 
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/generator" component={Generator} />
       <Route path="/results" component={Results} />
       <Route path="/ai-analysis" component={AIAnalysis} />
+      <Route path="/ai-metrics" component={AIMetrics} />
       <Route path="/information" component={Information} />
       <Route path="/advanced-dashboard" component={AdvancedDashboard} />
       <Route component={NotFound} />
