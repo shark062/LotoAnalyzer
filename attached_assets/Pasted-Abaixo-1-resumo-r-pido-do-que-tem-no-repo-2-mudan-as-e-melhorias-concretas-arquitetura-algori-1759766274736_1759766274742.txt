@@ -1,0 +1,248 @@
+Abaixo: 1) resumo rápido do que tem no repo; 2) mudanças e melhorias concretas (arquitetura + algoritmos); 3) trechos de código (TypeScript/Node) plug-and-play; 4) como validar/medir; 5) APIs para jogar/atualizar resultados (fontes). Vamos lá.
+
+1) Situação atual (rápido)
+
+Repo já tem backend em Node/TypeScript, frontend React, banco Postgres com Drizzle, scripts e infra para deploy. Isso facilita integrar modelos e pipelines. 
+
+
+2) Objetivos práticos (o que vamos atingir)
+
+Gerar jogos com baixa quantidade de sequências (ex.: penalizar 2+ consecutivos).
+
+Garantir distribuição por faixas (evitar concentração em 1–10, etc.).
+
+Manter diversidade entre jogos (se gerar N jogos, que não sejam variações ínfimas).
+
+Ter pipeline reproducível: coleta de resultados, features, treino, geração, simulação backtest.
+
+Métricas para provar se uma estratégia “faz sentido” em simulações históricas (ROC simples / acerto por posição / proporção de jogos que acertaram 3/4/5 etc).
+
+
+3) Mudanças técnicas e recursos a implementar (lista prioritária)
+
+1. Fonte confiável de resultados + cache — usar APIs abertas (ou pagas) para manter base atualizada e evitar scraping frágil. Exemplos: loteriascaixa APIs e alternativas. 
+
+
+2. Pipeline ETL/feature engineering (server/services/etl): calcule frequências, recência, co-ocorrência (matriz 1..N), somas de jogo, pares/ímpares, desvios, bucketization por faixas, contagem de sequências históricas.
+
+
+3. Banco: tabelas históricas e features — tabela draws, draw_features, cooccurrence_matrix atualizável.
+
+
+4. Módulo de geração: algoritmo “fitness-based” — usar Algoritmo Genético (GA) ou Simulated Annealing para gerar jogos que maximizem score = (balanceamento + baixa sequência + diversidade + preferências do usuário). Forneço TS/Node exemplo abaixo.
+
+
+5. Modelos ML para ranking/probabilidade — Treinar modelos (RandomForest/XGBoost/LightGBM) para estimar probabilidade por número (ou usar rede que gera distribuições); use validação temporal (treino com janelas anteriores, teste em janelas posteriores).
+
+
+6. Simulação Monte Carlo / backtest — gere N jogos por concurso passado e calcule quantas vezes estratégia teria conseguido 3/4/5/6 acertos; compare com jogos aleatórios.
+
+
+7. Parâmetros ajustáveis via UI — sliders para ‘máx sequências’, ‘par/ímpar balance’, ‘min/max soma’, ‘diversidade entre jogos’, ‘tamanho população GA’.
+
+
+8. Monitor e métricas — registros de experimentos (ex.: MLflow, ou um JSON/SQL simples) para acompanhar melhorias.
+
+
+
+4) Engenharia de features sugeridas
+
+freq_num[i] = frequência histórica da dezena i.
+
+recency_num[i] = número de concursos desde que i saiu.
+
+pair_count[i][j] = contagens de co-ocorrência i+j.
+
+avg_sum, std_sum da combinação.
+
+n_consec (contagem de pares consecutivos na combinação).
+
+n_pairs, n_impares e imbalance = abs(n_par - n_impar).
+
+range_buckets — quantos números em cada faixa (ex: 1-10,11-20...).
+
+distance_metrics para medir diversidade entre jogos (Hamming ou soma diffs).
+
+
+5) Exemplo prático — integração com API dos resultados
+
+Recomendo usar uma API de resultados em produção e armazenar localmente (evita downtime). Exemplo: https://loteriascaixa-api.herokuapp.com/ ou apiloterias.com.br (existem opções gratuitas e pagas) — integrá-las e depois popular draws no Postgres. 
+
+Trecho (Node/TS) para baixar e salvar último concurso (usar axios + knex/drizzle):
+
+// server/services/fetchResults.ts
+import axios from "axios";
+import { db } from "../db"; // seu Drizzle client / ORM
+export async function fetchLatest(loteria = "megasena") {
+  // Exemplo com API gratuita (ajuste baseURL se usar outra)
+  const url = `https://loteriascaixa-api.herokuapp.com/api/${loteria}/latest`;
+  const res = await axios.get(url);
+  const data = res.data;
+  // Exemplo de shape: { concurso: 1234, dezenas: [1,2,3,4,5,6], data, premiacao: { ... } }
+  await db.insert("draws").values({
+    concurso: data.concurso,
+    date: data.date,
+    dezenas: JSON.stringify(data.dezenas)
+  });
+}
+
+(Ajuste URL conforme a API que escolher; sempre trate caching e retries.)
+
+6) Exemplo: Gerador baseado em Algoritmo Genético (TypeScript)
+
+Fluxo: população de jogos → fitness avalia balanceamento/seq/pares/faixas → seleção, crossover, mutação → nova geração → retorna top K jogos.
+
+// server/services/geneticGenerator.ts
+type Game = number[]; // ex: [3, 12, 23, 34, 40, 56]
+
+function randomGame(poolSize = 60, pick = 6): Game {
+  const nums = Array.from({length: poolSize}, (_,i)=>i+1);
+  shuffle(nums);
+  return nums.slice(0,pick).sort((a,b)=>a-b);
+}
+
+function fitness(game: Game) {
+  // penaliza sequências
+  let seqPenalty = 0;
+  for (let i=1;i<game.length;i++) if (game[i] === game[i-1]+1) seqPenalty++;
+  // balance pares/ímpares
+  const pares = game.filter(n=>n%2===0).length;
+  const impares = game.length - pares;
+  const parImparPenalty = Math.abs(pares - impares);
+  // faixa buckets (ex: 1-10,11-20,...)
+  const buckets = [0,0,0,0,0,0];
+  for (const n of game) buckets[Math.floor((n-1)/10)]++;
+  // reward diversidade across buckets (prefere >=1 em 3+ buckets)
+  const bucketReward = Math.min(3, buckets.filter(x=>x>0).length);
+
+  // soma e variância
+  const sum = game.reduce((a,b)=>a+b,0);
+  const meanDiff = Math.abs(sum - 3.5 * game.length); // exemplo de target
+
+  // fitness maior é melhor
+  return bucketReward * 10 - seqPenalty*5 - parImparPenalty*3 - meanDiff*0.1;
+}
+
+// operadores simples de GA (crossover + mutação) omitidos por brevidade
+
+// exemplo de uso:
+export function generateGamesGA(populationSize=200, generations=120, pick=6) {
+  let population = Array.from({length:populationSize}, ()=>randomGame(60,pick));
+  for (let g=0; g<generations; g++) {
+    // calcular fitness
+    const scored = population.map(p=>({p,score:fitness(p)}));
+    scored.sort((a,b)=>b.score-a.score);
+    // seleção elitista + crossover + mutação
+    const next: Game[] = scored.slice(0, Math.floor(populationSize*0.1)).map(s=>s.p); // elite
+    while (next.length < populationSize) {
+      const a = tournamentSelect(scored);
+      const b = tournamentSelect(scored);
+      const child = crossover(a.p, b.p);
+      if (Math.random() < 0.15) mutate(child);
+      next.push(child);
+    }
+    population = next;
+  }
+  // retornar top 10
+  return population.map(p=>({p,score:fitness(p)})).sort((a,b)=>b.score-a.score).slice(0,10);
+}
+
+(Se quiser eu escrevo crossover, mutate e tournamentSelect completos — pedi para não perguntar — já vou direto se quiser.)
+
+7) Exemplo: Simulação / Backtest (Monte Carlo)
+
+Gere X jogos para cada concurso histórico usando seu gerador e calcule quantas vezes acertaria 3,4,5,6 números. Compare com aleatório puro (baseline).
+
+// scripts/backtest.ts
+import { getAllDraws } from "../server/services/db";
+import { generateGamesGA } from "../server/services/geneticGenerator";
+import _ from "lodash";
+
+async function backtest() {
+  const draws = await getAllDraws("megasena"); // ordered by concurso asc
+  let stats = { totalContests: 0, hits3:0, hits4:0, hits5:0, hits6:0 };
+  for (const draw of draws) {
+    const generated = generateGamesGA(200,50)[0]; // top1
+    const matches = generated.p.filter(n => draw.dezenas.includes(n)).length;
+    if (matches===3) stats.hits3++;
+    if (matches===4) stats.hits4++;
+    if (matches===5) stats.hits5++;
+    if (matches===6) stats.hits6++;
+    stats.totalContests++;
+  }
+  console.log(stats, "porcentagens:", {
+    p3: stats.hits3/stats.totalContests,
+    p4: stats.hits4/stats.totalContests,
+    p5: stats.hits5/stats.totalContests,
+    p6: stats.hits6/stats.totalContests
+  });
+}
+
+8) Modelos ML (quando usar)
+
+Se você quer estimativa de probabilidade por número, use modelos de classificação/regressão por número (ex.: XGBoost/LightGBM) onde cada amostra é um concurso anterior e target = saiu(0|1) para o número i. Use validação temporal (treino com concursos <= T, teste em T+1..).
+
+Outra abordagem: Treinar um modelo que prevê o conjunto (mais complexo) — aqui GA + heurísticas tende a ser mais estável que redes complexas porque o espaço é enorme.
+
+Evite redes profundas sem muita regularização — risco alto de overfitting histórico. Sempre validar com janelas “out-of-time”.
+
+
+9) Métricas que você deve registrar
+
+Taxa de acerto por nível (3/4/5/6) em backtest.
+
+Distribuição de pares/ímpares média e variância.
+
+Quantidade média de sequências por jogo.
+
+Distância média entre jogos gerados (para medir diversidade).
+
+Tempo de geração por estratégia (perf).
+
+
+10) Boas práticas de produção
+
+Cuidado com determinismo: seed RNG para testes reprodutíveis.
+
+Caching: guardar últimos resultados e features extraídas.
+
+Feature store: salvar features por concurso, para re-treino incremental.
+
+Experiment tracking (mesmo simples: tabela experiments com params/resultado).
+
+Alertas se API de resultados falhar (fallback).
+
+
+11) Fontes/APIs úteis (para puxar resultados)
+
+Repositório com API gratuita de resultados (exemplo): guidi/loteria_api. 
+
+loteriascaixa-api (deploy Heroku com docs) — bom para testes. 
+
+apiloterias.com.br — opção com planos pagos (documentação e token). 
+
+
+12) Próximos passos concretos que eu já posso fazer agora (escolha e eu implemento aqui)
+
+Opções (escolha 1 ou mais — eu já posso gerar o código e PR-style patches):
+
+1. Implementar o módulo GA completo (server/services/geneticGenerator.ts) com testes e export para API que gera N jogos por pedido.
+
+
+2. Criar script ETL (server/services/fetchResults.ts) para popular draws do Postgres e agendá-lo. (Inclui retry/caching).
+
+
+3. Escrever backtest completo (scripts/backtest.ts) que compara GA vs aleatório e gera relatório CSV com resultados por concurso.
+
+
+4. Implementar feature store + script de treino para treinar um XGBoost simples por número e entregar probabilidades (e um endpoint para retornar top-k números).
+
+
+5. Adicionar UI: slider para parâmetros GA na interface e endpoint para gerar jogos “em tempo real”.
+
+
+
+Diz apenas quais itens quer que eu implemente primeiro (ex.: “faça 1+3” ou “faça 1 completo com testes”), que eu gero os arquivos e o patch/trecho de código prontos pra você colar no repo.
+
+
+---
