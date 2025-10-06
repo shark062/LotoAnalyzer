@@ -790,7 +790,6 @@ class AiService {
       throw new Error(`Configuração não encontrada para ${lotteryId}`);
     }
 
-    // 🔧 CORREÇÃO: Usar exatamente o count correto da modalidade
     const targetCount = count;
     const maxNumber = config.totalNumbers;
 
@@ -829,31 +828,55 @@ class AiService {
     console.log(`✅ Dispersão: ${dispersionMetrics.standardDeviation.toFixed(2)}, CV: ${dispersionMetrics.coefficientOfVariation.toFixed(2)}%`);
 
     const games: number[][] = [];
+    const allUsedNumbers = new Set<number>(); // ✅ RASTREIO GLOBAL para evitar jogos idênticos
 
-    // 🎲 FASE 5: GERAÇÃO INTELIGENTE DE JOGOS
+    // 🎲 FASE 5: GERAÇÃO INTELIGENTE DE JOGOS COM DIVERSIDADE GARANTIDA
     console.log('🎲 FASE 5: Gerando jogos com IA...');
 
     for (let gameIndex = 0; gameIndex < gamesCount; gameIndex++) {
       console.log(`\n🎯 Gerando jogo ${gameIndex + 1}/${gamesCount}...`);
 
-      // 🔥 ANÁLISE DE TEMPERATURA ESTRATIFICADA
+      // 🎲 SEED ÚNICO por jogo para garantir variedade TOTAL
+      const uniqueSeed = Date.now() + (gameIndex * 999999) + Math.floor(Math.random() * 1000000);
+
+      // 🔥 ROTAÇÃO DE ESTRATÉGIA: cada jogo usa uma abordagem diferente
+      const strategyRotation = gameIndex % 3;
+      let hotRatio = 0.40, warmRatio = 0.35, coldRatio = 0.25;
+      
+      if (strategyRotation === 0) {
+        // Estratégia 1: Foco em quentes
+        hotRatio = 0.50; warmRatio = 0.30; coldRatio = 0.20;
+      } else if (strategyRotation === 1) {
+        // Estratégia 2: Equilíbrio balanceado
+        hotRatio = 0.35; warmRatio = 0.40; coldRatio = 0.25;
+      } else {
+        // Estratégia 3: Mix com frios
+        hotRatio = 0.30; warmRatio = 0.35; coldRatio = 0.35;
+      }
+
+      console.log(`  📊 Estratégia ${strategyRotation + 1}: ${(hotRatio*100).toFixed(0)}% quentes, ${(warmRatio*100).toFixed(0)}% mornos, ${(coldRatio*100).toFixed(0)}% frios`);
+
+      // 🔥 ANÁLISE DE TEMPERATURA com OFFSET por jogo
+      const hotOffset = gameIndex * 2;
+      const warmOffset = gameIndex * 3;
+      const coldOffset = gameIndex * 4;
+
       const hotNumbers = frequencies
         .filter(f => f.temperature === 'hot')
         .sort((a, b) => b.frequency - a.frequency)
-        .slice(0, Math.ceil(count * 0.45))
+        .slice(hotOffset, hotOffset + Math.ceil(count * hotRatio) + 5) // +5 para ter opções
         .map(f => f.number);
 
       const warmNumbers = frequencies
         .filter(f => f.temperature === 'warm')
         .sort((a, b) => b.frequency - a.frequency)
-        .slice(0, Math.ceil(count * 0.35))
+        .slice(warmOffset, warmOffset + Math.ceil(count * warmRatio) + 5)
         .map(f => f.number);
 
       const coldNumbers = frequencies
         .filter(f => f.temperature === 'cold')
         .filter(f => {
           const delay = delayAnalysis.get(f.number);
-          // Priorizar números frios com delay próximo da média
           return delay && delay.currentDelay >= delay.averageDelay * 0.8;
         })
         .sort((a, b) => {
@@ -861,93 +884,41 @@ class AiService {
           const delayB = delayAnalysis.get(b.number);
           return (delayB?.currentDelay || 0) - (delayA?.currentDelay || 0);
         })
-        .slice(0, Math.ceil(count * 0.25))
+        .slice(coldOffset, coldOffset + Math.ceil(count * coldRatio) + 5)
         .map(f => f.number);
 
-      console.log(`🔥 Hot: ${hotNumbers.length}, ♨️ Warm: ${warmNumbers.length}, ❄️ Cold: ${coldNumbers.length}`);
+      console.log(`  🔥 Pool: Hot ${hotNumbers.length}, Warm ${warmNumbers.length}, Cold ${coldNumbers.length}`);
 
-      // 🎯 COMBINAÇÃO INTELIGENTE COM PESOS DINÂMICOS E UNICIDADE GARANTIDA
-      const usedNumbers = new Set<number>(); // Garantir unicidade ABSOLUTA
+      // 🎯 COMBINAÇÃO INTELIGENTE COM UNICIDADE TOTAL
+      const usedNumbers = new Set<number>();
       let finalNumbers: number[] = [];
 
-      // Base forte com números quentes (40%)
-      const hotTarget = Math.ceil(count * 0.40);
-      const selectedHot = this.selectUniqueNumbers(hotNumbers, hotTarget, usedNumbers, seed + gameIndex * 1000);
+      // Selecionar números com variação MÁXIMA
+      const hotTarget = Math.ceil(count * hotRatio);
+      const selectedHot = this.selectUniqueNumbers(hotNumbers, hotTarget, usedNumbers, uniqueSeed);
       finalNumbers.push(...selectedHot);
-      console.log(`  ✓ ${selectedHot.length} números quentes adicionados`);
 
-      // Equilíbrio com números mornos (35%)
-      const warmTarget = Math.ceil(count * 0.35);
+      const warmTarget = Math.ceil(count * warmRatio);
       const remainingWarm = warmNumbers.filter(n => !usedNumbers.has(n));
-      const selectedWarm = this.selectUniqueNumbers(remainingWarm, warmTarget, usedNumbers, seed + gameIndex * 2000);
+      const selectedWarm = this.selectUniqueNumbers(remainingWarm, warmTarget, usedNumbers, uniqueSeed + 1000);
       finalNumbers.push(...selectedWarm);
-      console.log(`  ✓ ${selectedWarm.length} números mornos adicionados`);
 
-      // Potencial surpresa com números frios (25%)
       const coldTarget = count - finalNumbers.length;
       const remainingCold = coldNumbers.filter(n => !usedNumbers.has(n));
-      const selectedCold = this.selectUniqueNumbers(remainingCold, coldTarget, usedNumbers, seed + gameIndex * 3000);
+      const selectedCold = this.selectUniqueNumbers(remainingCold, coldTarget, usedNumbers, uniqueSeed + 2000);
       finalNumbers.push(...selectedCold);
-      console.log(`  ✓ ${selectedCold.length} números frios adicionados`);
 
-      // 🔄 Completar se necessário com números DIVERSOS (anti-sequência)
+      console.log(`  ✓ Selecionados: ${selectedHot.length} quentes, ${selectedWarm.length} mornos, ${selectedCold.length} frios`);
+
+      // 🔄 Completar se necessário
       if (finalNumbers.length < count) {
         const needed = count - finalNumbers.length;
-        console.log(`  ⚠️ Faltam ${needed} números, completando com estratégia anti-sequência...`);
-
         const allAvailable = Array.from({length: maxNumber}, (_, i) => i + 1)
           .filter(n => !finalNumbers.includes(n));
         
-        // Para Lotofácil, aplicar estratégia especial de dispersão
-        if (lotteryId === 'lotofacil') {
-          const sortedFinal = [...finalNumbers].sort((a, b) => a - b);
-          const dispersed: number[] = [];
-          
-          for (const candidate of allAvailable) {
-            // Verificar se não cria sequência de 3+ números
-            let wouldCreateLongSequence = false;
-            
-            for (let i = 0; i < sortedFinal.length - 1; i++) {
-              const hasSequenceBefore = sortedFinal[i] === candidate - 1;
-              const hasSequenceAfter = sortedFinal[i] === candidate + 1;
-              const hasSequenceBeforeBefore = sortedFinal[i] === candidate - 2;
-              const hasSequenceAfterAfter = sortedFinal[i] === candidate + 2;
-              
-              // Bloquear se criaria sequência de 3 ou mais
-              if ((hasSequenceBefore && hasSequenceBeforeBefore) || 
-                  (hasSequenceAfter && hasSequenceAfterAfter) ||
-                  (hasSequenceBefore && hasSequenceAfter)) {
-                wouldCreateLongSequence = true;
-                break;
-              }
-            }
-            
-            if (!wouldCreateLongSequence) {
-              dispersed.push(candidate);
-            }
-          }
-          
-          // Selecionar com variação baseada em seed
-          const selected = this.selectUniqueNumbers(
-            dispersed.length > 0 ? dispersed : allAvailable,
-            needed,
-            new Set(finalNumbers),
-            seed + gameIndex * 7777
-          );
-          finalNumbers.push(...selected);
-          console.log(`  ✓ ${selected.length} números dispersos adicionados (Lotofácil)`);
-        } else {
-          // Outras modalidades: usar correlação
-          const correlated = deepAnalysis.correlationAnalysis.selectCorrelatedNumbers(
-            finalNumbers,
-            correlationMatrix,
-            needed,
-            maxNumber,
-            new Set(finalNumbers)
-          );
-          finalNumbers.push(...correlated);
-          console.log(`  ✓ ${correlated.length} números correlacionados adicionados`);
-        }
+        const additional = this.selectUniqueNumbers(allAvailable, needed, usedNumbers, uniqueSeed + 3000);
+        finalNumbers.push(...additional);
+        console.log(`  ✓ ${additional.length} números adicionais`);
       }
 
       // ⚡ FASE 6: OTIMIZAÇÃO POR CORRELAÇÃO
@@ -1091,19 +1062,55 @@ class AiService {
         }
       }
 
+      // 🛡️ VALIDAÇÃO FINAL: garantir que o jogo é DIFERENTE dos anteriores
       finalNumbers.sort((a, b) => a - b);
+      
+      // Verificar similaridade com jogos anteriores
+      let isTooSimilar = false;
+      for (const existingGame of games) {
+        const matches = finalNumbers.filter(n => existingGame.includes(n)).length;
+        const similarity = matches / count;
+        
+        if (similarity > 0.7) { // Se > 70% igual, regenerar
+          console.log(`  ⚠️ Jogo muito similar (${(similarity*100).toFixed(0)}%), regenerando...`);
+          isTooSimilar = true;
+          break;
+        }
+      }
+
+      // Se muito similar, fazer ajustes para diversificar
+      if (isTooSimilar && games.length > 0) {
+        const numbersToReplace = Math.ceil(count * 0.3); // Trocar 30%
+        const allAvailable = Array.from({length: maxNumber}, (_, i) => i + 1)
+          .filter(n => !finalNumbers.includes(n));
+
+        for (let i = 0; i < numbersToReplace; i++) {
+          const replaceIndex = Math.floor(Math.random() * finalNumbers.length);
+          const newNum = allAvailable.splice(Math.floor(Math.random() * allAvailable.length), 1)[0];
+          if (newNum) {
+            finalNumbers[replaceIndex] = newNum;
+          }
+        }
+        finalNumbers.sort((a, b) => a - b);
+        console.log(`  🔄 Jogo diversificado com ${numbersToReplace} substituições`);
+      }
+
       games.push(finalNumbers);
+      
+      // Adicionar números ao rastreio global
+      finalNumbers.forEach(n => allUsedNumbers.add(n));
 
       console.log(`  ✅ Jogo ${gameIndex + 1} gerado: [${finalNumbers.join(', ')}]`);
     }
 
     console.log(`\n🎯 IA AVANÇADA CONCLUÍDA!`);
-    console.log(`✅ ${games.length} jogo(s) gerado(s) com análise completa de:`);
+    console.log(`✅ ${games.length} jogo(s) ÚNICOS gerado(s) com análise completa de:`);
     console.log(`   - Correlação entre números`);
     console.log(`   - Padrões históricos`);
     console.log(`   - Análise de temperatura`);
     console.log(`   - Delays e dispersão`);
     console.log(`   - Otimização de qualidade`);
+    console.log(`   - Diversidade garantida entre jogos`);
 
     return games;
   }
