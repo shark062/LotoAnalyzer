@@ -10,7 +10,11 @@
     "check": "tsc --noEmit",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "test:accuracy": "npx tsx scripts/test-accuracy.ts"
+    "test:accuracy": "npx tsx scripts/test-accuracy.ts",
+    "etl:sync": "npx tsx scripts/etl-sync.ts",
+    "backtest": "npx tsx scripts/backtest.ts",
+    "train": "npx tsx scripts/train-model.ts",
+    "test:ga": "npx tsx -e \"import { testGA } from './server/services/geneticGenerator.js'; testGA();\""
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.0.5",
@@ -106,13 +110,5 @@
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
-  }
-}
-{
-  "scripts": {
-    "etl:sync": "tsx scripts/etl-sync.ts",
-    "backtest": "tsx scripts/backtest.ts",
-    "train": "tsx scripts/train-model.ts",
-    "test:ga": "tsx -e \"import { testGA } from './server/services/geneticGenerator'; testGA();\""
   }
 }

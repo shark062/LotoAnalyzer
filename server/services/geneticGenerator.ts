@@ -1,23 +1,24 @@
 
 /**
- * 🧬 GERADOR BASEADO EM ALGORITMO GENÉTICO
+ * 🧬 GERADOR BASEADO EM ALGORITMO GENÉTICO OTIMIZADO
  * 
- * Gera jogos otimizados usando evolução artificial:
- * - Minimiza sequências consecutivas
- * - Balanceia pares/ímpares
- * - Distribui por faixas numéricas
- * - Garante diversidade entre jogos
+ * Implementação completa com:
+ * - Penalização de sequências
+ * - Balanceamento par/ímpar
+ * - Distribuição por faixas (buckets)
+ * - Diversidade entre jogos
+ * - Crossover e mutação adaptativos
  */
 
 export type Game = number[];
 
 interface GAParams {
-  poolSize: number;      // Tamanho do pool de números (ex: 60 para Mega-Sena)
-  pick: number;          // Quantos números escolher
-  populationSize: number; // Tamanho da população
-  generations: number;    // Número de gerações
-  mutationRate: number;   // Taxa de mutação (0-1)
-  elitePercent: number;   // Percentual de elite mantida (0-1)
+  poolSize: number;
+  pick: number;
+  populationSize: number;
+  generations: number;
+  mutationRate: number;
+  elitePercent: number;
 }
 
 interface ScoredGame {
@@ -79,21 +80,20 @@ export function calculateFitness(game: Game, poolSize: number = 60): GameMetrics
       buckets[bucketIndex]++;
     }
   }
-  // Recompensa ter números em múltiplos buckets
   const occupiedBuckets = buckets.filter(x => x > 0).length;
   const bucketDiversity = occupiedBuckets;
 
   // 4. DESVIO DA SOMA IDEAL
   const sum = game.reduce((a, b) => a + b, 0);
-  const idealSum = (poolSize / 2) * game.length; // média esperada
+  const idealSum = (poolSize / 2) * game.length;
   const sumDeviation = Math.abs(sum - idealSum);
 
-  // FÓRMULA FINAL DE FITNESS (ajuste pesos conforme necessário)
+  // FÓRMULA FINAL DE FITNESS (ajustável)
   const finalScore = 
-    bucketDiversity * 15 -        // +15 por bucket ocupado
-    sequencePenalty * 8 -          // -8 por sequência
-    parityBalance * 5 -            // -5 por desbalanceamento par/ímpar
-    sumDeviation * 0.05;           // -0.05 por unidade de desvio da soma
+    bucketDiversity * 15 -
+    sequencePenalty * 8 -
+    parityBalance * 5 -
+    sumDeviation * 0.05;
 
   return {
     sequencePenalty,
@@ -213,7 +213,6 @@ function ensureDiversity(games: Game[], minDistance: number = 3): Game[] {
  * FUNÇÃO PRINCIPAL: Gera jogos usando Algoritmo Genético
  */
 export function generateGamesGA(params: Partial<GAParams> = {}, numGames: number = 10): ScoredGame[] {
-  // Parâmetros padrão
   const config: GAParams = {
     poolSize: params.poolSize || 60,
     pick: params.pick || 6,

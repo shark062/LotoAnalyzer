@@ -38,16 +38,17 @@ export interface GameFeatures {
 }
 
 /**
- * Calcula matriz de co-ocorrência
+ * Calcula matriz de co-ocorrência com normalização
  */
 export function calculateCooccurrenceMatrix(
   draws: LotteryDraw[],
   poolSize: number
 ): Map<string, number> {
   const matrix = new Map<string, number>();
+  const totalDraws = draws.length;
 
   for (const draw of draws) {
-    if (!draw.drawnNumbers) continue;
+    if (!draw.drawnNumbers || draw.drawnNumbers.length < 2) continue;
 
     for (let i = 0; i < draw.drawnNumbers.length; i++) {
       for (let j = i + 1; j < draw.drawnNumbers.length; j++) {
@@ -60,7 +61,61 @@ export function calculateCooccurrenceMatrix(
     }
   }
 
+  // Normalizar por total de draws
+  for (const [key, count] of matrix.entries()) {
+    matrix.set(key, count / totalDraws);
+  }
+
   return matrix;
+}
+
+/**
+ * Calcula bucketization (distribuição por faixas)
+ */
+export function calculateBucketDistribution(
+  numbers: number[],
+  poolSize: number,
+  bucketCount: number = 6
+): number[] {
+  const bucketSize = Math.ceil(poolSize / bucketCount);
+  const buckets = Array(bucketCount).fill(0);
+  
+  for (const num of numbers) {
+    const bucketIndex = Math.min(
+      bucketCount - 1,
+      Math.floor((num - 1) / bucketSize)
+    );
+    buckets[bucketIndex]++;
+  }
+  
+  return buckets;
+}
+
+/**
+ * Calcula features de sequências
+ */
+export function calculateSequenceFeatures(numbers: number[]): {
+  consecutiveCount: number;
+  maxGap: number;
+  minGap: number;
+  avgGap: number;
+} {
+  const sorted = [...numbers].sort((a, b) => a - b);
+  let consecutiveCount = 0;
+  const gaps: number[] = [];
+  
+  for (let i = 1; i < sorted.length; i++) {
+    const gap = sorted[i] - sorted[i - 1];
+    gaps.push(gap);
+    if (gap === 1) consecutiveCount++;
+  }
+  
+  return {
+    consecutiveCount,
+    maxGap: gaps.length > 0 ? Math.max(...gaps) : 0,
+    minGap: gaps.length > 0 ? Math.min(...gaps) : 0,
+    avgGap: gaps.length > 0 ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 0
+  };
 }
 
 /**

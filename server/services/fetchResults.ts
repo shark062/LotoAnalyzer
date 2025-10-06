@@ -2,8 +2,11 @@
 /**
  * 📥 ETL - FETCH DE RESULTADOS DAS LOTERIAS
  * 
- * Busca resultados de APIs públicas e armazena no banco
- * com retry automático e caching inteligente
+ * Sistema robusto com:
+ * - Múltiplas APIs com fallback automático
+ * - Retry exponencial
+ * - Validação de dados
+ * - Cache inteligente
  */
 
 import axios, { AxiosError } from 'axios';
@@ -13,7 +16,7 @@ import type { InsertLotteryDraw } from '@shared/schema';
 interface APIResult {
   concurso: number;
   data: string;
-  dezenas: string[];
+  dezenas: string[] | number[];
   premiacao?: {
     acertos_6?: { vencedores: number; valor: string };
     acertos_5?: { vencedores: number; valor: string };
@@ -21,18 +24,31 @@ interface APIResult {
   };
 }
 
-// Mapeamento de APIs (use a que preferir)
-const API_ENDPOINTS: Record<string, string> = {
-  megasena: 'https://loteriascaixa-api.herokuapp.com/api/megasena',
-  lotofacil: 'https://loteriascaixa-api.herokuapp.com/api/lotofacil',
-  quina: 'https://loteriascaixa-api.herokuapp.com/api/quina',
-  lotomania: 'https://loteriascaixa-api.herokuapp.com/api/lotomania',
-  duplasena: 'https://loteriascaixa-api.herokuapp.com/api/duplasena',
-  // Adicione outras conforme necessário
-};
+// Lista de APIs por prioridade (tentará em ordem)
+const API_PROVIDERS = [
+  {
+    name: 'loteriascaixa-api',
+    base: 'https://loteriascaixa-api.herokuapp.com/api',
+    timeout: 10000
+  },
+  {
+    name: 'caixa-oficial',
+    base: 'https://servicebus2.caixa.gov.br/portaldeloterias/api',
+    timeout: 15000
+  }
+];
 
-// Alternativa: API da Caixa (oficial)
-const CAIXA_API_BASE = 'https://servicebus2.caixa.gov.br/portaldeloterias/api';
+const API_ENDPOINTS: Record<string, string> = {
+  megasena: 'megasena',
+  lotofacil: 'lotofacil',
+  quina: 'quina',
+  lotomania: 'lotomania',
+  duplasena: 'duplasena',
+  supersete: 'supersete',
+  milionaria: 'maismilionaria',
+  timemania: 'timemania',
+  diadesorte: 'diadesorte'
+};
 
 /**
  * Retry com backoff exponencial
@@ -57,46 +73,67 @@ async function retryWithBackoff<T>(
 }
 
 /**
- * Busca último resultado de uma loteria (com fallback)
+ * Validação de dados da API
+ */
+function validateAPIResult(data: any, lotteryId: string): APIResult | null {
+  if (!data || typeof data !== 'object') return null;
+  
+  const concurso = data.concurso || data.numero;
+  const dezenas = data.dezenas || data.listaDezenas;
+  const dataStr = data.data || data.dataApuracao;
+  
+  if (!concurso || !dezenas || !Array.isArray(dezenas) || dezenas.length === 0) {
+    console.warn(`⚠️ Dados inválidos para ${lotteryId}:`, { concurso, dezenas: dezenas?.length });
+    return null;
+  }
+  
+  return {
+    concurso: parseInt(String(concurso)),
+    data: dataStr,
+    dezenas: dezenas.map(d => String(d)),
+    premiacao: data.premiacao || data.listaRateioPremio
+  };
+}
+
+/**
+ * Busca último resultado com fallback entre múltiplas APIs
  */
 export async function fetchLatestResult(lotteryId: string): Promise<APIResult | null> {
   console.log(`📡 Buscando último resultado: ${lotteryId}`);
-
-  // Tentar API Heroku primeiro
-  try {
-    const url = `${API_ENDPOINTS[lotteryId]}/latest`;
-    const response = await retryWithBackoff(() => 
-      axios.get<APIResult>(url, { timeout: 10000 })
-    );
-    
-    if (response.data && response.data.concurso) {
-      console.log(`✅ Resultado obtido via Heroku API: Concurso ${response.data.concurso}`);
-      return response.data;
-    }
-  } catch (error) {
-    console.log(`⚠️  Heroku API falhou, tentando API da Caixa...`);
+  
+  const endpoint = API_ENDPOINTS[lotteryId];
+  if (!endpoint) {
+    console.error(`❌ Endpoint não encontrado para ${lotteryId}`);
+    return null;
   }
-
-  // Fallback: API da Caixa
-  try {
-    const url = `${CAIXA_API_BASE}/${lotteryId}`;
-    const response = await retryWithBackoff(() =>
-      axios.get(url, { timeout: 15000 })
-    );
-
-    if (response.data) {
-      // Transformar formato da Caixa para nosso padrão
-      return {
-        concurso: response.data.numero || response.data.concurso,
-        data: response.data.dataApuracao || response.data.data,
-        dezenas: response.data.listaDezenas || response.data.dezenas || [],
-        premiacao: response.data.listaRateioPremio
-      };
+  
+  // Tentar cada provedor em ordem de prioridade
+  for (const provider of API_PROVIDERS) {
+    try {
+      const url = `${provider.base}/${endpoint}/latest`;
+      console.log(`  🔍 Tentando ${provider.name}...`);
+      
+      const response = await retryWithBackoff(
+        () => axios.get(url, { 
+          timeout: provider.timeout,
+          headers: { 'Accept': 'application/json' }
+        }),
+        2, // apenas 2 tentativas por provider
+        1000
+      );
+      
+      const validated = validateAPIResult(response.data, lotteryId);
+      if (validated) {
+        console.log(`✅ Sucesso via ${provider.name}: Concurso ${validated.concurso}`);
+        return validated;
+      }
+    } catch (error) {
+      console.log(`  ⚠️ ${provider.name} falhou:`, (error as Error).message);
+      continue;
     }
-  } catch (error) {
-    console.error(`❌ Falha ao buscar ${lotteryId}:`, (error as Error).message);
   }
-
+  
+  console.error(`❌ Todas as APIs falharam para ${lotteryId}`);
   return null;
 }
 

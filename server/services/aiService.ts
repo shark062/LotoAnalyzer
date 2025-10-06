@@ -1047,6 +1047,32 @@ class AiService {
         // Buscar melhor combinação entre os top números
         const topFrequencies = frequencies
           .sort((a, b) => b.frequency - a.frequency)
+
+
+  /**
+   * Geração usando Algoritmo Genético
+   */
+  private generateWithGA(count: number, maxNumber: number, gameIndex: number = 0): number[] {
+    const { generateGamesGA } = require('./geneticGenerator');
+    
+    const results = generateGamesGA({
+      poolSize: maxNumber,
+      pick: count,
+      populationSize: 100,
+      generations: 50,
+      mutationRate: 0.15,
+      elitePercent: 0.1
+    }, 1);
+    
+    if (results.length > 0) {
+      console.log(`🧬 GA gerou jogo com score ${results[0].score.toFixed(2)}`);
+      return results[0].game;
+    }
+    
+    // Fallback se GA falhar
+    return this.generateAdvancedAlgorithmicNumbers(count, maxNumber, 'fallback', gameIndex);
+  }
+
           .slice(0, Math.min(maxNumber, count * 3));
 
         const bestCombo = this.findBestCorrelatedCombo(
@@ -1191,8 +1217,8 @@ class AiService {
       const latestDraws = await storage.getLatestDraws(lotteryId, 100);
 
       if (frequencies.length === 0) {
-        console.log('Insufficient frequency data for AI, using advanced algorithmic generation');
-        return this.generateAdvancedAlgorithmicNumbers(count, maxNumber, lotteryId, gameIndex);
+        console.log('Insufficient frequency data for AI, using GA generation');
+        return this.generateWithGA(count, maxNumber, gameIndex);
       }
 
       console.log(`🤖 Iniciando análise de IA avançada para ${lotteryId} (jogo #${gameIndex})...`);
