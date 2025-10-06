@@ -205,23 +205,75 @@ export default function Generator() {
   };
 
   const exportGames = () => {
-    const content = generatedGames.map((game, index) =>
-      `Jogo ${index + 1}: ${game.numbers.join(' - ')}`
-    ).join('\n');
+    try {
+      // Gerar conteúdo formatado
+      const timestamp = new Date().toLocaleString('pt-BR');
+      const selectedLotteryName = selectedLottery?.displayName || 'Loteria';
+      
+      const content = [
+        `🦈 SHARK LOTO - Jogos Gerados`,
+        `Modalidade: ${selectedLotteryName}`,
+        `Data: ${timestamp}`,
+        `Estratégia: ${form.watch('strategy') || 'mixed'}`,
+        `Total de jogos: ${generatedGames.length}`,
+        ``,
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+        ``,
+        ...generatedGames.map((game, index) => 
+          `Jogo ${(index + 1).toString().padStart(2, '0')}: ${game.numbers.map(n => n.toString().padStart(2, '0')).join(' - ')}`
+        ),
+        ``,
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+        `Powered by Shark062`
+      ].join('\n');
 
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'jogos-shark-loto.txt';
-    document.body.appendChild(a); // Append to body for Firefox
-    a.click();
-    URL.revokeObjectURL(url);
-    document.body.removeChild(a); // Clean up
-    toast({
-      title: "Exportado!",
-      description: "Jogos salvos no seu dispositivo.",
-    });
+      // Criar blob e URL
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      
+      // Criar elemento de download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `shark-loto-jogos-${Date.now()}.txt`;
+      
+      // Adicionar ao DOM (necessário para alguns navegadores)
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      
+      // Tentar download
+      link.click();
+      
+      // Aguardar um momento antes de limpar (importante para mobile)
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
+
+      toast({
+        title: "✅ Exportado com sucesso!",
+        description: `${generatedGames.length} jogo(s) salvos na memória do dispositivo.`,
+      });
+    } catch (error) {
+      console.error('Erro ao exportar jogos:', error);
+      
+      // Fallback: copiar para área de transferência
+      const fallbackContent = generatedGames.map((game, index) =>
+        `Jogo ${index + 1}: ${game.numbers.join(' - ')}`
+      ).join('\n');
+      
+      navigator.clipboard.writeText(fallbackContent).then(() => {
+        toast({
+          title: "Jogos copiados!",
+          description: "Os jogos foram copiados para a área de transferência. Cole em um aplicativo de texto para salvar.",
+        });
+      }).catch(() => {
+        toast({
+          title: "Erro ao exportar",
+          description: "Não foi possível exportar os jogos. Tente novamente.",
+          variant: "destructive",
+        });
+      });
+    }
   };
 
   return (
