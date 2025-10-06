@@ -208,6 +208,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🧬 Endpoint para geração com Algoritmo Genético
+  app.post('/api/games/generate-ga', async (req: any, res) => {
+    try {
+      const { lotteryId, numbersCount, gamesCount, gaParams } = req.body;
+      const { generateGamesGA } = await import('./services/geneticGenerator');
+      const config = getLotteryConfig(lotteryId);
+      
+      if (!config) {
+        return res.status(404).json({ error: 'Loteria não encontrada' });
+      }
+
+      const params = {
+        poolSize: config.totalNumbers,
+        pick: numbersCount || config.minNumbers,
+        populationSize: gaParams?.populationSize || 200,
+        generations: gaParams?.generations || 100,
+        mutationRate: gaParams?.mutationRate || 0.15,
+        elitePercent: gaParams?.elitePercent || 0.1
+      };
+
+      const results = generateGamesGA(params, gamesCount || 5);
+
+      res.json({
+        lotteryId,
+        games: results.map(r => ({
+          numbers: r.game,
+          score: r.score,
+          metrics: r.metrics
+        })),
+        parameters: params
+      });
+    } catch (error) {
+      console.error('Erro na geração GA:', error);
+      res.status(500).json({ error: 'Falha ao gerar jogos' });
+    }
+  });
+
   // Lottery games routes
   app.post('/api/games/generate', async (req: any, res) => {
     try {

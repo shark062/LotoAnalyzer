@@ -327,6 +327,75 @@ class Storage {
     }
   }
 
+  // Buscar sorteio por concurso específico
+  async getDrawByContest(lotteryId: string, contestNumber: number): Promise<LotteryDraw | null> {
+    try {
+      if (!this.db) return null;
+
+      const [draw] = await this.db
+        .select()
+        .from(schema.lotteryDraws)
+        .where(
+          and(
+            eq(schema.lotteryDraws.lotteryId, lotteryId),
+            eq(schema.lotteryDraws.contestNumber, contestNumber)
+          )
+        )
+        .limit(1);
+
+      return draw || null;
+    } catch (error) {
+      console.error('Error fetching draw by contest:', error);
+      return null;
+    }
+  }
+
+  // Data synchronization methods
+  async syncDraws(draws: InsertLotteryDraw[]): Promise<void> {
+    try {
+      if (!this.db) {
+        console.log('Database not available for syncing draws');
+        return;
+      }
+
+      const drawPromises = draws.map(async (draw) => {
+        try {
+          const existing = await this.getDrawByContest(draw.lotteryId, draw.contestNumber);
+          if (existing) {
+            console.log(`Draw ${draw.lotteryId} #${draw.contestNumber} already exists, skipping.`);
+            return;
+          }
+
+          await this.db.insert(schema.lotteryDraws).values(draw);
+          console.log(`✓ Synced draw ${draw.lotteryId} #${draw.contestNumber}`);
+
+          // Trigger prediction evaluation if draw numbers are available
+          if (draw.drawnNumbers && draw.drawnNumbers.length > 0) {
+            try {
+              const { performanceService } = await import('./services/performanceService');
+              await performanceService.evaluatePredictions(
+                draw.lotteryId,
+                draw.contestNumber,
+                draw.drawnNumbers
+              );
+              console.log(`🎯 Predictions evaluated for ${draw.lotteryId} #${draw.contestNumber}`);
+            } catch (error) {
+              console.log(`⚠️ Error evaluating predictions for ${draw.lotteryId} #${draw.contestNumber}:`, error);
+            }
+          }
+        } catch (error) {
+          console.error(`Error syncing draw ${draw.lotteryId} #${draw.contestNumber}:`, error);
+        }
+      });
+
+      await Promise.all(drawPromises);
+      console.log('✓ Draw synchronization complete.');
+    } catch (error) {
+      console.error('Error during draw synchronization process:', error);
+    }
+  }
+
+
   async createLotteryDraw(drawData: any): Promise<void> {
     try {
       if (!this.db) {
@@ -680,7 +749,7 @@ class Storage {
             })
             .where(eq(schema.predictions.id, existing[0].id))
             .returning();
-          
+
           console.log(`🔄 Predição atualizada: ${prediction.modelName} para ${prediction.lotteryId} #${prediction.contestNumber}`);
           return updated;
         } else {
@@ -725,9 +794,9 @@ class Storage {
 
   // Avaliar predição quando sai o resultado real
   async evaluatePrediction(
-    predictionId: number, 
-    actualNumbers: number[], 
-    matches: number, 
+    predictionId: number,
+    actualNumbers: number[],
+    matches: number,
     accuracy: number
   ): Promise<void> {
     try {
@@ -808,15 +877,15 @@ class Storage {
       if (!this.db) return;
 
       const performance = await this.getOrCreateModelPerformance(modelName, lotteryId);
-      
+
       // Calcular novas métricas
       const newTotal = performance.totalPredictions + 1;
       const newCorrect = accuracy > 0.5 ? performance.totalCorrectPredictions + 1 : performance.totalCorrectPredictions;
       const newAvgAccuracy = ((parseFloat(performance.averageAccuracy?.toString() || '0') * performance.totalPredictions) + accuracy) / newTotal;
       const newAvgConfidence = ((parseFloat(performance.averageConfidence?.toString() || '0') * performance.totalPredictions) + confidence) / newTotal;
       const newBestAccuracy = Math.max(parseFloat(performance.bestAccuracy?.toString() || '0'), accuracy);
-      const newWorstAccuracy = performance.totalPredictions === 0 
-        ? accuracy 
+      const newWorstAccuracy = performance.totalPredictions === 0
+        ? accuracy
         : Math.min(parseFloat(performance.worstAccuracy?.toString() || '1'), accuracy);
 
       // Determinar grau de performance

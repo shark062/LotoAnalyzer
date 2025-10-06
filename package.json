@@ -108,3 +108,11 @@
     "bufferutil": "^4.0.8"
   }
 }
+{
+  "scripts": {
+    "etl:sync": "tsx scripts/etl-sync.ts",
+    "backtest": "tsx scripts/backtest.ts",
+    "train": "tsx scripts/train-model.ts",
+    "test:ga": "tsx -e \"import { testGA } from './server/services/geneticGenerator'; testGA();\""
+  }
+}
