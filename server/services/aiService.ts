@@ -1073,7 +1073,38 @@ class AiService {
     return this.generateAdvancedAlgorithmicNumbers(count, maxNumber, 'fallback', gameIndex);
   }
 
-          .slice(0, Math.min(maxNumber, count * 3));
+  private findBestCorrelatedCombo(
+    candidates: number[],
+    count: number,
+    correlationMatrix: Map<string, number>
+  ): number[] {
+    let bestCombo: number[] = [];
+    let bestScore = 0;
+
+    // Testar algumas combinações aleatórias e escolher a melhor
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const combo = this.selectRandomFromArray(candidates, count);
+      const score = deepAnalysis.correlationAnalysis.calculateSetCorrelationScore(combo, correlationMatrix);
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestCombo = combo;
+      }
+    }
+
+    return bestCombo;
+  }
+
+  // Métodos auxiliares restantes continuam aqui...
+  
+  private calculateFinalAccuracyScore(number: number, latestDraws: any[]): number {
+    let score = 0.5;
+    const recentNumbers = this.getRecentNumbers(latestDraws, 10);
+    if (recentNumbers.includes(number)) score *= 0.8;
+    return score;
+  }
+
+  // Continua com os outros métodos da classe...
 
         const bestCombo = this.findBestCorrelatedCombo(
           topFrequencies.map(f => f.number),
