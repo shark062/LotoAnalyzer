@@ -15,6 +15,7 @@ import { advancedDataAnalysis } from "./services/advancedDataAnalysis";
 import { correlationAnalysis } from "./services/correlationAnalysis";
 // Import for chatbot
 import { chatbotService } from "./services/chatbotService";
+import { log } from "./utils"; // Assuming a log utility exists
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -213,7 +214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🧬 Endpoint para geração com Algoritmo Genético
   app.post('/api/games/generate-ga', async (req: any, res) => {
     try {
-      const { lotteryId, numbersCount, gamesCount, gaParams } = req.body;
+      const { lotteryId, gamesCount, gaParams } = req.body;
       const { generateGamesGA } = await import('./services/geneticGenerator');
       const config = getLotteryConfig(lotteryId);
 
@@ -223,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const params = {
         poolSize: config.totalNumbers,
-        pick: numbersCount || config.minNumbers,
+        pick: req.body.numbersCount || config.minNumbers,
         populationSize: gaParams?.populationSize || 200,
         generations: gaParams?.generations || 100,
         mutationRate: gaParams?.mutationRate || 0.15,
@@ -505,6 +506,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error syncing latest draws:", error);
       res.json({ message: "Synchronization completed with some errors" });
+    }
+  });
+
+  // Voice endpoints
+  app.post('/api/voice/stt', async (req, res) => {
+    try {
+      const { voiceHandler } = await import('./services/voiceHandler');
+      const audioBuffer = Buffer.from(req.body.audio, 'base64');
+      const text = await voiceHandler.transcribe(audioBuffer, req.body.format || 'webm');
+      res.json({ text });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/voice/tts', async (req, res) => {
+    try {
+      const { voiceHandler } = await import('./services/voiceHandler');
+      const audioBuffer = await voiceHandler.synthesize(req.body.text, req.body.voice);
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.send(audioBuffer);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Agent endpoints
+  app.post('/api/agent/incident', async (req, res) => {
+    try {
+      const { orchestrator } = await import('./agent/orchestrator');
+      const result = await orchestrator.handleIncident(req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/agent/audit/:incidentId?', async (req, res) => {
+    try {
+      const { auditor } = await import('./agent/auditor');
+      const history = await auditor.getHistory(req.params.incidentId);
+      res.json(history);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
   });
 

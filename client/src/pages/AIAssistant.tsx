@@ -1,13 +1,15 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Bot, User, Sparkles, Copy, Flame, Snowflake, Sun } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Copy, Flame, Snowflake, Sun, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+
+// Import hook for voice functionality
+import { useVoice } from '@/hooks/useVoice'; // Assuming this hook is created
 
 interface Message {
   role: 'user' | 'assistant';
@@ -28,7 +30,22 @@ export default function AIAssistant() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
   const { toast } = useToast();
+
+  // Initialize voice hook
+  const { startListening, stopListening, speak, isListening, stopSpeaking } = useVoice();
+
+  useEffect(() => {
+    // If voice is enabled, speak the last assistant message
+    if (voiceEnabled && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'assistant') {
+        speak(lastMessage.content);
+      }
+    }
+  }, [voiceEnabled, messages, speak]);
+
 
   const sendMessage = async (text?: string) => {
     const messageText = text || input;
@@ -66,6 +83,11 @@ export default function AIAssistant() {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+      
+      // Speak the assistant's reply if voice is enabled
+      if (voiceEnabled) {
+        speak(data.reply);
+      }
     } catch (error) {
       console.error('Erro no chat:', error);
       toast({
@@ -130,7 +152,7 @@ export default function AIAssistant() {
                 const number = i + 1;
                 const freq = viz.content.frequencies.find((f: any) => f.number === number);
                 const temp = freq?.temperature || 'cold';
-                
+
                 const colors = {
                   hot: 'bg-red-500',
                   warm: 'bg-yellow-500',
@@ -228,7 +250,7 @@ export default function AIAssistant() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
       <Navigation />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
@@ -276,7 +298,7 @@ export default function AIAssistant() {
                           <div className="whitespace-pre-wrap break-words text-white">
                             {msg.content}
                           </div>
-                          
+
                           {msg.visualizations?.map((viz, i) => (
                             <div key={i}>
                               {renderVisualization(viz)}
@@ -328,8 +350,42 @@ export default function AIAssistant() {
                 disabled={loading}
                 className="bg-black/20 border-border/20 text-white placeholder:text-gray-500"
               />
+              {/* Voice I/O Buttons */}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  if (isListening) {
+                    stopListening();
+                  } else {
+                    startListening(
+                      (text) => {
+                        setInput(text);
+                        sendMessage(text);
+                      },
+                      (error) => toast({ title: 'Erro', description: error, variant: 'destructive' })
+                    );
+                  }
+                }}
+                className={isListening ? 'bg-red-500 hover:bg-red-600' : ''}
+              >
+                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </Button>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  setVoiceEnabled(!voiceEnabled);
+                  if (voiceEnabled) stopSpeaking();
+                }}
+                className={voiceEnabled ? 'bg-accent' : ''}
+              >
+                {voiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              </Button>
+
               <Button 
-                onClick={() => sendMessage()} 
+                onClick={() => sendMessage()}
                 disabled={loading || !input.trim()}
                 className="bg-gradient-to-r from-cyan-600 to-purple-600"
               >
