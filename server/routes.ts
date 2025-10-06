@@ -823,6 +823,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🤖 CHATBOT HÍBRIDO MULTI-IA
+  app.post("/api/chat", async (req, res) => {
+    try {
+      const { chatbotService } = await import('./services/chatbotService');
+      const { userId = 'guest-user', message, context, persona = 'analista' } = req.body;
+
+      const result = await chatbotService.processChat(
+        { userId, message, context },
+        persona
+      );
+
+      res.json(result);
+    } catch (error) {
+      console.error("Error in chat:", error);
+      res.status(500).json({ error: "Failed to process chat message" });
+    }
+  });
+
+  app.post("/api/chat/feedback", async (req, res) => {
+    try {
+      const { chatbotService } = await import('./services/chatbotService');
+      const { chatId, outcome } = req.body;
+
+      await chatbotService.updateWeights({ chatId, outcome });
+      
+      res.json({ success: true, message: 'Feedback processado' });
+    } catch (error) {
+      console.error("Error processing feedback:", error);
+      res.status(500).json({ error: "Failed to process feedback" });
+    }
+  });
+
+  app.get("/api/chat/history", async (req, res) => {
+    try {
+      const userId = req.query.userId || 'guest-user';
+      // Implementar busca de histórico
+      res.json({ history: [], userId });
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+      res.status(500).json({ error: "Failed to fetch chat history" });
+    }
+  });
+
   // 🎯 Sistema de Pontuação Híbrida
   app.get('/api/analysis/hybrid-score/:lotteryId', async (req, res) => {
     try {

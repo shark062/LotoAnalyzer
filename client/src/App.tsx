@@ -12,6 +12,7 @@ import AIAnalysis from "@/pages/AIAnalysis";
 import AIMetrics from "@/pages/AIMetrics";
 import Information from "@/pages/Information";
 import AdvancedDashboard from "@/components/AdvancedDashboard";
+import AIAssistant from "@/pages/AIAssistant"; // Import the new page
 
 
 function Router() {
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/ai-metrics" component={AIMetrics} />
       <Route path="/information" component={Information} />
       <Route path="/advanced-dashboard" component={AdvancedDashboard} />
+      <Route path="/ai-assistant" component={AIAssistant} /> {/* Add the new route */}
       <Route component={NotFound} />
     </Switch>
   );

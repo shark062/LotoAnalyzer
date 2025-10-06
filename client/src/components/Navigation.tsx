@@ -2,20 +2,22 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Menu, 
-  Flame, 
-  Dice6, 
-  Trophy, 
-  Brain, 
-  Info, 
+import {
+  Menu,
+  Flame,
+  Dice6,
+  Trophy,
+  Brain,
+  Info,
   Home,
   Zap,
   History,
   BarChart3,
   Settings,
   User,
-  TrendingUp
+  TrendingUp,
+  Activity,
+  MessageSquare
 } from "lucide-react";
 import sharkLogo from "@assets/Logo Futurista da Shark Loterias_1757013773517.png";
 
@@ -37,42 +39,42 @@ export default function Navigation() {
   }, [isMobileMenuOpen]);
 
   const navItems = [
-    { 
-      href: "/", 
-      label: "Página Inicial", 
-      icon: Home, 
+    {
+      href: "/",
+      label: "Página Inicial",
+      icon: Home,
       emoji: "🏠",
       description: "Painel principal com visão geral"
     },
-    { 
-      href: "/heat-map", 
-      label: "Mapa de Calor", 
-      icon: Flame, 
+    {
+      href: "/heat-map",
+      label: "Mapa de Calor",
+      icon: Flame,
       emoji: "🔥❄️♨️",
       description: "Análise de números quentes e frios"
     },
-    { 
-      href: "/generator", 
-      label: "Gerador", 
-      icon: Dice6, 
+    {
+      href: "/generator",
+      label: "Gerador",
+      icon: Dice6,
       emoji: "🔮",
       description: "Gerar jogos inteligentes"
     },
-    { 
-      href: "/results", 
-      label: "Resultados", 
-      icon: Trophy, 
+    {
+      href: "/results",
+      label: "Resultados",
+      icon: Trophy,
       emoji: "📊",
       description: "Histórico de sorteios e prêmios"
     },
-    { 
-      href: "/ai-analysis", 
-      label: "IA Análises", 
-      icon: Brain, 
+    {
+      href: "/ai-analysis",
+      label: "IA Análises",
+      icon: Brain,
       emoji: "🤖",
       description: "Análises avançadas com inteligência artificial"
     },
-    { 
+    {
       href: "/ai-metrics",
       label: "Métricas IA",
       icon: BarChart3,
@@ -80,31 +82,31 @@ export default function Navigation() {
       description: "Performance dos modelos Multi-IA",
       tooltip: "Dashboard de métricas avançadas"
     },
-    { 
-      href: "/information", 
-      label: "Informações", 
-      icon: Info, 
+    {
+      href: "/information",
+      label: "Informações",
+      icon: Info,
       emoji: "📚",
       description: "Guia completo das modalidades"
     },
   ];
 
   const quickActions = [
-    { 
+    {
       action: () => window.location.href = "/generator",
       label: "Gerar Jogos Rápido",
       icon: Zap,
       variant: "primary" as const,
       tooltip: "Gerar jogos com IA instantaneamente"
     },
-    { 
+    {
       action: () => window.location.href = "/results",
       label: "Ver Resultados",
       icon: History,
       variant: "secondary" as const,
       tooltip: "Verificar últimos resultados"
     },
-    { 
+    {
       action: () => window.location.href = "/heat-map",
       label: "Análise Rápida",
       icon: TrendingUp,
@@ -123,9 +125,9 @@ export default function Navigation() {
             <div className="flex-1 flex justify-center items-start -mt-2">
               <Link href="/" className="flex items-center justify-center">
                 <div className="w-24 h-24">
-                  <img 
-                    src={sharkLogo} 
-                    alt="Shark Loterias Logo" 
+                  <img
+                    src={sharkLogo}
+                    alt="Shark Loterias Logo"
                     className="w-full h-full object-contain"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
@@ -205,7 +207,7 @@ export default function Navigation() {
 
       {/* Full Screen Menu Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/95 z-[60] backdrop-blur-md"
           data-testid="menu-overlay"
         >
@@ -239,12 +241,12 @@ export default function Navigation() {
                 const isActive = location === item.href;
 
                 return (
-                  <Link 
+                  <Link
                     key={item.href}
                     href={item.href}
                     className={`flex items-center justify-between p-4 rounded-3xl group ${
-                      isActive 
-                        ? "text-primary bg-primary/20 border border-primary/50" 
+                      isActive
+                        ? "text-primary bg-primary/20 border border-primary/50"
                         : "text-foreground/80 hover:text-primary hover:bg-primary/10 border border-foreground/10 hover:border-primary/30"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -252,8 +254,8 @@ export default function Navigation() {
                   >
                     <div className="flex items-center space-x-4">
                       <div className={`w-10 h-10 rounded-3xl flex items-center justify-center border ${
-                        isActive 
-                          ? 'bg-primary/30 text-primary border-primary/50' 
+                        isActive
+                          ? 'bg-primary/30 text-primary border-primary/50'
                           : 'bg-foreground/10 text-foreground/70 border-foreground/20 group-hover:bg-primary/20 group-hover:text-primary group-hover:border-primary/40'
                       }`}>
                         <Icon className="h-5 w-5" />
@@ -270,9 +272,36 @@ export default function Navigation() {
                   </Link>
                 );
               })}
+              {/* New AI Assistant Link */}
+              <Link
+                to="/ai-assistant"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                  location === '/ai-assistant'
+                    ? 'bg-primary/20 text-primary border border-primary/50'
+                    : 'text-foreground/80 hover:text-primary hover:bg-primary/10 border border-foreground/10 hover:border-primary/30'
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                data-testid="nav-link-ai-assistant"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className={`w-10 h-10 rounded-3xl flex items-center justify-center border ${
+                    location === '/ai-assistant'
+                      ? 'bg-primary/30 text-primary border-primary/50'
+                      : 'bg-foreground/10 text-foreground/70 border-foreground/20 group-hover:bg-primary/20 group-hover:text-primary group-hover:border-primary/40'
+                  }`}>
+                    <MessageSquare className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-lg">Assistente IA</div>
+                    <div className="text-xs opacity-70">Chat inteligente com IA</div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-lg">🤖</span>
+                  <span className="text-xs">→</span>
+                </div>
+              </Link>
             </nav>
-
-
           </div>
         </div>
       )}
@@ -292,8 +321,8 @@ export default function Navigation() {
                 variant={action.variant === "primary" ? "default" : action.variant as any}
                 size="sm"
                 className={`w-full shadow-lg group relative rounded-3xl ${
-                  action.variant === "primary" 
-                    ? "bg-black/25" 
+                  action.variant === "primary"
+                    ? "bg-black/25"
                     : action.variant === "secondary"
                     ? "bg-black/25"
                     : "border-2 border-dashed border-primary/30 hover:border-primary hover:bg-black/25"
