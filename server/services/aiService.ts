@@ -1045,65 +1045,142 @@ class AiService {
 
       console.log(`🤖 Iniciando análise de IA avançada para ${lotteryId} (jogo #${gameIndex})...`);
 
-      // 🎲 Seed ÚNICO com múltiplas fontes de aleatoriedade
-      const uniqueSeed = Date.now() * Math.random() * 1000000 + (gameIndex * 999999) + Math.random() * gameIndex;
+      // 🎲 Seed ÚNICO baseado no gameIndex para garantir jogos diferentes
+      const uniqueSeed = Date.now() + (gameIndex * 1000000) + Math.floor(Math.random() * 1000000);
+      
+      // Análise de frequências com balanceamento
+      const enhancedFreqs = this.calculateEnhancedFrequencies(frequencies, latestDraws);
+      
+      // Separar por temperatura
+      const hotNumbers = enhancedFreqs
+        .filter(f => f.temperature === 'hot')
+        .map(f => f.number);
+      
+      const warmNumbers = enhancedFreqs
+        .filter(f => f.temperature === 'warm')
+        .map(f => f.number);
+      
+      const coldNumbers = enhancedFreqs
+        .filter(f => f.temperature === 'cold')
+        .map(f => f.number);
 
-      // Análise multi-dimensional avançada com variação
-      const deepAnalysis = this.performDeepAnalysis(frequencies, latestDraws, maxNumber, lotteryId);
-      const predictionModel = this.buildPredictionModel(deepAnalysis, latestDraws, maxNumber);
-      const probabilityMatrix = this.calculateProbabilityMatrix(predictionModel, maxNumber);
+      // Distribuição estratégica: 40% quentes, 30% mornos, 30% frios
+      const hotCount = Math.ceil(count * 0.4);
+      const warmCount = Math.ceil(count * 0.3);
+      const coldCount = count - hotCount - warmCount;
 
-      // Aplicar algoritmos de machine learning simulado COM VARIAÇÃO
-      const neuralNetworkOutput = this.simulateNeuralNetwork(probabilityMatrix, count, maxNumber, uniqueSeed);
-      const patternRecognition = this.applyPatternRecognition(latestDraws, neuralNetworkOutput, maxNumber, uniqueSeed);
-      const temporalAnalysis = this.applyTemporalAnalysis(latestDraws, patternRecognition, lotteryId, uniqueSeed);
+      const finalNumbers: number[] = [];
+      
+      // Selecionar números evitando sequências e repetições
+      const selectedHot = this.selectDiverseNumbers(hotNumbers, hotCount, uniqueSeed, finalNumbers);
+      finalNumbers.push(...selectedHot);
+      
+      const selectedWarm = this.selectDiverseNumbers(warmNumbers, warmCount, uniqueSeed + 1, finalNumbers);
+      finalNumbers.push(...selectedWarm);
+      
+      const selectedCold = this.selectDiverseNumbers(coldNumbers, coldCount, uniqueSeed + 2, finalNumbers);
+      finalNumbers.push(...selectedCold);
 
-      // Seleção final com algoritmo genético simulado + seed único
-      let finalNumbers = this.applyGeneticAlgorithm(temporalAnalysis, count, maxNumber, lotteryId, uniqueSeed);
-
-      // Validação e otimização final COM DIVERSIDADE E CORRELAÇÃO
-      finalNumbers = this.optimizeWithAdvancedValidation(finalNumbers, deepAnalysis, count, maxNumber, lotteryId, uniqueSeed);
-
-      // 🔬 VALIDAÇÃO DE CORRELAÇÃO: Avaliar qualidade do conjunto
-      const correlationMatrix = deepAnalysis.correlationAnalysis.calculateCorrelationMatrix(latestDraws, maxNumber);
-      const correlationScore = deepAnalysis.correlationAnalysis.calculateSetCorrelationScore(finalNumbers, correlationMatrix);
-
-      // Se score de correlação for muito baixo, tentar melhorar
-      if (correlationScore < 0.15 && latestDraws.length > 20) {
-        console.log(`⚠️ Score de correlação baixo (${correlationScore.toFixed(3)}), otimizando...`);
-        const usedSet = new Set(finalNumbers);
-
-        // Substituir 30% dos números por correlacionados
-        const replaceCount = Math.ceil(count * 0.3);
-        const toReplace = finalNumbers.slice(-replaceCount);
-        const remaining = finalNumbers.slice(0, -replaceCount);
-
-        const improved = deepAnalysis.correlationAnalysis.selectCorrelatedNumbers(
-          remaining,
-          correlationMatrix,
-          replaceCount,
-          maxNumber,
-          new Set(remaining)
-        );
-
-        finalNumbers = [...remaining, ...improved];
-
-        const newScore = deepAnalysis.correlationAnalysis.calculateSetCorrelationScore(finalNumbers, correlationMatrix);
-        console.log(`✨ Score melhorado de ${correlationScore.toFixed(3)} para ${newScore.toFixed(3)}`);
+      // Garante que não há números duplicados
+      const uniqueNumbers = Array.from(new Set(finalNumbers));
+      
+      // Se faltarem números, adicionar de forma diversa
+      if (uniqueNumbers.length < count) {
+        const allAvailable = Array.from({length: maxNumber}, (_, i) => i + 1)
+          .filter(n => !uniqueNumbers.includes(n));
+        
+        while (uniqueNumbers.length < count && allAvailable.length > 0) {
+          const index = Math.floor(this.seededRandom(uniqueSeed + uniqueNumbers.length) * allAvailable.length);
+          const num = allAvailable.splice(index, 1)[0];
+          
+          // Verificar se não cria sequência
+          if (!this.wouldCreateSequence(num, uniqueNumbers)) {
+            uniqueNumbers.push(num);
+          }
+        }
       }
 
-
-      // Garante unicidade TOTAL com múltiplas fontes de aleatoriedade
-      finalNumbers = this.ensureUniqueness(finalNumbers, count, maxNumber, uniqueSeed);
-
-      console.log(`🎯 IA gerou ${finalNumbers.length} números ÚNICOS para jogo #${gameIndex} (correlação: ${correlationScore.toFixed(3)})`);
-      return finalNumbers.sort((a, b) => a - b);
+      // Validação final anti-sequência
+      const validated = this.removeExcessiveSequences(uniqueNumbers.slice(0, count));
+      
+      console.log(`🎯 IA gerou ${validated.length} números ÚNICOS e DIVERSOS para jogo #${gameIndex}`);
+      return validated.sort((a, b) => a - b);
 
     } catch (error) {
       console.error('Error in advanced AI generation:', error);
       console.log('Falling back to advanced algorithmic generation');
       return this.generateAdvancedAlgorithmicNumbers(count, maxNumber, lotteryId, gameIndex);
     }
+  }
+
+  // Função auxiliar para random com seed
+  private seededRandom(seed: number): number {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }
+
+  // Seleciona números diversos evitando sequências
+  private selectDiverseNumbers(pool: number[], count: number, seed: number, existing: number[]): number[] {
+    const selected: number[] = [];
+    const available = [...pool].filter(n => !existing.includes(n));
+    
+    // Embaralhar com seed
+    const shuffled = available.sort(() => this.seededRandom(seed++) - 0.5);
+    
+    for (const num of shuffled) {
+      if (selected.length >= count) break;
+      
+      // Verificar se não cria sequência
+      if (!this.wouldCreateSequence(num, [...existing, ...selected])) {
+        selected.push(num);
+      }
+    }
+    
+    // Se não conseguiu preencher, pega os restantes sem verificação de sequência
+    if (selected.length < count) {
+      const remaining = shuffled.filter(n => !selected.includes(n));
+      selected.push(...remaining.slice(0, count - selected.length));
+    }
+    
+    return selected;
+  }
+
+  // Verifica se um número criaria sequência com os existentes
+  private wouldCreateSequence(num: number, existing: number[]): boolean {
+    for (const exist of existing) {
+      if (Math.abs(num - exist) === 1) {
+        // Verificar se já tem sequência
+        const hasSequenceBefore = existing.includes(exist - 1);
+        const hasSequenceAfter = existing.includes(exist + 1);
+        if (hasSequenceBefore || hasSequenceAfter) {
+          return true; // Criaria uma sequência de 3+
+        }
+      }
+    }
+    return false;
+  }
+
+  // Remove sequências excessivas (máximo 2 números consecutivos)
+  private removeExcessiveSequences(numbers: number[]): number[] {
+    const sorted = [...numbers].sort((a, b) => a - b);
+    const result: number[] = [];
+    let consecutiveCount = 0;
+    
+    for (let i = 0; i < sorted.length; i++) {
+      const isConsecutive = i > 0 && sorted[i] === sorted[i-1] + 1;
+      
+      if (isConsecutive) {
+        consecutiveCount++;
+        if (consecutiveCount < 2) { // Permite no máximo 2 consecutivos
+          result.push(sorted[i]);
+        }
+      } else {
+        consecutiveCount = 0;
+        result.push(sorted[i]);
+      }
+    }
+    
+    return result;
   }
 
   private ensureUniqueness(numbers: number[], count: number, maxNumber: number, seed: number): number[] {
