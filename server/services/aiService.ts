@@ -890,20 +890,64 @@ class AiService {
       finalNumbers.push(...selectedCold);
       console.log(`  ✓ ${selectedCold.length} números frios adicionados`);
 
-      // 🔄 Completar se necessário com números correlacionados
+      // 🔄 Completar se necessário com números DIVERSOS (anti-sequência)
       if (finalNumbers.length < count) {
         const needed = count - finalNumbers.length;
-        console.log(`  ⚠️ Faltam ${needed} números, completando com correlacionados...`);
+        console.log(`  ⚠️ Faltam ${needed} números, completando com estratégia anti-sequência...`);
 
-        const correlated = deepAnalysis.correlationAnalysis.selectCorrelatedNumbers(
-          finalNumbers,
-          correlationMatrix,
-          needed,
-          maxNumber,
-          new Set(finalNumbers)
-        );
-        finalNumbers.push(...correlated);
-        console.log(`  ✓ ${correlated.length} números correlacionados adicionados`);
+        const allAvailable = Array.from({length: maxNumber}, (_, i) => i + 1)
+          .filter(n => !finalNumbers.includes(n));
+        
+        // Para Lotofácil, aplicar estratégia especial de dispersão
+        if (lotteryId === 'lotofacil') {
+          const sortedFinal = [...finalNumbers].sort((a, b) => a - b);
+          const dispersed: number[] = [];
+          
+          for (const candidate of allAvailable) {
+            // Verificar se não cria sequência de 3+ números
+            let wouldCreateLongSequence = false;
+            
+            for (let i = 0; i < sortedFinal.length - 1; i++) {
+              const hasSequenceBefore = sortedFinal[i] === candidate - 1;
+              const hasSequenceAfter = sortedFinal[i] === candidate + 1;
+              const hasSequenceBeforeBefore = sortedFinal[i] === candidate - 2;
+              const hasSequenceAfterAfter = sortedFinal[i] === candidate + 2;
+              
+              // Bloquear se criaria sequência de 3 ou mais
+              if ((hasSequenceBefore && hasSequenceBeforeBefore) || 
+                  (hasSequenceAfter && hasSequenceAfterAfter) ||
+                  (hasSequenceBefore && hasSequenceAfter)) {
+                wouldCreateLongSequence = true;
+                break;
+              }
+            }
+            
+            if (!wouldCreateLongSequence) {
+              dispersed.push(candidate);
+            }
+          }
+          
+          // Selecionar com variação baseada em seed
+          const selected = this.selectUniqueNumbers(
+            dispersed.length > 0 ? dispersed : allAvailable,
+            needed,
+            new Set(finalNumbers),
+            seed + gameIndex * 7777
+          );
+          finalNumbers.push(...selected);
+          console.log(`  ✓ ${selected.length} números dispersos adicionados (Lotofácil)`);
+        } else {
+          // Outras modalidades: usar correlação
+          const correlated = deepAnalysis.correlationAnalysis.selectCorrelatedNumbers(
+            finalNumbers,
+            correlationMatrix,
+            needed,
+            maxNumber,
+            new Set(finalNumbers)
+          );
+          finalNumbers.push(...correlated);
+          console.log(`  ✓ ${correlated.length} números correlacionados adicionados`);
+        }
       }
 
       // ⚡ FASE 6: OTIMIZAÇÃO POR CORRELAÇÃO
@@ -946,11 +990,46 @@ class AiService {
         console.log(`  ✨ Score otimizado: ${initialScore.toFixed(3)} → ${newScore.toFixed(3)} (+${((newScore - initialScore) * 100).toFixed(1)}%)`);
       }
 
-      // 🎲 FASE 7: VALIDAÇÃO DE PADRÕES
+      // 🎲 FASE 7: VALIDAÇÃO E CORREÇÃO DE PADRÕES
       const hasSequence = this.hasConsecutiveNumbers(finalNumbers);
       const evenOddRatio = finalNumbers.filter(n => n % 2 === 0).length / count;
 
-      console.log(`  🔍 Validação: ${hasSequence ? '✓' : '✗'} Sequências, Par/Ímpar: ${(evenOddRatio * 100).toFixed(0)}%/${((1 - evenOddRatio) * 100).toFixed(0)}%`);
+      console.log(`  🔍 Validação inicial: ${hasSequence ? '✓' : '✗'} Sequências, Par/Ímpar: ${(evenOddRatio * 100).toFixed(0)}%/${((1 - evenOddRatio) * 100).toFixed(0)}%`);
+
+      // CORREÇÃO ESPECÍFICA PARA LOTOFÁCIL: Quebrar sequências longas
+      if (lotteryId === 'lotofacil') {
+        const sorted = [...finalNumbers].sort((a, b) => a - b);
+        const problematicIndices: number[] = [];
+        
+        // Identificar sequências de 3+ números
+        for (let i = 0; i < sorted.length - 2; i++) {
+          if (sorted[i+1] === sorted[i] + 1 && sorted[i+2] === sorted[i] + 2) {
+            problematicIndices.push(i + 1); // Remover o número do meio
+          }
+        }
+        
+        if (problematicIndices.length > 0) {
+          console.log(`  ⚠️ Detectadas ${problematicIndices.length} sequências longas, corrigindo...`);
+          
+          // Substituir números problemáticos
+          const toReplace = problematicIndices.map(idx => sorted[idx]);
+          finalNumbers = finalNumbers.filter(n => !toReplace.includes(n));
+          
+          // Adicionar substitutos dispersos
+          const allAvailable = Array.from({length: maxNumber}, (_, i) => i + 1)
+            .filter(n => !finalNumbers.includes(n));
+          
+          const replacements = this.selectUniqueNumbers(
+            allAvailable,
+            toReplace.length,
+            new Set(finalNumbers),
+            seed + gameIndex * 9999
+          );
+          
+          finalNumbers.push(...replacements);
+          console.log(`  ✓ ${replacements.length} números substituídos para quebrar sequências`);
+        }
+      }
 
       // 🛡️ FASE 8: VALIDAÇÃO RIGOROSA DE UNICIDADE E CONTAGEM
       finalNumbers = Array.from(new Set(finalNumbers)); // Remove qualquer duplicata
