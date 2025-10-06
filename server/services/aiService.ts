@@ -790,7 +790,11 @@ class AiService {
       throw new Error(`Configuração não encontrada para ${lotteryId}`);
     }
 
+    // 🔧 CORREÇÃO: Usar exatamente o count correto da modalidade
+    const targetCount = count;
     const maxNumber = config.totalNumbers;
+
+    console.log(`✅ Modalidade: ${lotteryId} | Números por jogo: ${targetCount} | Máximo: ${maxNumber}`);
 
     // 📊 FASE 1: COLETA E ANÁLISE PROFUNDA DOS DADOS
     console.log('📊 FASE 1: Coletando dados históricos...');
@@ -862,23 +866,27 @@ class AiService {
 
       console.log(`🔥 Hot: ${hotNumbers.length}, ♨️ Warm: ${warmNumbers.length}, ❄️ Cold: ${coldNumbers.length}`);
 
-      // 🎯 COMBINAÇÃO INTELIGENTE COM PESOS DINÂMICOS
+      // 🎯 COMBINAÇÃO INTELIGENTE COM PESOS DINÂMICOS E UNICIDADE GARANTIDA
+      const usedNumbers = new Set<number>(); // Garantir unicidade ABSOLUTA
       let finalNumbers: number[] = [];
 
-      // Base forte com números quentes
-      const selectedHot = this.selectRandomFromArray(hotNumbers, Math.min(hotNumbers.length, Math.ceil(count * 0.45)));
+      // Base forte com números quentes (40%)
+      const hotTarget = Math.ceil(count * 0.40);
+      const selectedHot = this.selectUniqueNumbers(hotNumbers, hotTarget, usedNumbers, seed + gameIndex * 1000);
       finalNumbers.push(...selectedHot);
       console.log(`  ✓ ${selectedHot.length} números quentes adicionados`);
 
-      // Equilíbrio com números mornos
-      const remainingWarm = warmNumbers.filter(n => !finalNumbers.includes(n));
-      const selectedWarm = this.selectRandomFromArray(remainingWarm, Math.min(remainingWarm.length, Math.ceil(count * 0.35)));
+      // Equilíbrio com números mornos (35%)
+      const warmTarget = Math.ceil(count * 0.35);
+      const remainingWarm = warmNumbers.filter(n => !usedNumbers.has(n));
+      const selectedWarm = this.selectUniqueNumbers(remainingWarm, warmTarget, usedNumbers, seed + gameIndex * 2000);
       finalNumbers.push(...selectedWarm);
       console.log(`  ✓ ${selectedWarm.length} números mornos adicionados`);
 
-      // Potencial surpresa com números frios estratégicos
-      const remainingCold = coldNumbers.filter(n => !finalNumbers.includes(n));
-      const selectedCold = this.selectRandomFromArray(remainingCold, Math.min(remainingCold.length, count - finalNumbers.length));
+      // Potencial surpresa com números frios (25%)
+      const coldTarget = count - finalNumbers.length;
+      const remainingCold = coldNumbers.filter(n => !usedNumbers.has(n));
+      const selectedCold = this.selectUniqueNumbers(remainingCold, coldTarget, usedNumbers, seed + gameIndex * 3000);
       finalNumbers.push(...selectedCold);
       console.log(`  ✓ ${selectedCold.length} números frios adicionados`);
 
@@ -944,8 +952,33 @@ class AiService {
 
       console.log(`  🔍 Validação: ${hasSequence ? '✓' : '✗'} Sequências, Par/Ímpar: ${(evenOddRatio * 100).toFixed(0)}%/${((1 - evenOddRatio) * 100).toFixed(0)}%`);
 
-      // 🛡️ FASE 8: GARANTIR UNICIDADE E ORDENAÇÃO
-      finalNumbers = this.ensureUniqueness(finalNumbers, count, maxNumber);
+      // 🛡️ FASE 8: VALIDAÇÃO RIGOROSA DE UNICIDADE E CONTAGEM
+      finalNumbers = Array.from(new Set(finalNumbers)); // Remove qualquer duplicata
+      
+      // Se ainda faltarem números, completar com disponíveis
+      if (finalNumbers.length < count) {
+        const needed = count - finalNumbers.length;
+        const allAvailable = Array.from({length: maxNumber}, (_, i) => i + 1)
+          .filter(n => !finalNumbers.includes(n));
+        
+        const additional = this.selectUniqueNumbers(allAvailable, needed, usedNumbers, seed + gameIndex * 5000);
+        finalNumbers.push(...additional);
+        console.log(`  ⚠️ Completados ${additional.length} números adicionais`);
+      }
+
+      // Garantir exatamente o count correto
+      finalNumbers = finalNumbers.slice(0, count);
+
+      // Validação final: confirmar unicidade
+      if (finalNumbers.length !== new Set(finalNumbers).size) {
+        console.error(`❌ ERRO: Números duplicados detectados no jogo ${gameIndex + 1}`);
+        throw new Error(`Geração falhou: números duplicados`);
+      }
+
+      if (finalNumbers.length !== count) {
+        console.error(`❌ ERRO: Contagem incorreta - esperado ${count}, gerado ${finalNumbers.length}`);
+        throw new Error(`Geração falhou: contagem incorreta`);
+      }
 
       // 📊 FASE 9: SCORE DE QUALIDADE FINAL
       const finalCorrelation = deepAnalysis.correlationAnalysis.calculateSetCorrelationScore(finalNumbers, correlationMatrix);
@@ -994,6 +1027,39 @@ class AiService {
     console.log(`   - Otimização de qualidade`);
 
     return games;
+  }
+
+  // Método para selecionar números ÚNICOS com seed para variação
+  private selectUniqueNumbers(
+    pool: number[],
+    count: number,
+    usedNumbers: Set<number>,
+    seed: number
+  ): number[] {
+    const selected: number[] = [];
+    const available = pool.filter(n => !usedNumbers.has(n));
+    
+    if (available.length === 0) {
+      console.warn('⚠️ Pool vazio para seleção');
+      return selected;
+    }
+
+    // Embaralhar com seed para diversidade
+    const shuffled = [...available].sort(() => {
+      const random = Math.sin(seed++ * Math.random() * 10000) * 10000;
+      return (random - Math.floor(random)) - 0.5;
+    });
+
+    // Selecionar até count números únicos
+    for (const num of shuffled) {
+      if (selected.length >= count) break;
+      if (!usedNumbers.has(num) && !selected.includes(num)) {
+        selected.push(num);
+        usedNumbers.add(num);
+      }
+    }
+
+    return selected;
   }
 
   // Método auxiliar para encontrar melhor combinação correlacionada
@@ -1183,35 +1249,29 @@ class AiService {
     return result;
   }
 
-  private ensureUniqueness(numbers: number[], count: number, maxNumber: number, seed: number): number[] {
-    const unique = [...new Set(numbers)];
+  private ensureUniqueness(numbers: number[], count: number, maxNumber: number): number[] {
+    // Remover duplicatas mantendo ordem
+    const unique = Array.from(new Set(numbers));
 
     if (unique.length >= count) {
       return unique.slice(0, count);
     }
 
-    // Adiciona números únicos com MÁXIMA VARIAÇÃO
+    // Se faltarem números, preencher com disponíveis
+    const needed = count - unique.length;
     const available = Array.from({length: maxNumber}, (_, i) => i + 1)
       .filter(n => !unique.includes(n));
 
-    // Tripla camada de aleatoriedade para garantir ZERO repetição
-    const shuffled = available.sort(() => {
-      const random1 = Math.random();
-      const random2 = Math.random();
-      const seedRandom = Math.sin(seed++ * random1 * random2 * 10000) * 10000;
-      const timeRandom = Math.sin(Date.now() * random1) * 1000;
-      const finalRandom = (seedRandom - Math.floor(seedRandom)) + (timeRandom - Math.floor(timeRandom));
-      return (finalRandom - 1) * (random1 - 0.5) * (random2 - 0.5);
-    });
-
-    while (unique.length < count && shuffled.length > 0) {
-      const nextNum = shuffled.shift()!;
-      if (!unique.includes(nextNum)) {
-        unique.push(nextNum);
-      }
+    if (available.length === 0) {
+      console.error('❌ Sem números disponíveis para completar');
+      return unique;
     }
 
-    return unique.slice(0, count);
+    // Embaralhar e adicionar
+    const shuffled = available.sort(() => Math.random() - 0.5);
+    const additional = shuffled.slice(0, needed);
+    
+    return [...unique, ...additional].slice(0, count);
   }
 
   private calculateEnhancedFrequencies(frequencies: any[], latestDraws: any[]): any[] {
