@@ -1046,8 +1046,32 @@ class AiService {
 
         // Buscar melhor combinação entre os top números
         const topFrequencies = frequencies
-          .sort((a, b) => b.frequency - a.frequency)
+          .sort((a, b) => b.frequency - a.frequency);
 
+        const bestCombo = this.findBestCorrelatedCombo(
+          topFrequencies.map(f => f.number),
+          count,
+          correlationMatrix
+        );
+
+        if (bestCombo.length === count) {
+          finalNumbers = bestCombo;
+          const improvedScore = deepAnalysis.correlationAnalysis.calculateSetCorrelationScore(finalNumbers, correlationMatrix);
+          console.log(`  ✨ Otimização aplicada: ${qualityScore.toFixed(3)} → ${improvedScore.toFixed(3)}`);
+        }
+      }
+
+      // Validação final
+      finalNumbers.sort((a, b) => a - b);
+      
+      games.push(finalNumbers);
+      finalNumbers.forEach(n => allUsedNumbers.add(n));
+      console.log(`  ✅ Jogo ${gameIndex + 1} gerado: [${finalNumbers.join(', ')}]`);
+    }
+
+    console.log(`\n🎯 IA AVANÇADA CONCLUÍDA!`);
+    return games;
+  }
 
   /**
    * Geração usando Algoritmo Genético
@@ -1095,8 +1119,6 @@ class AiService {
     return bestCombo;
   }
 
-  // Métodos auxiliares restantes continuam aqui...
-  
   private calculateFinalAccuracyScore(number: number, latestDraws: any[]): number {
     let score = 0.5;
     const recentNumbers = this.getRecentNumbers(latestDraws, 10);
@@ -1104,75 +1126,6 @@ class AiService {
     return score;
   }
 
-  // Continua com os outros métodos da classe...
-
-        const bestCombo = this.findBestCorrelatedCombo(
-          topFrequencies.map(f => f.number),
-          count,
-          correlationMatrix
-        );
-
-        if (bestCombo.length === count) {
-          finalNumbers = bestCombo;
-          const improvedScore = deepAnalysis.correlationAnalysis.calculateSetCorrelationScore(finalNumbers, correlationMatrix);
-          console.log(`  ✨ Otimização aplicada: ${qualityScore.toFixed(3)} → ${improvedScore.toFixed(3)}`);
-        }
-      }
-
-      // 🛡️ VALIDAÇÃO FINAL: garantir que o jogo é DIFERENTE dos anteriores
-      finalNumbers.sort((a, b) => a - b);
-      
-      // Verificar similaridade com jogos anteriores
-      let isTooSimilar = false;
-      for (const existingGame of games) {
-        const matches = finalNumbers.filter(n => existingGame.includes(n)).length;
-        const similarity = matches / count;
-        
-        if (similarity > 0.7) { // Se > 70% igual, regenerar
-          console.log(`  ⚠️ Jogo muito similar (${(similarity*100).toFixed(0)}%), regenerando...`);
-          isTooSimilar = true;
-          break;
-        }
-      }
-
-      // Se muito similar, fazer ajustes para diversificar
-      if (isTooSimilar && games.length > 0) {
-        const numbersToReplace = Math.ceil(count * 0.3); // Trocar 30%
-        const allAvailable = Array.from({length: maxNumber}, (_, i) => i + 1)
-          .filter(n => !finalNumbers.includes(n));
-
-        for (let i = 0; i < numbersToReplace; i++) {
-          const replaceIndex = Math.floor(Math.random() * finalNumbers.length);
-          const newNum = allAvailable.splice(Math.floor(Math.random() * allAvailable.length), 1)[0];
-          if (newNum) {
-            finalNumbers[replaceIndex] = newNum;
-          }
-        }
-        finalNumbers.sort((a, b) => a - b);
-        console.log(`  🔄 Jogo diversificado com ${numbersToReplace} substituições`);
-      }
-
-      games.push(finalNumbers);
-      
-      // Adicionar números ao rastreio global
-      finalNumbers.forEach(n => allUsedNumbers.add(n));
-
-      console.log(`  ✅ Jogo ${gameIndex + 1} gerado: [${finalNumbers.join(', ')}]`);
-    }
-
-    console.log(`\n🎯 IA AVANÇADA CONCLUÍDA!`);
-    console.log(`✅ ${games.length} jogo(s) ÚNICOS gerado(s) com análise completa de:`);
-    console.log(`   - Correlação entre números`);
-    console.log(`   - Padrões históricos`);
-    console.log(`   - Análise de temperatura`);
-    console.log(`   - Delays e dispersão`);
-    console.log(`   - Otimização de qualidade`);
-    console.log(`   - Diversidade garantida entre jogos`);
-
-    return games;
-  }
-
-  // Método para selecionar números ÚNICOS com seed para variação
   private selectUniqueNumbers(
     pool: number[],
     count: number,
@@ -1187,13 +1140,11 @@ class AiService {
       return selected;
     }
 
-    // Embaralhar com seed para diversidade
     const shuffled = [...available].sort(() => {
       const random = Math.sin(seed++ * Math.random() * 10000) * 10000;
       return (random - Math.floor(random)) - 0.5;
     });
 
-    // Selecionar até count números únicos
     for (const num of shuffled) {
       if (selected.length >= count) break;
       if (!usedNumbers.has(num) && !selected.includes(num)) {
@@ -1205,30 +1156,6 @@ class AiService {
     return selected;
   }
 
-  // Método auxiliar para encontrar melhor combinação correlacionada
-  private findBestCorrelatedCombo(
-    candidates: number[],
-    count: number,
-    correlationMatrix: Map<string, number>
-  ): number[] {
-    let bestCombo: number[] = [];
-    let bestScore = 0;
-
-    // Testar algumas combinações aleatórias e escolher a melhor
-    for (let attempt = 0; attempt < 20; attempt++) {
-      const combo = this.selectRandomFromArray(candidates, count);
-      const score = deepAnalysis.correlationAnalysis.calculateSetCorrelationScore(combo, correlationMatrix);
-
-      if (score > bestScore) {
-        bestScore = score;
-        bestCombo = combo;
-      }
-    }
-
-    return bestCombo;
-  }
-
-  // Verificar se há números consecutivos
   private hasConsecutiveNumbers(numbers: number[]): boolean {
     const sorted = [...numbers].sort((a, b) => a - b);
     for (let i = 1; i < sorted.length; i++) {
