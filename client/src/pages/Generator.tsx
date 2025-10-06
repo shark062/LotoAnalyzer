@@ -316,7 +316,7 @@ export default function Generator() {
                     }}
                     disabled={lotteriesLoading}
                   >
-                    <SelectTrigger className="w-full data-[placeholder]:text-muted-foreground">
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione a modalidade" />
                     </SelectTrigger>
                     <SelectContent>
