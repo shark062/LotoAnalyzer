@@ -227,10 +227,11 @@ class LotteryService {
       const officialId = lotteryMapping[lotteryId];
       if (!officialId) return null;
 
-      // Try multiple official endpoints for better reliability
+      // Try multiple official endpoints for better reliability (including free Guidi API)
       const apiUrls = [
         `https://servicebus2.caixa.gov.br/portaldeloterias/api/${officialId}/`,
         `https://servicebus2.caixa.gov.br/portaldeloterias/api/${officialId}`,
+        `https://api.guidi.dev.br/loteria/${officialId}/ultimo`, // 🆕 API Guidi gratuita como backup
         `https://api.loterias.caixa.gov.br/${officialId}/latest`
       ];
 

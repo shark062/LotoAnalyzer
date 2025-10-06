@@ -422,7 +422,7 @@ export default function AIAnalysis() {
                         </div>
 
                         <div className="text-sm text-muted-foreground mb-4">
-                          <strong>Reasoning:</strong> {predictionAnalysis.result.reasoning}
+                          <strong>Análise:</strong> {predictionAnalysis.result.reasoning}
                         </div>
 
                         <div className="flex items-center justify-between">

@@ -359,39 +359,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }]};
           break;
         case 'prediction':
-          // Predições com números específicos
-          analysis = {
-            primaryPrediction: [8, 15, 23, 31, 42, 50],
-            confidence: 0.76,
-            reasoning: 'Baseado em análise temporal avançada e padrões históricos dos últimos 50 sorteios',
-            alternatives: [
-              {
-                numbers: [5, 12, 28, 35, 44, 52],
-                strategy: 'Estratégia Conservadora'
-              },
-              {
-                numbers: [11, 19, 27, 39, 46, 58],
-                strategy: 'Estratégia Agressiva'
-              }
-            ],
-            riskLevel: 'medium'
-          };
+          // Predições com dados reais usando aiService
+          const predictionResult = await aiService.performAnalysis(lotteryId, 'prediction');
+          analysis = predictionResult.result;
           break;
         case 'strategy':
-          // Recomendações estratégicas
-          analysis = {
-            recommendedStrategy: 'Estratégia Equilibrada Inteligente',
-            reasoning: 'Com base na análise de 100 sorteios anteriores, recomendamos uma abordagem que combina números quentes (40%), mornos (35%) e frios (25%) para maximizar as chances.',
-            numberSelection: {
-              hotPercentage: 40,
-              warmPercentage: 35,
-              coldPercentage: 25
-            },
-            riskLevel: 'balanced',
-            playFrequency: 'Jogue 2-3 vezes por semana nos dias de sorteio',
-            budgetAdvice: 'Invista de forma responsável, nunca mais de 5% da sua renda mensal',
-            expectedImprovement: '+18% em precisão de acertos'
-          };
+          // Recomendações estratégicas com dados reais usando aiService
+          const strategyResult = await aiService.performAnalysis(lotteryId, 'strategy');
+          analysis = strategyResult.result;
           break;
         default:
           analysis = await advancedAI.performEnsembleAnalysis(lotteryId);
