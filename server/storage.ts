@@ -350,7 +350,7 @@ class Storage {
     }
   }
 
-  // Data synchronization methods
+  // Data synchronization methods with transaction support
   async syncDraws(draws: InsertLotteryDraw[]): Promise<void> {
     try {
       if (!this.db) {
@@ -358,40 +358,56 @@ class Storage {
         return;
       }
 
-      const drawPromises = draws.map(async (draw) => {
-        try {
-          const existing = await this.getDrawByContest(draw.lotteryId, draw.contestNumber);
-          if (existing) {
-            console.log(`Draw ${draw.lotteryId} #${draw.contestNumber} already exists, skipping.`);
-            return;
-          }
+      // Use transaction to ensure atomicity - all or nothing
+      await this.db.transaction(async (tx) => {
+        for (const draw of draws) {
+          try {
+            const existing = await tx
+              .select()
+              .from(schema.lotteryDraws)
+              .where(
+                and(
+                  eq(schema.lotteryDraws.lotteryId, draw.lotteryId),
+                  eq(schema.lotteryDraws.contestNumber, draw.contestNumber)
+                )
+              )
+              .limit(1);
 
-          await this.db.insert(schema.lotteryDraws).values(draw);
-          console.log(`✓ Synced draw ${draw.lotteryId} #${draw.contestNumber}`);
-
-          // Trigger prediction evaluation if draw numbers are available
-          if (draw.drawnNumbers && draw.drawnNumbers.length > 0) {
-            try {
-              const { performanceService } = await import('./services/performanceService');
-              await performanceService.evaluatePredictions(
-                draw.lotteryId,
-                draw.contestNumber,
-                draw.drawnNumbers
-              );
-              console.log(`🎯 Predictions evaluated for ${draw.lotteryId} #${draw.contestNumber}`);
-            } catch (error) {
-              console.log(`⚠️ Error evaluating predictions for ${draw.lotteryId} #${draw.contestNumber}:`, error);
+            if (existing.length > 0) {
+              console.log(`Draw ${draw.lotteryId} #${draw.contestNumber} already exists, skipping.`);
+              continue;
             }
+
+            await tx.insert(schema.lotteryDraws).values(draw);
+            console.log(`✓ Synced draw ${draw.lotteryId} #${draw.contestNumber}`);
+          } catch (error) {
+            console.error(`Error syncing draw ${draw.lotteryId} #${draw.contestNumber}:`, error);
+            throw error; // Re-throw to rollback transaction
           }
-        } catch (error) {
-          console.error(`Error syncing draw ${draw.lotteryId} #${draw.contestNumber}:`, error);
         }
       });
 
-      await Promise.all(drawPromises);
+      // Trigger prediction evaluation after transaction completes successfully
+      for (const draw of draws) {
+        if (draw.drawnNumbers && draw.drawnNumbers.length > 0) {
+          try {
+            const { performanceService } = await import('./services/performanceService');
+            await performanceService.evaluatePredictions(
+              draw.lotteryId,
+              draw.contestNumber,
+              draw.drawnNumbers
+            );
+            console.log(`🎯 Predictions evaluated for ${draw.lotteryId} #${draw.contestNumber}`);
+          } catch (error) {
+            console.log(`⚠️ Error evaluating predictions for ${draw.lotteryId} #${draw.contestNumber}:`, error);
+          }
+        }
+      }
+
       console.log('✓ Draw synchronization complete.');
     } catch (error) {
       console.error('Error during draw synchronization process:', error);
+      throw error; // Propagate error for caller to handle
     }
   }
 
