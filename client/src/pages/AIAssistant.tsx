@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Bot, User, Mic, MicOff, Volume2, VolumeX, Zap } from 'lucide-react';
+import { Send, Bot, User, Mic, MicOff, Volume2, VolumeX, Copy, Flame, Sun, Snowflake } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useVoice } from '@/hooks/useVoice';
 
@@ -70,8 +70,7 @@ export default function AIAssistant() {
         body: JSON.stringify({
           userId: 'guest-user',
           message: messageText,
-          context: {},
-          persona: currentPersona === 'lek_do_black' ? 'lek_do_black' : undefined
+          context: {}
         })
       });
 
@@ -150,17 +149,6 @@ export default function AIAssistant() {
     toast({
       title: voiceEnabled ? '🔇 Voz desativada' : '🔊 Voz ativada',
       description: voiceEnabled ? 'As respostas não serão faladas' : 'As respostas serão faladas em voz alta'
-    });
-  };
-
-  const togglePersona = () => {
-    const newPersona = currentPersona === 'normal' ? 'lek_do_black' : 'normal';
-    setCurrentPersona(newPersona);
-    toast({
-      title: newPersona === 'lek_do_black' ? '💸🔥 Modo Lek do Black!' : '🧠 Modo Normal',
-      description: newPersona === 'lek_do_black'
-        ? 'BORA DOMINAR ESSAS LOTERIAS MEU CRIA!'
-        : 'Análise técnica e educada ativada.'
     });
   };
 
@@ -319,7 +307,7 @@ export default function AIAssistant() {
         <Card className="max-w-4xl mx-auto h-[calc(100vh-12rem)] flex flex-col bg-gray-800/50 backdrop-blur border-cyan-500/30">
           <CardHeader className="border-b border-cyan-500/30">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1">
                 <CardTitle className="flex items-center gap-2 text-2xl">
                   <Bot className="h-6 w-6 text-cyan-400" />
                   {currentPersona === 'lek_do_black' ? (
@@ -328,23 +316,17 @@ export default function AIAssistant() {
                     <span className="text-cyan-400">🧠 Shark Assistant</span>
                   )}
                 </CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardDescription className="text-gray-300 flex items-center gap-2">
                   {currentPersona === 'lek_do_black'
-                    ? 'Modo agressivo ativado - Bora ganhar grana!'
+                    ? 'Modo agressivo detectado automaticamente - Bora ganhar grana!'
                     : 'Assistente IA com análise avançada de loterias'}
+                  <Badge variant="outline" className={currentPersona === 'lek_do_black' ? 'border-yellow-500 text-yellow-400' : 'border-cyan-500 text-cyan-400'}>
+                    Auto
+                  </Badge>
                 </CardDescription>
               </div>
 
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={togglePersona}
-                  className={currentPersona === 'lek_do_black' ? 'bg-yellow-500/20 border-yellow-500' : 'bg-cyan-500/20 border-cyan-500'}
-                >
-                  <Zap className="h-4 w-4" />
-                </Button>
-
                 <Button
                   variant="outline"
                   size="icon"
