@@ -723,7 +723,35 @@ class Storage {
         throw new Error('Database connection required to save prediction');
       }
 
-      // Verificar se predição já existe
+      // Use upsert com onConflictDoUpdate para evitar condições de corrida
+      // Isso é atômico e thread-safe
+      const [result] = await this.db
+        .insert(schema.predictions)
+        .values(prediction)
+        .onConflictDoUpdate({
+          target: [
+            schema.predictions.lotteryId,
+            schema.predictions.contestNumber,
+            schema.predictions.modelName,
+            schema.predictions.strategy
+          ],
+          set: {
+            predictedNumbers: prediction.predictedNumbers,
+            confidence: prediction.confidence,
+            metadata: prediction.metadata,
+            updatedAt: new Date()
+          },
+          // Só atualizar se não foi avaliada ainda
+          where: eq(schema.predictions.isEvaluated, false)
+        })
+        .returning();
+
+      if (result) {
+        console.log(`💾 Predição salva/atualizada: ${prediction.modelName} para ${prediction.lotteryId} #${prediction.contestNumber}`);
+        return result;
+      }
+
+      // Se não retornou resultado, buscar a predição existente (já foi avaliada)
       const existing = await this.db
         .select()
         .from(schema.predictions)
@@ -738,31 +766,11 @@ class Storage {
         .limit(1);
 
       if (existing.length > 0) {
-        // Atualizar predição existente se não foi avaliada
-        if (!existing[0].isEvaluated) {
-          const [updated] = await this.db
-            .update(schema.predictions)
-            .set({
-              predictedNumbers: prediction.predictedNumbers,
-              confidence: prediction.confidence,
-              metadata: prediction.metadata
-            })
-            .where(eq(schema.predictions.id, existing[0].id))
-            .returning();
-
-          console.log(`🔄 Predição atualizada: ${prediction.modelName} para ${prediction.lotteryId} #${prediction.contestNumber}`);
-          return updated;
-        } else {
-          // Retornar predição existente se já foi avaliada
-          console.log(`📊 Predição já existe e foi avaliada: ${prediction.modelName} para ${prediction.lotteryId} #${prediction.contestNumber}`);
-          return existing[0];
-        }
+        console.log(`📊 Predição já existe e foi avaliada: ${prediction.modelName} para ${prediction.lotteryId} #${prediction.contestNumber}`);
+        return existing[0];
       }
 
-      // Inserir nova predição
-      const [result] = await this.db.insert(schema.predictions).values(prediction).returning();
-      console.log(`💾 Nova predição salva: ${prediction.modelName} para ${prediction.lotteryId} #${prediction.contestNumber}`);
-      return result;
+      throw new Error('Failed to save or retrieve prediction');
     } catch (error) {
       console.error('Error saving prediction:', error);
       throw new Error('Failed to save prediction to database');
