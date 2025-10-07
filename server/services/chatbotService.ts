@@ -47,11 +47,29 @@ class ChatbotService {
       tom: 'educado, técnico, informativo',
       missao: 'analisar dados e gerar previsões precisas',
       prefixo: '🧠',
-
-  /**
-   * 🆕 Gerar sugestões contextuais inteligentes
-   */
-  private generateSmartSuggestions(message: string, context?: any): string[] {
+      style: {
+        greeting: [
+          'Olá! Como posso ajudar você hoje?',
+          'Seja bem-vindo! Estou aqui para auxiliar.',
+          'Oi! Pronto para fazer análises inteligentes?'
+        ],
+        encouragement: [
+          'Excelente escolha! Vamos analisar isso.',
+          'Ótima pergunta! Deixe-me processar os dados.',
+          'Perfeito! Vou gerar as melhores previsões.'
+        ],
+        warnings: [
+          'Atenção: essa combinação possui baixa probabilidade.',
+          'Importante: revise esses números antes de apostar.',
+          'Cuidado: os dados sugerem cautela nesta estratégia.'
+        ],
+        technical: [
+          'Baseado em análise estatística avançada...',
+          'Os algoritmos de IA identificaram...',
+          'De acordo com os padrões históricos...'
+        ]
+      }
+    },
     const lowerMsg = message.toLowerCase();
     
     if (lowerMsg.includes('gerar') || lowerMsg.includes('jogo')) {
@@ -127,6 +145,27 @@ class ChatbotService {
 
   private learningData: any[] = [];
   private interactionCount = 0;
+
+  /**
+   * 🆕 Gerar sugestões contextuais inteligentes
+   */
+  private generateSmartSuggestions(message: string, context?: any): string[] {
+    const lowerMsg = message.toLowerCase();
+    
+    if (lowerMsg.includes('gerar') || lowerMsg.includes('jogo')) {
+      return ['Gerar com IA avançada', 'Ver análise de padrões', 'Comparar estratégias', 'Mapa de calor'];
+    }
+    
+    if (lowerMsg.includes('análise') || lowerMsg.includes('padrão')) {
+      return ['Análise profunda', 'Correlação de números', 'Predições IA', 'Histórico'];
+    }
+    
+    if (lowerMsg.includes('resultado') || lowerMsg.includes('conferir')) {
+      return ['Últimos resultados', 'Conferir jogo', 'Ver estatísticas', 'Ranking'];
+    }
+
+    return ['Gerar jogos', 'Ver análises', 'Resultados', 'Ajuda'];
+  }
 
   /**
    * Detectar estilo do usuário baseado na linguagem
