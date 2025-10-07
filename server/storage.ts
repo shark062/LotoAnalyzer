@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@shared/schema";
 import { eq, desc, sql, and } from "drizzle-orm";
+import { withRetry } from './utils';
 import type {
   LotteryType,
   LotteryDraw,
@@ -35,35 +36,44 @@ class Storage {
   }
 
   private async ensureGuestUser(): Promise<void> {
+    if (!this.db) return;
+
     try {
-      if (!this.db) return;
+      // Use retry logic for critical guest user creation
+      await withRetry(async () => {
+        if (!this.db) throw new Error('Database not available');
 
-      // Check if guest user exists
-      const existingUser = await this.db
-        .select()
-        .from(schema.users)
-        .where(eq(schema.users.id, 'guest-user'))
-        .limit(1);
+        // Use upsert for atomic guest user creation/update
+        await this.db
+          .insert(schema.users)
+          .values({
+            id: 'guest-user',
+            email: 'guest@sharkloterias.com',
+            firstName: 'Guest',
+            lastName: 'User',
+            profileImageUrl: null,
+          })
+          .onConflictDoUpdate({
+            target: schema.users.id,
+            set: {
+              email: 'guest@sharkloterias.com',
+              firstName: 'Guest',
+              lastName: 'User'
+            }
+          });
 
-      if (existingUser.length === 0) {
-        // Create guest user
-        await this.db.insert(schema.users).values({
-          id: 'guest-user',
-          email: 'guest@sharkloterias.com',
-          firstName: 'Guest',
-          lastName: 'User',
-          profileImageUrl: null,
-        });
-        console.log('✓ Guest user created successfully');
-      } else {
-        // Reset guest user data for fresh start
+        console.log('✓ Guest user created/updated successfully');
+
+        // Reset guest user games for fresh start
         await this.db
           .delete(schema.userGames)
           .where(eq(schema.userGames.userId, 'guest-user'));
+        
         console.log('✓ Guest user games reset for fresh start');
-      }
+      }, 3); // Retry up to 3 times
     } catch (error) {
-      console.error('Error ensuring guest user exists:', error);
+      console.error('Failed to ensure guest user after retries:', error);
+      // Don't throw - allow app to continue without guest user
     }
   }
 
