@@ -162,10 +162,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       await lotteryService.updateNumberFrequencies(id);
-      res.json({ message: "Frequencies updated successfully" });
+      res.json({ success: true, message: "Frequencies updated successfully" });
     } catch (error) {
       console.error("Error updating frequencies:", error);
-      res.json({ message: "Frequencies updated successfully" }); // Return success to prevent UI errors
+      res.status(500).json({ success: false, error: "Failed to update frequencies" });
     }
   });
 
