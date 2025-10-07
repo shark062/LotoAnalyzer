@@ -738,11 +738,8 @@ class Storage {
           set: {
             predictedNumbers: prediction.predictedNumbers,
             confidence: prediction.confidence,
-            metadata: prediction.metadata,
-            updatedAt: new Date()
-          },
-          // Só atualizar se não foi avaliada ainda
-          where: eq(schema.predictions.isEvaluated, false)
+            metadata: prediction.metadata
+          }
         })
         .returning();
 
@@ -827,31 +824,15 @@ class Storage {
     }
   }
 
-  // Obter ou criar performance de modelo
+  // Obter ou criar performance de modelo com upsert atômico
   async getOrCreateModelPerformance(modelName: string, lotteryId: string): Promise<ModelPerformance> {
     try {
       if (!this.db) {
         throw new Error('Database connection required');
       }
 
-      // Tentar encontrar performance existente
-      const existing = await this.db
-        .select()
-        .from(schema.modelPerformance)
-        .where(
-          and(
-            eq(schema.modelPerformance.modelName, modelName),
-            eq(schema.modelPerformance.lotteryId, lotteryId)
-          )
-        )
-        .limit(1);
-
-      if (existing.length > 0) {
-        return existing[0];
-      }
-
-      // Criar nova entrada se não existir
-      const [newPerformance] = await this.db
+      // Use upsert atômico para evitar condições de corrida
+      const [result] = await this.db
         .insert(schema.modelPerformance)
         .values({
           modelName,
@@ -865,9 +846,15 @@ class Storage {
           performanceGrade: 'N/A',
           isActive: true
         })
+        .onConflictDoUpdate({
+          target: [schema.modelPerformance.modelName, schema.modelPerformance.lotteryId],
+          set: {
+            isActive: true // Apenas reativar se existir
+          }
+        })
         .returning();
 
-      return newPerformance;
+      return result;
     } catch (error) {
       console.error('Error getting/creating model performance:', error);
       throw new Error('Failed to handle model performance');
