@@ -870,10 +870,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // 🤖 CHATBOT HÍBRIDO MULTI-IA
+  // 🤖 CHATBOT HÍBRIDO MULTI-IA COM PERSONALIDADES
   app.post("/api/chat", async (req, res) => {
     try {
-      const { userId = 'guest-user', message, context, persona = 'analista' } = req.body;
+      const { userId = 'guest-user', message, context, persona } = req.body;
 
       if (!message) {
         return res.status(400).json({ error: "Mensagem não fornecida" });
@@ -881,13 +881,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const result = await chatbotService.processChat(
         { userId, message, context },
-        persona
+        persona // 'normal', 'lek_do_black', ou undefined para auto-detecção
       );
 
       res.json(result);
     } catch (error) {
       console.error("Error in chat:", error);
       res.status(500).json({ error: "Failed to process chat message" });
+    }
+  });
+
+  // Obter dados de aprendizado do chatbot
+  app.get("/api/chat/learning-data", async (req, res) => {
+    try {
+      const data = chatbotService.getLearningData();
+      res.json({ data, count: data.length });
+    } catch (error) {
+      console.error("Error fetching learning data:", error);
+      res.status(500).json({ error: "Failed to fetch learning data" });
     }
   });
 

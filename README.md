@@ -1,4 +1,3 @@
-
 # 🦈 Shark Loterias
 
 Sistema avançado de análise de loterias brasileiras com inteligência artificial.

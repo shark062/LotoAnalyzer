@@ -1,21 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Bot, User, Sparkles, Copy, Flame, Snowflake, Sun, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { Send, Bot, User, Mic, MicOff, Volume2, VolumeX, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-// Import hook for voice functionality
-import { useVoice } from '@/hooks/useVoice'; // Assuming this hook is created
+import { useVoice } from '@/hooks/useVoice';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   visualizations?: any[];
   suggestions?: string[];
+  persona?: string;
   timestamp: Date;
 }
 
@@ -31,21 +30,24 @@ export default function AIAssistant() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [currentPersona, setCurrentPersona] = useState<'normal' | 'lek_do_black'>('normal');
+  const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Initialize voice hook
-  const { startListening, stopListening, speak, isListening, stopSpeaking } = useVoice();
+  const { startListening, stopListening, speak, stopSpeaking, isListening, isSpeaking } = useVoice();
 
   useEffect(() => {
-    // If voice is enabled, speak the last assistant message
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  useEffect(() => {
     if (voiceEnabled && messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage.role === 'assistant') {
         speak(lastMessage.content);
       }
     }
-  }, [voiceEnabled, messages, speak]);
-
+  }, [voiceEnabled, messages]);
 
   const sendMessage = async (text?: string) => {
     const messageText = text || input;
@@ -68,9 +70,14 @@ export default function AIAssistant() {
         body: JSON.stringify({
           userId: 'guest-user',
           message: messageText,
-          context: {}
+          context: {},
+          persona: currentPersona === 'lek_do_black' ? 'lek_do_black' : undefined
         })
       });
+
+      if (!response.ok) {
+        throw new Error('Falha na comunicação');
+      }
 
       const data = await response.json();
 
@@ -79,25 +86,82 @@ export default function AIAssistant() {
         content: data.reply,
         visualizations: data.visualizations,
         suggestions: data.suggestions,
+        persona: data.persona,
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-      
-      // Speak the assistant's reply if voice is enabled
-      if (voiceEnabled) {
-        speak(data.reply);
+
+      // Detectar mudança automática de persona
+      if (data.persona && data.persona !== currentPersona) {
+        setCurrentPersona(data.persona);
+        toast({
+          title: data.persona === 'lek_do_black' ? '💸 Modo Lek do Black ativado!' : '🧠 Modo Normal ativado',
+          description: data.persona === 'lek_do_black'
+            ? 'Agora tô falando na linguagem da quebrada!'
+            : 'Voltando ao modo técnico e educado.'
+        });
       }
     } catch (error) {
       console.error('Erro no chat:', error);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: '❌ Erro ao processar mensagem. Tente novamente!',
+        timestamp: new Date()
+      }]);
       toast({
         title: 'Erro',
-        description: 'Não foi possível processar sua mensagem',
+        description: 'Não foi possível processar sua mensagem.',
         variant: 'destructive'
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleVoiceInput = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening(
+        (text) => {
+          setInput(text);
+          toast({
+            title: '🎤 Capturado',
+            description: text
+          });
+        },
+        (error) => {
+          toast({
+            title: 'Erro de Voz',
+            description: error,
+            variant: 'destructive'
+          });
+        }
+      );
+    }
+  };
+
+  const toggleVoiceOutput = () => {
+    if (isSpeaking) {
+      stopSpeaking();
+    }
+    setVoiceEnabled(!voiceEnabled);
+    toast({
+      title: voiceEnabled ? '🔇 Voz desativada' : '🔊 Voz ativada',
+      description: voiceEnabled ? 'As respostas não serão faladas' : 'As respostas serão faladas em voz alta'
+    });
+  };
+
+  const togglePersona = () => {
+    const newPersona = currentPersona === 'normal' ? 'lek_do_black' : 'normal';
+    setCurrentPersona(newPersona);
+    toast({
+      title: newPersona === 'lek_do_black' ? '💸🔥 Modo Lek do Black!' : '🧠 Modo Normal',
+      description: newPersona === 'lek_do_black'
+        ? 'BORA DOMINAR ESSAS LOTERIAS MEU CRIA!'
+        : 'Análise técnica e educada ativada.'
+    });
   };
 
   const copyToClipboard = (text: string) => {
@@ -248,29 +312,58 @@ export default function AIAssistant() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
       <Navigation />
 
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Bot className="h-10 w-10 text-purple-400" />
-            Assistente IA Completo
-          </h1>
-          <p className="text-gray-300">
-            Gere jogos, veja análises, mapas de calor e muito mais através do chat
-          </p>
-        </div>
+        <Card className="max-w-4xl mx-auto h-[calc(100vh-12rem)] flex flex-col bg-gray-800/50 backdrop-blur border-cyan-500/30">
+          <CardHeader className="border-b border-cyan-500/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-2xl">
+                  <Bot className="h-6 w-6 text-cyan-400" />
+                  {currentPersona === 'lek_do_black' ? (
+                    <span className="text-yellow-400">💸 Lek do Black</span>
+                  ) : (
+                    <span className="text-cyan-400">🧠 Shark Assistant</span>
+                  )}
+                </CardTitle>
+                <CardDescription className="text-gray-300">
+                  {currentPersona === 'lek_do_black'
+                    ? 'Modo agressivo ativado - Bora ganhar grana!'
+                    : 'Assistente IA com análise avançada de loterias'}
+                </CardDescription>
+              </div>
 
-        <Card className="w-full h-[700px] flex flex-col neon-border bg-black/20">
-          <CardHeader className="border-b border-border/20">
-            <CardTitle className="flex items-center gap-2 text-white">
-              <Sparkles className="h-5 w-5 text-purple-400" />
-              Chat Inteligente
-            </CardTitle>
-            <CardDescription className="text-gray-400">
-              Peça o que quiser: gerar jogos, análises, predições, mapas de calor...
-            </CardDescription>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={togglePersona}
+                  className={currentPersona === 'lek_do_black' ? 'bg-yellow-500/20 border-yellow-500' : 'bg-cyan-500/20 border-cyan-500'}
+                >
+                  <Zap className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleVoiceInput}
+                  className={isListening ? 'bg-red-500/20 border-red-500 animate-pulse' : ''}
+                >
+                  {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={toggleVoiceOutput}
+                  className={voiceEnabled ? 'bg-green-500/20 border-green-500' : ''}
+                >
+                  {voiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
           </CardHeader>
 
           <CardContent className="flex-1 flex flex-col p-4 gap-4 overflow-hidden">
@@ -282,62 +375,61 @@ export default function AIAssistant() {
                     className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[85%] rounded-lg p-4 ${
+                      className={`max-w-[80%] rounded-lg p-4 ${
                         msg.role === 'user'
-                          ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white'
-                          : 'bg-black/40 border border-border/20'
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                          : msg.persona === 'lek_do_black'
+                          ? 'bg-gradient-to-r from-yellow-600 to-orange-600 text-white'
+                          : 'bg-gray-700/50 text-gray-100'
                       }`}
                     >
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-start gap-2 mb-2">
                         {msg.role === 'assistant' ? (
-                          <Bot className="h-5 w-5 mt-1 text-purple-400 flex-shrink-0" />
+                          <Bot className="h-5 w-5 mt-1" />
                         ) : (
-                          <User className="h-5 w-5 mt-1 flex-shrink-0" />
+                          <User className="h-5 w-5 mt-1" />
                         )}
-                        <div className="flex-1 min-w-0">
-                          <div className="whitespace-pre-wrap break-words text-white">
-                            {msg.content}
-                          </div>
-
-                          {msg.visualizations?.map((viz, i) => (
-                            <div key={i}>
-                              {renderVisualization(viz)}
-                            </div>
-                          ))}
+                        <div className="flex-1">
+                          <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
 
                           {msg.suggestions && msg.suggestions.length > 0 && (
                             <div className="mt-3 flex flex-wrap gap-2">
                               {msg.suggestions.map((suggestion, i) => (
-                                <Button
+                                <Badge
                                   key={i}
                                   variant="outline"
-                                  size="sm"
-                                  onClick={() => sendMessage(suggestion)}
-                                  className="text-xs bg-black/20 border-purple-500/30 hover:bg-purple-500/20 text-white"
+                                  className="cursor-pointer hover:bg-white/10"
+                                  onClick={() => {
+                                    setInput(suggestion);
+                                    setTimeout(() => sendMessage(suggestion), 100);
+                                  }}
                                 >
                                   {suggestion}
-                                </Button>
+                                </Badge>
                               ))}
                             </div>
                           )}
                         </div>
                       </div>
-                      <span className="text-xs opacity-50 mt-2 block text-right">
-                        {msg.timestamp.toLocaleTimeString()}
+                      <span className="text-xs opacity-50">
+                        {msg.timestamp.toLocaleTimeString('pt-BR')}
                       </span>
                     </div>
                   </div>
                 ))}
                 {loading && (
                   <div className="flex justify-start">
-                    <div className="bg-black/40 rounded-lg p-4 border border-border/20">
-                      <div className="flex items-center gap-3">
-                        <Bot className="h-5 w-5 animate-pulse text-purple-400" />
-                        <span className="text-sm text-white">Processando...</span>
+                    <div className="bg-gray-700/50 rounded-lg p-4">
+                      <div className="flex items-center gap-2">
+                        <Bot className="h-5 w-5 animate-pulse text-cyan-400" />
+                        <span className="text-sm text-gray-300">
+                          {currentPersona === 'lek_do_black' ? 'Processando mano...' : 'Pensando...'}
+                        </span>
                       </div>
                     </div>
                   </div>
                 )}
+                <div ref={scrollRef} />
               </div>
             </ScrollArea>
 
@@ -346,48 +438,18 @@ export default function AIAssistant() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && !loading && sendMessage()}
-                placeholder="Digite sua mensagem... Ex: gerar 3 jogos para mega-sena"
+                placeholder={
+                  currentPersona === 'lek_do_black'
+                    ? 'Manda a braba aí mano...'
+                    : 'Digite sua mensagem...'
+                }
                 disabled={loading}
-                className="bg-black/20 border-border/20 text-white placeholder:text-gray-500"
+                className="bg-gray-700/50 border-cyan-500/30 text-white placeholder:text-gray-400"
               />
-              {/* Voice I/O Buttons */}
               <Button
-                variant="outline"
-                size="icon"
-                onClick={() => {
-                  if (isListening) {
-                    stopListening();
-                  } else {
-                    startListening(
-                      (text) => {
-                        setInput(text);
-                        sendMessage(text);
-                      },
-                      (error) => toast({ title: 'Erro', description: error, variant: 'destructive' })
-                    );
-                  }
-                }}
-                className={isListening ? 'bg-red-500 hover:bg-red-600' : ''}
-              >
-                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-              </Button>
-
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => {
-                  setVoiceEnabled(!voiceEnabled);
-                  if (voiceEnabled) stopSpeaking();
-                }}
-                className={voiceEnabled ? 'bg-accent' : ''}
-              >
-                {voiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-              </Button>
-
-              <Button 
                 onClick={() => sendMessage()}
                 disabled={loading || !input.trim()}
-                className="bg-gradient-to-r from-cyan-600 to-purple-600"
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
               >
                 <Send className="h-4 w-4" />
               </Button>
