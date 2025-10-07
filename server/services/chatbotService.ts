@@ -169,7 +169,19 @@ class ChatbotService {
       const persona = this.personas[personaKey];
 
       const lowerMessage = message.toLowerCase();
-      const intent = this.detectIntent(lowerMessage);
+      
+      // 🆕 CLASSIFICAÇÃO DE INTENÇÃO APRIMORADA
+      const intent = this.classifyIntent(lowerMessage);
+      
+      // 🆕 TRATAMENTO ESPECIAL PARA SAUDAÇÕES (não mostrar menu completo)
+      if (intent.type === 'greeting') {
+        return this.handleGreeting(persona, userId);
+      }
+
+      // 🆕 MENU APENAS QUANDO EXPLICITAMENTE SOLICITADO
+      if (intent.type === 'help_request') {
+        return this.handleHelpRequest(persona);
+      }
 
       let response: ChatResponse;
 
@@ -228,30 +240,92 @@ class ChatbotService {
   }
 
   /**
-   * Detectar intenção da mensagem
+   * Classificar intenção da mensagem com detecção aprimorada
    */
-  private detectIntent(message: string): { type: string; params: any } {
+  private classifyIntent(message: string): { type: string; params: any; confidence: number } {
+    // 🆕 SAUDAÇÕES (prioridade alta - não mostrar menu)
+    const greetingPatterns = /^(oi|olá|ola|hey|e aí|eai|bom dia|boa tarde|boa noite|salve|fala)\b/i;
+    if (greetingPatterns.test(message.trim())) {
+      return { type: 'greeting', params: {}, confidence: 0.95 };
+    }
+
+    // 🆕 PEDIDOS DE AJUDA (mostrar menu apenas aqui)
+    const helpPatterns = /\b(ajuda|help|menu|opções|opçoes|comandos|o que|que faz|pode fazer)\b/i;
+    if (helpPatterns.test(message)) {
+      return { type: 'help_request', params: {}, confidence: 0.90 };
+    }
+
     const patterns = {
-      generate_games: /gerar|criar|fazer|montar|sortear|jogo|aposta|números/i,
-      show_heatmap: /mapa de calor|heatmap|temperatura|quentes|frios|frequência/i,
-      analyze_lottery: /analis|análise|estud|padrão|tendência/i,
-      compare_lotteries: /compar|diferença|versus|vs|qual melhor/i,
-      show_predictions: /predição|previsão|próximo|sugestão|recomendar/i,
-      explain_strategy: /estratégia|como jogar|dica|método/i,
-      check_results: /resultado|conferir|verificar|acertei|ganhei/i,
-      show_statistics: /estatística|dado|histórico|probabilidade/i,
+      generate_games: { pattern: /gerar|criar|fazer|montar|sortear|jogo|aposta|números/i, confidence: 0.85 },
+      show_heatmap: { pattern: /mapa de calor|heatmap|temperatura|quentes|frios|frequência/i, confidence: 0.85 },
+      analyze_lottery: { pattern: /analis|análise|estud|padrão|tendência/i, confidence: 0.80 },
+      compare_lotteries: { pattern: /compar|diferença|versus|vs|qual melhor/i, confidence: 0.80 },
+      show_predictions: { pattern: /predição|previsão|próximo|sugestão|recomendar/i, confidence: 0.80 },
+      explain_strategy: { pattern: /estratégia|como jogar|dica|método/i, confidence: 0.75 },
+      check_results: { pattern: /resultado|conferir|verificar|acertei|ganhei/i, confidence: 0.85 },
+      show_statistics: { pattern: /estatística|dado|histórico|probabilidade/i, confidence: 0.75 },
     };
 
-    for (const [type, pattern] of Object.entries(patterns)) {
-      if (pattern.test(message)) {
+    for (const [type, config] of Object.entries(patterns)) {
+      if (config.pattern.test(message)) {
         return {
           type,
-          params: this.extractParams(message, type)
+          params: this.extractParams(message, type),
+          confidence: config.confidence
         };
       }
     }
 
-    return { type: 'general_question', params: {} };
+    return { type: 'general_question', params: {}, confidence: 0.5 };
+  }
+
+  /**
+   * 🆕 Handler para saudações (resposta curta, SEM menu completo)
+   */
+  private handleGreeting(persona: Persona, userId: string): ChatResponse {
+    const greetings = persona.style.greeting;
+    const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+    
+    const shortPrompt = persona.nome === 'Lek do Black'
+      ? 'Bora gerar jogo ou ver análises?'
+      : 'Quer gerar jogos ou ver análises?';
+
+    return {
+      reply: `${persona.prefixo} ${greeting}\n\n${shortPrompt}`,
+      suggestions: ['Gerar jogos', 'Ver mapa de calor', 'Análise completa', 'Últimos resultados'],
+      id: Date.now().toString(),
+      persona: persona.nome === 'Lek do Black' ? 'lek_do_black' : 'normal'
+    };
+  }
+
+  /**
+   * 🆕 Handler para pedidos de ajuda (AQUI SIM mostra menu completo)
+   */
+  private handleHelpRequest(persona: Persona): ChatResponse {
+    const helpTopics = persona.nome === 'Lek do Black'
+      ? [
+          '🎲 **GERAR JOGOS**: "gera 3 jogos pra mega-sena mano"',
+          '🔥 **MAPA DE CALOR**: "mostra o mapa de calor da lotofácil"',
+          '📊 **ANÁLISES**: "analisa a quina aí"',
+          '🔮 **PREDIÇÕES**: "prevê os números pra mega-sena"',
+          '📈 **RESULTADOS**: "qual foi o último resultado da lotofácil?"',
+          '⚙️ **ESTRATÉGIAS**: "explica a parada dos números quentes"'
+        ]
+      : [
+          '🎲 **Gerar Jogos**: "gerar 3 jogos para mega-sena"',
+          '🔥 **Mapa de Calor**: "mostrar mapa de calor da lotofácil"',
+          '📊 **Análises**: "analisar quina"',
+          '🔮 **Predições**: "prever números para mega-sena"',
+          '📈 **Resultados**: "último resultado da lotofácil"',
+          '⚙️ **Estratégias**: "explicar estratégia de números quentes"'
+        ];
+
+    return {
+      reply: `${persona.prefixo} Posso te ajudar com:\n\n${helpTopics.join('\n\n')}`,
+      suggestions: ['Gerar jogos', 'Mapa de calor', 'Análises', 'Resultados'],
+      id: Date.now().toString(),
+      persona: persona.nome === 'Lek do Black' ? 'lek_do_black' : 'normal'
+    };
   }
 
   /**

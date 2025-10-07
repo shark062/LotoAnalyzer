@@ -916,21 +916,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🤖 CHATBOT HÍBRIDO MULTI-IA COM PERSONALIDADES
   app.post("/api/chat", async (req, res) => {
     try {
-      const { userId = 'guest-user', message, context, persona } = req.body;
+      const { userId = 'guest-user', message, context, persona, sessionId } = req.body;
 
-      if (!message) {
-        return res.status(400).json({ error: "Mensagem não fornecida" });
+      // Validação robusta
+      if (!message || typeof message !== 'string' || message.trim().length === 0) {
+        return res.status(400).json({ 
+          error: "Mensagem inválida",
+          reply: "Por favor, digite uma mensagem válida."
+        });
       }
 
-      const result = await chatbotService.processChat(
-        { userId, message, context },
-        persona // 'normal', 'lek_do_black', ou undefined para auto-detecção
-      );
+      const effectiveSessionId = sessionId || userId;
+
+      // 🆕 ENFILEIRAR MENSAGENS POR SESSÃO (evita processamento concorrente)
+      const { conversationQueue } = await import('./services/conversationQueue');
+      
+      const result = await conversationQueue.enqueue(effectiveSessionId, async () => {
+        // Timeout de 15 segundos para evitar requisições penduradas
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout: processamento demorou mais de 15s')), 15000)
+        );
+
+        return Promise.race([
+          chatbotService.processChat(
+            { userId, message: message.trim(), context },
+            persona
+          ),
+          timeoutPromise
+        ]);
+      });
 
       res.json(result);
-    } catch (error) {
-      console.error("Error in chat:", error);
-      res.status(500).json({ error: "Failed to process chat message" });
+    } catch (error: any) {
+      console.error("[CHAT ERROR]", error);
+      
+      // Resposta amigável para o usuário
+      const friendlyError = error.message?.includes('Timeout') 
+        ? '⏱️ Demorou demais pra processar. Tenta de novo com uma pergunta mais simples?'
+        : error.message?.includes('generateFallbackGames')
+        ? '🔧 Tô ajustando uns dados aqui. Tenta outra loteria ou pergunta sobre análises.'
+        : '⚠️ Eita, deu ruim aqui. Tenta de novo que eu olho isso melhor. (Se persistir, manda "ajuda")';
+
+      res.status(500).json({ 
+        reply: friendlyError,
+        error: process.env.NODE_ENV === 'development' ? String(error.message || error) : undefined,
+        suggestions: ['Gerar jogos', 'Ver análises', 'Ajuda']
+      });
     }
   });
 

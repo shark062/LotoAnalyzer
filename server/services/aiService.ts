@@ -3363,6 +3363,25 @@ class AiService {
     return numbers.slice(0, count).sort((a, b) => a - b);
   }
 
+  /**
+   * 🆕 Método generateFallbackGames (estava ausente, causando erro)
+   */
+  private async generateFallbackGames(lotteryId: string, count: number, gamesCount: number): Promise<number[][]> {
+    const config = getLotteryConfig(lotteryId);
+    if (!config) {
+      throw new Error(`Configuração não encontrada para ${lotteryId}`);
+    }
+
+    const games: number[][] = [];
+    
+    for (let i = 0; i < gamesCount; i++) {
+      const game = this.generateAdvancedAlgorithmicNumbers(count, config.totalNumbers, lotteryId, i);
+      games.push(game);
+    }
+
+    return games;
+  }
+
   // Métodos auxiliares para correlação (redefined to be accessible)
   private getCorrelationScore(number: number, correlationAnalysis: any): number {
     // Dummy implementation for now, assumes correlationAnalysis has a method
