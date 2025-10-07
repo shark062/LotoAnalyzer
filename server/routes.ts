@@ -94,12 +94,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/lotteries/:id/draws', async (req, res) => {
     try {
       const { id } = req.params;
-      const limit = parseInt(req.query.limit as string) || 10;
+      
+      // Validate and parse limit parameter
+      const limitParam = req.query.limit as string;
+      let limit = 10; // default
+      
+      if (limitParam) {
+        const parsedLimit = parseInt(limitParam);
+        if (isNaN(parsedLimit) || parsedLimit < 1) {
+          return res.status(400).json({ error: 'limit must be a positive number' });
+        }
+        if (parsedLimit > 100) {
+          return res.status(400).json({ error: 'limit cannot exceed 100' });
+        }
+        limit = parsedLimit;
+      }
+
       const draws = await storage.getLatestDraws(id, limit);
       res.json(draws);
     } catch (error) {
       console.error("Error fetching draws:", error);
-      res.json([]); // Return empty array instead of error
+      res.status(500).json({ error: 'Failed to fetch draws' });
     }
   });
 
@@ -254,6 +269,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = 'guest-user'; // Default guest user for direct access
       const { lotteryId, numbersCount, gamesCount, strategy } = req.body;
 
+      // Validate required fields
+      if (!lotteryId) {
+        return res.status(400).json({ error: 'lotteryId is required' });
+      }
+
+      // Validate lottery configuration exists
+      const config = getLotteryConfig(lotteryId);
+      if (!config) {
+        return res.status(404).json({ error: 'Lottery configuration not found' });
+      }
+
+      // Validate numbersCount is within allowed range
+      const parsedNumbersCount = parseInt(numbersCount);
+      if (isNaN(parsedNumbersCount)) {
+        return res.status(400).json({ error: 'numbersCount must be a valid number' });
+      }
+      if (parsedNumbersCount < config.minNumbers || parsedNumbersCount > config.maxNumbers) {
+        return res.status(400).json({ 
+          error: `numbersCount must be between ${config.minNumbers} and ${config.maxNumbers}` 
+        });
+      }
+
+      // Validate gamesCount
+      const parsedGamesCount = parseInt(gamesCount) || 1;
+      if (parsedGamesCount < 1 || parsedGamesCount > 50) {
+        return res.status(400).json({ error: 'gamesCount must be between 1 and 50' });
+      }
+
       // Ensure guest user exists before generating games
       try {
         await storage.upsertUser({
@@ -268,8 +311,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const generatedGames = await lotteryService.generateGames({
         lotteryId,
-        numbersCount: parseInt(numbersCount),
-        gamesCount: parseInt(gamesCount),
+        numbersCount: parsedNumbersCount,
+        gamesCount: parsedGamesCount,
         strategy: strategy || 'mixed',
         userId,
       });
