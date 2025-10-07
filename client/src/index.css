@@ -120,7 +120,7 @@ button, a, input, select {
 }
 
 :root {
-  --background: rgba(0, 0, 0, 0);
+  --background: hsl(0, 0%, 0%);
   --foreground: hsl(0, 0%, 95%);
   --card: rgba(0, 0, 0, 0.7);
   --card-foreground: hsl(0, 0%, 95%);
@@ -209,11 +209,7 @@ button, a, input, select {
   body {
     @apply text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/attached_assets/cyberpunk-shark-icon_1759593221276.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
+    background: #000000;
     min-height: 100vh;
     position: relative;
   }

@@ -67,7 +67,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen text-foreground">
+      <div className="min-h-screen bg-black text-foreground">
         <Toaster />
         <Router />
       </div>
