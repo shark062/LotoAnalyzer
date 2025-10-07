@@ -47,6 +47,28 @@ class ChatbotService {
       tom: 'educado, técnico, informativo',
       missao: 'analisar dados e gerar previsões precisas',
       prefixo: '🧠',
+
+  /**
+   * 🆕 Gerar sugestões contextuais inteligentes
+   */
+  private generateSmartSuggestions(message: string, context?: any): string[] {
+    const lowerMsg = message.toLowerCase();
+    
+    if (lowerMsg.includes('gerar') || lowerMsg.includes('jogo')) {
+      return ['Gerar com IA avançada', 'Ver análise de padrões', 'Comparar estratégias', 'Mapa de calor'];
+    }
+    
+    if (lowerMsg.includes('análise') || lowerMsg.includes('padrão')) {
+      return ['Análise profunda', 'Correlação de números', 'Predições IA', 'Histórico'];
+    }
+    
+    if (lowerMsg.includes('resultado') || lowerMsg.includes('conferir')) {
+      return ['Últimos resultados', 'Conferir jogo', 'Ver estatísticas', 'Ranking'];
+    }
+
+    return ['Gerar jogos', 'Ver análises', 'Resultados', 'Ajuda'];
+  }
+
       style: {
         greeting: [
           'Olá! Como posso ajudar você hoje?',
@@ -170,6 +192,28 @@ class ChatbotService {
 
       const lowerMessage = message.toLowerCase();
       
+      // 🆕 USAR LIBRE-CHAT PARA CONVERSAS NATURAIS
+      if (process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY || process.env.GROQ_API_KEY) {
+        try {
+          const { libreChatEngine } = await import('./libreIntegration');
+          const aiResponse = await libreChatEngine.chat(
+            userId,
+            message,
+            personaKey,
+            context
+          );
+
+          return {
+            reply: `${persona.prefixo} ${aiResponse.message}`,
+            suggestions: this.generateSmartSuggestions(message, context),
+            id: Date.now().toString(),
+            persona: personaKey
+          };
+        } catch (error) {
+          console.log('📱 Libre-Chat indisponível, usando lógica tradicional');
+        }
+      }
+
       // 🆕 CLASSIFICAÇÃO DE INTENÇÃO APRIMORADA
       const intent = this.classifyIntent(lowerMessage);
       

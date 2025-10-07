@@ -8,6 +8,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Bot, User, Mic, MicOff, Volume2, VolumeX, Copy, Flame, Sun, Snowflake } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useVoice } from '@/hooks/useVoice';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -78,18 +81,54 @@ export default function AIAssistant() {
         throw new Error('Falha na comunicação');
       }
 
-      const data = await response.json();
+      const reader = response.body?.getReader();
+      let fullReply = '';
+      let accumulatedContent = '';
+
+      while (true) {
+        const { done, value } = await reader!.read();
+        if (done) break;
+
+        const chunk = new TextDecoder().decode(value);
+        fullReply += chunk;
+        accumulatedContent += chunk;
+
+        setMessages(prev => {
+          const lastMessageIndex = prev.length - 1;
+          if (lastMessageIndex >= 0 && prev[lastMessageIndex].role === 'assistant') {
+            const updatedMessages = [...prev];
+            updatedMessages[lastMessageIndex] = {
+              ...updatedMessages[lastMessageIndex],
+              content: accumulatedContent
+            };
+            return updatedMessages;
+          }
+          return [...prev, { role: 'assistant', content: accumulatedContent, timestamp: new Date() }];
+        });
+      }
+
+      const data = JSON.parse(fullReply); // Assuming the final response is JSON with other fields
 
       const assistantMessage: Message = {
         role: 'assistant',
-        content: data.reply,
+        content: data.reply || accumulatedContent, // Use reply if available, otherwise use accumulated content
         visualizations: data.visualizations,
         suggestions: data.suggestions,
         persona: data.persona,
         timestamp: new Date()
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages(prev => {
+        const updatedMessages = [...prev];
+        // Replace the streaming message with the final structured message
+        if (updatedMessages.length > 0 && updatedMessages[updatedMessages.length - 1].role === 'assistant') {
+          updatedMessages[updatedMessages.length - 1] = assistantMessage;
+        } else {
+          updatedMessages.push(assistantMessage);
+        }
+        return updatedMessages;
+      });
+
 
       // Detectar mudança automática de persona
       if (data.persona && data.persona !== currentPersona) {
@@ -371,8 +410,13 @@ export default function AIAssistant() {
                         ) : (
                           <User className="h-5 w-5 mt-1" />
                         )}
-                        <div className="flex-1">
-                          <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
+                        <div className="flex-1 prose prose-invert max-w-none">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            rehypePlugins={[rehypeHighlight]}
+                          >
+                            {msg.content}
+                          </ReactMarkdown>
 
                           {msg.suggestions && msg.suggestions.length > 0 && (
                             <div className="mt-3 flex flex-wrap gap-2">
