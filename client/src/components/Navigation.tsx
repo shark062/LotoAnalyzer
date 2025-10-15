@@ -17,7 +17,7 @@ import {
   User,
   TrendingUp,
   Activity,
-  MessageSquare
+  Target
 } from "lucide-react";
 import sharkLogo from "@assets/Logo Futurista da Shark Loterias_1757013773517.png";
 
@@ -89,6 +89,13 @@ export default function Navigation() {
       emoji: "📚",
       description: "Guia completo das modalidades"
     },
+    {
+      href: "/manual-picker",
+      label: "Escolher Dezenas",
+      icon: Target,
+      emoji: "🎯",
+      description: "Selecione suas dezenas manualmente"
+    }
   ];
 
   const quickActions = [
@@ -272,35 +279,6 @@ export default function Navigation() {
                   </Link>
                 );
               })}
-              {/* New AI Assistant Link */}
-              <Link
-                to="/ai-assistant"
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                  location === '/ai-assistant'
-                    ? 'bg-primary/20 text-primary border border-primary/50'
-                    : 'text-foreground/80 hover:text-primary hover:bg-primary/10 border border-foreground/10 hover:border-primary/30'
-                }`}
-                onClick={() => setIsMobileMenuOpen(false)}
-                data-testid="nav-link-ai-assistant"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className={`w-10 h-10 rounded-3xl flex items-center justify-center border ${
-                    location === '/ai-assistant'
-                      ? 'bg-primary/30 text-primary border-primary/50'
-                      : 'bg-foreground/10 text-foreground/70 border-foreground/20 group-hover:bg-primary/20 group-hover:text-primary group-hover:border-primary/40'
-                  }`}>
-                    <MessageSquare className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-lg">Assistente IA</div>
-                    <div className="text-xs opacity-70">Chat inteligente com IA</div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-lg">🤖</span>
-                  <span className="text-xs">→</span>
-                </div>
-              </Link>
             </nav>
           </div>
         </div>

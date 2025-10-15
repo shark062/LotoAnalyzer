@@ -848,12 +848,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { lottery1, lottery2 } = req.query;
 
-  // 🆕 Chat com Streaming (melhor UX)
-  app.post("/api/chat/stream", async (req, res) => {
-    try {
-      const { userId = 'guest-user', message, context, persona } = req.body;
+  // Rota do chatbot removida - substituída por seleção manual de números
 
-      if (!message || typeof message !== 'string') {
+  // Placeholder para evitar erro se houver chamadas antigas
+  app.post("/api/chat/stream", async (req, res) => {
+    res.status(410).json({ error: "Chatbot descontinuado" });
+  });
+
+  app.post("/api/chat", async (req, res) => {
+    res.status(410).json({ error: "Chatbot descontinuado" });
+  });
+
+  if (!false || typeof message !== 'string') {
         return res.status(400).json({ error: "Mensagem inválida" });
       }
 
@@ -1009,29 +1015,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/chat/feedback", async (req, res) => {
-    try {
-      const { chatId, outcome } = req.body;
-
-      await chatbotService.updateWeights({ chatId, outcome });
-
-      res.json({ success: true, message: 'Feedback processado' });
-    } catch (error) {
-      console.error("Error processing feedback:", error);
-      res.status(500).json({ error: "Failed to process feedback" });
-    }
-  });
-
-  app.get("/api/chat/history", async (req, res) => {
-    try {
-      const userId = req.query.userId || 'guest-user';
-      // Implementar busca de histórico
-      res.json({ history: [], userId });
-    } catch (error) {
-      console.error("Error fetching chat history:", error);
-      res.status(500).json({ error: "Failed to fetch chat history" });
-    }
-  });
+  // Rotas do chatbot removidas
 
   // 🎯 Sistema de Pontuação Híbrida
   app.get('/api/analysis/hybrid-score/:lotteryId', async (req, res) => {
