@@ -70,46 +70,6 @@ class ChatbotService {
         ]
       }
     },
-    const lowerMsg = message.toLowerCase();
-    
-    if (lowerMsg.includes('gerar') || lowerMsg.includes('jogo')) {
-      return ['Gerar com IA avançada', 'Ver análise de padrões', 'Comparar estratégias', 'Mapa de calor'];
-    }
-    
-    if (lowerMsg.includes('análise') || lowerMsg.includes('padrão')) {
-      return ['Análise profunda', 'Correlação de números', 'Predições IA', 'Histórico'];
-    }
-    
-    if (lowerMsg.includes('resultado') || lowerMsg.includes('conferir')) {
-      return ['Últimos resultados', 'Conferir jogo', 'Ver estatísticas', 'Ranking'];
-    }
-
-    return ['Gerar jogos', 'Ver análises', 'Resultados', 'Ajuda'];
-  }
-
-      style: {
-        greeting: [
-          'Olá! Como posso ajudar você hoje?',
-          'Seja bem-vindo! Estou aqui para auxiliar.',
-          'Oi! Pronto para fazer análises inteligentes?'
-        ],
-        encouragement: [
-          'Excelente escolha! Vamos analisar isso.',
-          'Ótima pergunta! Deixe-me processar os dados.',
-          'Perfeito! Vou gerar as melhores previsões.'
-        ],
-        warnings: [
-          'Atenção: essa combinação possui baixa probabilidade.',
-          'Importante: revise esses números antes de apostar.',
-          'Cuidado: os dados sugerem cautela nesta estratégia.'
-        ],
-        technical: [
-          'Baseado em análise estatística avançada...',
-          'Os algoritmos de IA identificaram...',
-          'De acordo com os padrões históricos...'
-        ]
-      }
-    },
     lek_do_black: {
       nome: 'Lek do Black',
       tom: 'agressivo, direto, estilo rua',
@@ -555,11 +515,11 @@ class ChatbotService {
     const sequences = deepAnalysis.correlationAnalysis.analyzeConsecutiveSequences(latestDraws, 2);
 
     const mostFrequent = frequencies
-      .sort((a, b) => b.frequency - a.frequency)
+      .sort((a, b) => (b.frequency || 0) - (a.frequency || 0))
       .slice(0, 10);
 
     const leastFrequent = frequencies
-      .sort((a, b) => a.frequency - b.frequency)
+      .sort((a, b) => (a.frequency || 0) - (b.frequency || 0))
       .slice(0, 10);
 
     const reply = persona?.nome === 'Lek do Black'
@@ -588,7 +548,7 @@ class ChatbotService {
   }
 
   private async handleCompareLotteries(intent: any, context?: any, persona?: Persona): Promise<ChatResponse> {
-    const lotteries = await storage.getAllLotteryTypes();
+    const lotteries = await storage.getLotteryTypes();
     const comparison: any[] = [];
 
     for (const lottery of lotteries.slice(0, 5)) {
@@ -628,11 +588,12 @@ class ChatbotService {
       return { reply: '❌ Modalidade não encontrada.', id: Date.now().toString() };
     }
 
-    const prediction = await aiService.generatePrediction(lotteryId, lottery);
+    const analysisResult = await aiService.performAnalysis(lotteryId, 'prediction');
+    const prediction = analysisResult.result;
 
     const reply = persona?.nome === 'Lek do Black'
-      ? `🔮 **PREDIÇÕES BRABAS - ${lottery.displayName}**\n\n🎯 **PREDIÇÃO PRINCIPAL** (${Math.round(prediction.confidence * 100)}% de certeza):\n${prediction.primaryPrediction.map(n => n.toString().padStart(2, '0')).join(' - ')}\n\n💡 **ANÁLISE DA IA**: ${prediction.reasoning}\n\n⚠️ **RISCO**: ${prediction.riskLevel}\n\nBORA APOSTAR NESSES NÚMEROS MEU CRIA!`
-      : `🔮 **Predições para ${lottery.displayName}**\n\n🎯 **Predição Principal** (${Math.round(prediction.confidence * 100)}% confiança):\n${prediction.primaryPrediction.map(n => n.toString().padStart(2, '0')).join(' - ')}\n\n💡 **Análise**: ${prediction.reasoning}\n\n⚠️ **Nível de Risco**: ${prediction.riskLevel}`;
+      ? `🔮 **PREDIÇÕES BRABAS - ${lottery.displayName}**\n\n🎯 **PREDIÇÃO PRINCIPAL** (${Math.round((prediction.confidence || 0.75) * 100)}% de certeza):\n${(prediction.primaryPrediction || []).map((n: number) => n.toString().padStart(2, '0')).join(' - ')}\n\n💡 **ANÁLISE DA IA**: ${prediction.reasoning || 'Análise baseada em padrões históricos'}\n\n⚠️ **RISCO**: ${prediction.riskLevel || 'Médio'}\n\nBORA APOSTAR NESSES NÚMEROS MEU CRIA!`
+      : `🔮 **Predições para ${lottery.displayName}**\n\n🎯 **Predição Principal** (${Math.round((prediction.confidence || 0.75) * 100)}% confiança):\n${(prediction.primaryPrediction || []).map((n: number) => n.toString().padStart(2, '0')).join(' - ')}\n\n💡 **Análise**: ${prediction.reasoning || 'Análise baseada em padrões históricos'}\n\n⚠️ **Nível de Risco**: ${prediction.riskLevel || 'Médio'}`;
 
     return {
       reply,
@@ -720,8 +681,8 @@ class ChatbotService {
     }
 
     const reply = persona?.nome === 'Lek do Black'
-      ? `🎲 **ÚLTIMO RESULTADO - ${lottery.displayName}**\n\n🎯 Concurso: **${latestDraw.contestNumber}**\n📅 Data: ${new Date(latestDraw.drawDate).toLocaleDateString('pt-BR')}\n\n**NÚMEROS SORTEADOS:**\n${latestDraw.drawnNumbers.map((n: number) => n.toString().padStart(2, '0')).join(' - ')}\n\nME MANDA SEUS NÚMEROS QUE EU CONFIRO SE VOCÊ ACERTOU!`
-      : `🎲 **Último Resultado - ${lottery.displayName}**\n\n🎯 Concurso: **${latestDraw.contestNumber}**\n📅 Data: ${new Date(latestDraw.drawDate).toLocaleDateString('pt-BR')}\n\n**Números Sorteados:**\n${latestDraw.drawnNumbers.map((n: number) => n.toString().padStart(2, '0')).join(' - ')}`;
+      ? `🎲 **ÚLTIMO RESULTADO - ${lottery.displayName}**\n\n🎯 Concurso: **${latestDraw.contestNumber}**\n📅 Data: ${new Date(latestDraw.drawDate).toLocaleDateString('pt-BR')}\n\n**NÚMEROS SORTEADOS:**\n${(latestDraw.drawnNumbers || []).map((n: number) => n.toString().padStart(2, '0')).join(' - ')}\n\nME MANDA SEUS NÚMEROS QUE EU CONFIRO SE VOCÊ ACERTOU!`
+      : `🎲 **Último Resultado - ${lottery.displayName}**\n\n🎯 Concurso: **${latestDraw.contestNumber}**\n📅 Data: ${new Date(latestDraw.drawDate).toLocaleDateString('pt-BR')}\n\n**Números Sorteados:**\n${(latestDraw.drawnNumbers || []).map((n: number) => n.toString().padStart(2, '0')).join(' - ')}`;
 
     return {
       reply,
