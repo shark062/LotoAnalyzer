@@ -515,8 +515,8 @@ export default function Generator() {
                       </div>
 
                       {/* Grid de números - Cartela organizada */}
-                      <div className="bg-white/5 rounded-2xl p-4 mb-4 border-2 border-white/10">
-                        <div className="grid grid-cols-10 gap-2">
+                      <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-2xl p-6 mb-4 border-2 border-white/20 shadow-xl">
+                        <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
                           {Array.from({ length: selectedLottery.totalNumbers }, (_, i) => {
                             const number = i + 1;
                             const isSelected = selectedNumbers.includes(number);
@@ -529,19 +529,21 @@ export default function Generator() {
                                 type="button"
                                 onClick={() => toggleNumber(number)}
                                 className={`
-                                  w-full aspect-square rounded-xl text-sm font-bold 
-                                  transition-all duration-200 border-2
+                                  relative w-full aspect-square rounded-2xl text-base font-bold 
+                                  transition-all duration-300 border-2 flex items-center justify-center
                                   ${isSelected
                                     ? temp === 'hot' 
-                                      ? 'bg-red-500 border-red-400 text-white shadow-lg shadow-red-500/50 scale-105' 
+                                      ? 'bg-red-500 border-red-400 text-white shadow-2xl shadow-red-500/60 scale-110 z-10' 
                                       : temp === 'warm' 
-                                      ? 'bg-yellow-500 border-yellow-400 text-white shadow-lg shadow-yellow-500/50 scale-105' 
-                                      : 'bg-blue-500 border-blue-400 text-white shadow-lg shadow-blue-500/50 scale-105'
-                                    : 'bg-white/5 border-white/20 text-white/80 hover:bg-white/10 hover:border-white/40 hover:scale-105'
+                                      ? 'bg-yellow-500 border-yellow-400 text-white shadow-2xl shadow-yellow-500/60 scale-110 z-10' 
+                                      : 'bg-blue-500 border-blue-400 text-white shadow-2xl shadow-blue-500/60 scale-110 z-10'
+                                    : 'bg-black/40 border-white/30 text-white/70 hover:bg-white/20 hover:border-white/50 hover:text-white hover:scale-105 hover:shadow-lg'
                                   }
                                 `}
                               >
-                                {number.toString().padStart(2, '0')}
+                                <span className={isSelected ? 'animate-pulse' : ''}>
+                                  {number.toString().padStart(2, '0')}
+                                </span>
                               </button>
                             );
                           })}
@@ -550,54 +552,66 @@ export default function Generator() {
 
                       {/* Números selecionados */}
                       {selectedNumbers.length > 0 && (
-                        <div className="space-y-3 border-t border-border/20 pt-3">
-                          <div className="bg-black/30 rounded-xl p-3">
-                            <p className="text-xs text-muted-foreground mb-2">Seus números:</p>
-                            <div className="flex flex-wrap gap-2">
+                        <div className="space-y-4 border-t-2 border-primary/30 pt-4 mt-4">
+                          <div className="bg-gradient-to-r from-black/50 to-black/30 rounded-2xl p-4 border border-primary/20">
+                            <div className="flex items-center justify-between mb-3">
+                              <p className="text-sm font-semibold text-primary flex items-center gap-2">
+                                <CheckCircle2 className="h-4 w-4" />
+                                Seus números selecionados:
+                              </p>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={clearSelection}
+                                className="text-xs text-muted-foreground hover:text-destructive"
+                              >
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                Limpar
+                              </Button>
+                            </div>
+                            <div className="flex flex-wrap gap-2.5">
                               {selectedNumbers.map((num) => {
                                 const freq = getNumberFrequency(num);
                                 const temp = freq?.temperature || 'cold';
                                 return (
-                                  <Badge
+                                  <div
                                     key={num}
-                                    className={`text-sm font-bold ${
-                                      temp === 'hot' ? 'bg-red-500 text-white' :
-                                      temp === 'warm' ? 'bg-yellow-500 text-white' :
-                                      'bg-blue-500 text-white'
-                                    }`}
+                                    className={`
+                                      px-4 py-2 rounded-xl text-base font-bold shadow-lg
+                                      ${temp === 'hot' ? 'bg-red-500 text-white shadow-red-500/50' :
+                                        temp === 'warm' ? 'bg-yellow-500 text-white shadow-yellow-500/50' :
+                                        'bg-blue-500 text-white shadow-blue-500/50'
+                                      }
+                                    `}
                                   >
                                     {num.toString().padStart(2, '0')}
-                                  </Badge>
+                                  </div>
                                 );
                               })}
                             </div>
                           </div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={clearSelection}
-                            className="w-full"
-                          >
-                            <Trash2 className="h-3 w-3 mr-2" />
-                            Limpar Seleção
-                          </Button>
                         </div>
                       )}
 
-                      {/* Legenda */}
-                      <div className="flex justify-center gap-4 text-xs mt-3 pt-3 border-t border-border/20">
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 rounded bg-red-500"></div>
-                          <span>Quentes</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 rounded bg-yellow-500"></div>
-                          <span>Mornos</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 rounded bg-blue-500"></div>
-                          <span>Frios</span>
+                      {/* Legenda com ícones */}
+                      <div className="bg-black/20 rounded-xl p-3 mt-4 border border-white/10">
+                        <p className="text-xs font-semibold text-center mb-2 text-muted-foreground">
+                          Legenda de Frequência:
+                        </p>
+                        <div className="flex justify-center gap-6 text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded-lg bg-red-500 shadow-lg shadow-red-500/50"></div>
+                            <span className="font-medium">🔥 Quentes</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded-lg bg-yellow-500 shadow-lg shadow-yellow-500/50"></div>
+                            <span className="font-medium">♨️ Mornos</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded-lg bg-blue-500 shadow-lg shadow-blue-500/50"></div>
+                            <span className="font-medium">❄️ Frios</span>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
