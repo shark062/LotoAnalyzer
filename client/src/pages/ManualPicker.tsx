@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useLotteryTypes, useNumberFrequencies } from "@/hooks/useLotteryData";
+import { useLotteryTypes, useNumberFrequencies, useLotteryDraws } from "@/hooks/useLotteryData";
 import { apiRequest } from "@/lib/queryClient";
 import { 
   Target, 
@@ -17,7 +17,9 @@ import {
   Save, 
   Download,
   Copy,
-  CheckCircle2
+  CheckCircle2,
+  History,
+  Trophy
 } from "lucide-react";
 
 export default function ManualPicker() {
@@ -27,6 +29,7 @@ export default function ManualPicker() {
 
   const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
   const { data: frequencies, isLoading: frequenciesLoading } = useNumberFrequencies(selectedLottery);
+  const { data: latestDraws, isLoading: drawsLoading } = useLotteryDraws(selectedLottery, 10);
 
   const selectedLotteryData = lotteryTypes?.find(l => l.id === selectedLottery);
 
@@ -399,6 +402,63 @@ export default function ManualPicker() {
             )}
           </div>
         </div>
+
+        {/* Últimos Resultados */}
+        {selectedLottery && latestDraws && latestDraws.length > 0 && (
+          <div className="mt-8">
+            <Card className="neon-border bg-black/20">
+              <CardHeader>
+                <CardTitle className="text-primary flex items-center">
+                  <History className="h-5 w-5 mr-2" />
+                  Últimos 10 Resultados - {selectedLotteryData?.displayName}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {latestDraws.map((draw, index) => (
+                    <div
+                      key={draw.contestNumber}
+                      className="flex items-center justify-between p-3 rounded-lg bg-black/30 border border-border/20 hover:border-primary/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        {index === 0 && (
+                          <Trophy className="h-5 w-5 text-yellow-500" />
+                        )}
+                        <div>
+                          <div className="text-sm font-semibold">
+                            Concurso {draw.contestNumber}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(draw.drawDate).toLocaleDateString('pt-BR')}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {draw.drawnNumbers?.sort((a, b) => a - b).map((num) => {
+                          const freq = getNumberFrequency(num);
+                          const temp = freq?.temperature || 'cold';
+                          
+                          return (
+                            <Badge
+                              key={num}
+                              className={`${
+                                temp === 'hot' ? 'bg-red-500/80' :
+                                temp === 'warm' ? 'bg-yellow-500/80' :
+                                'bg-blue-500/80'
+                              } text-white font-mono`}
+                            >
+                              {num.toString().padStart(2, '0')}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </main>
 
       {/* Developer Footer */}

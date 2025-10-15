@@ -859,33 +859,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(410).json({ error: "Chatbot descontinuado" });
   });
 
-  if (!false || typeof message !== 'string') {
-        return res.status(400).json({ error: "Mensagem inválida" });
-      }
-
-      // Configurar SSE (Server-Sent Events)
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-
-      const { libreChatEngine } = await import('./services/libreIntegration');
-
-      try {
-        for await (const chunk of libreChatEngine.streamChat(userId, message, persona, context)) {
-          res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
-        }
-        res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-      } catch (error: any) {
-        res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
-      }
-
-      res.end();
-    } catch (error: any) {
-      console.error("[STREAM ERROR]", error);
-      res.status(500).json({ error: error.message });
-    }
-  });
-
 
       if (!lottery1 || !lottery2) {
         return res.status(400).json({ error: "Both lottery1 and lottery2 parameters required" });
