@@ -349,18 +349,18 @@ export default function Generator() {
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-4">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold neon-text text-primary mb-2" data-testid="generator-title">
+        <div className="text-center mb-4">
+          <h2 className="text-2xl font-bold neon-text text-primary mb-1" data-testid="generator-title">
             Gerador Inteligente 🔮
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Gere jogos com estratégias baseadas em IA e análise estatística
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Generator Form */}
           <Card className="neon-border bg-black/20">
             <CardHeader>
@@ -369,8 +369,8 @@ export default function Generator() {
                 Configurações do Jogo
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <CardContent className="p-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 {/* Lottery Selection */}
                 <div>
                   <Label className="flex items-center text-sm font-medium text-foreground mb-2">
@@ -443,11 +443,11 @@ export default function Generator() {
 
                 {/* Strategy Selection */}
                 <div>
-                  <Label className="flex items-center text-sm font-medium text-foreground mb-4">
+                  <Label className="flex items-center text-sm font-medium text-foreground mb-2">
                     <Brain className="h-4 w-4 mr-2 text-secondary" />
                     Estratégia de Números
                   </Label>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {(['hot', 'cold', 'mixed', 'ai', 'manual'] as const).map((strategy) => {
                       const info = getStrategyInfo(strategy);
                       const isSelected = form.watch('strategy') === strategy;
@@ -462,8 +462,8 @@ export default function Generator() {
                           }`}
                           onClick={() => form.setValue('strategy', strategy)}
                         >
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between mb-2">
+                          <CardContent className="p-3">
+                            <div className="flex items-center justify-between mb-1">
                               <div className="flex items-center space-x-3">
                                 <div className={`p-2 rounded-full transition-colors ${
                                   isSelected ? 'bg-primary/30' : 'bg-background/50'
@@ -498,8 +498,8 @@ export default function Generator() {
                 {/* Manual Number Selection */}
                 {form.watch('strategy') === 'manual' && selectedLottery && (
                   <Card className="bg-black/20">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-4">
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between mb-3">
                         <h5 className="font-medium text-accent flex items-center">
                           <Target className="h-4 w-4 mr-2" />
                           Cartela - {selectedLottery.displayName}
@@ -515,8 +515,8 @@ export default function Generator() {
                       </div>
 
                       {/* Grid de números - Cartela organizada */}
-                      <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-2xl p-6 mb-4 border-2 border-white/20 shadow-xl">
-                        <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
+                      <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-2xl p-3 mb-3 border-2 border-white/20 shadow-xl">
+                        <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
                           {Array.from({ length: selectedLottery.totalNumbers }, (_, i) => {
                             const number = i + 1;
                             const isSelected = selectedNumbers.includes(number);
@@ -552,9 +552,9 @@ export default function Generator() {
 
                       {/* Números selecionados */}
                       {selectedNumbers.length > 0 && (
-                        <div className="space-y-4 border-t-2 border-primary/30 pt-4 mt-4">
-                          <div className="bg-gradient-to-r from-black/50 to-black/30 rounded-2xl p-4 border border-primary/20">
-                            <div className="flex items-center justify-between mb-3">
+                        <div className="space-y-2 border-t-2 border-primary/30 pt-3 mt-3">
+                          <div className="bg-gradient-to-r from-black/50 to-black/30 rounded-2xl p-3 border border-primary/20">
+                            <div className="flex items-center justify-between mb-2">
                               <p className="text-sm font-semibold text-primary flex items-center gap-2">
                                 <CheckCircle2 className="h-4 w-4" />
                                 Seus números selecionados:
@@ -595,8 +595,8 @@ export default function Generator() {
                       )}
 
                       {/* Legenda com ícones */}
-                      <div className="bg-black/20 rounded-xl p-3 mt-4 border border-white/10">
-                        <p className="text-xs font-semibold text-center mb-2 text-muted-foreground">
+                      <div className="bg-black/20 rounded-xl p-2 mt-3 border border-white/10">
+                        <p className="text-xs font-semibold text-center mb-1 text-muted-foreground">
                           Legenda de Frequência:
                         </p>
                         <div className="flex justify-center gap-6 text-xs">
@@ -621,8 +621,8 @@ export default function Generator() {
                 {/* Strategy Details */}
                 {form.watch('strategy') && form.watch('strategy') !== 'manual' && (
                   <Card className="bg-black/20">
-                    <CardContent className="p-4">
-                      <h5 className="font-medium text-accent mb-3 flex items-center">
+                    <CardContent className="p-3">
+                      <h5 className="font-medium text-accent mb-2 flex items-center">
                         <Sparkles className="h-4 w-4 mr-2" />
                         Como Funciona: {getStrategyInfo(form.watch('strategy')).name}
                       </h5>
@@ -719,7 +719,7 @@ export default function Generator() {
           </Card>
 
           {/* Generated Games */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Card className="neon-border bg-black/20">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-accent flex items-center">
@@ -741,15 +741,15 @@ export default function Generator() {
                   </div>
                 )}
               </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 p-4">
               {generatedGames.length > 0 ? (
                 generatedGames.map((game, index) => {
                   const strategyInfo = getStrategyInfo(game.strategy);
 
                   return (
                     <Card key={index} className="bg-black/20 border-border/50">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-3">
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center space-x-2">
                             <span className="text-sm font-medium text-primary">
                               Jogo #{index + 1}
@@ -810,8 +810,8 @@ export default function Generator() {
 
         {/* Quick Actions */}
         {generatedGames.length > 0 && (
-          <div className="text-center mt-8">
-            <div className="inline-flex gap-4">
+          <div className="text-center mt-4">
+            <div className="inline-flex gap-3">
               <Button
                 onClick={() => window.location.href = '/heat-map'}
                 variant="outline"
@@ -836,7 +836,7 @@ export default function Generator() {
       </main>
 
       {/* Developer Footer */}
-      <footer className="text-center py-4 mt-8 border-t border-border/20">
+      <footer className="text-center py-3 mt-4 border-t border-border/20">
         <p className="text-xs text-muted-foreground">
           powered by <span className="text-accent font-semibold">Shark062</span>
         </p>
