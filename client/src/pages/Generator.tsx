@@ -502,7 +502,7 @@ export default function Generator() {
                       <div className="flex items-center justify-between mb-4">
                         <h5 className="font-medium text-accent flex items-center">
                           <Target className="h-4 w-4 mr-2" />
-                          Selecione seus Números
+                          Cartela - {selectedLottery.displayName}
                         </h5>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="text-xs">
@@ -514,55 +514,63 @@ export default function Generator() {
                         </div>
                       </div>
 
-                      {/* Grid de números */}
-                      <div className="grid grid-cols-10 gap-1 mb-4">
-                        {Array.from({ length: selectedLottery.totalNumbers }, (_, i) => {
-                          const number = i + 1;
-                          const isSelected = selectedNumbers.includes(number);
-                          const freq = getNumberFrequency(number);
-                          const temp = freq?.temperature || 'cold';
+                      {/* Grid de números - Cartela organizada */}
+                      <div className="bg-white/5 rounded-2xl p-4 mb-4 border-2 border-white/10">
+                        <div className="grid grid-cols-10 gap-2">
+                          {Array.from({ length: selectedLottery.totalNumbers }, (_, i) => {
+                            const number = i + 1;
+                            const isSelected = selectedNumbers.includes(number);
+                            const freq = getNumberFrequency(number);
+                            const temp = freq?.temperature || 'cold';
 
-                          return (
-                            <button
-                              key={number}
-                              type="button"
-                              onClick={() => toggleNumber(number)}
-                              className={`w-full aspect-square rounded-lg text-xs font-bold transition-all ${
-                                isSelected
-                                  ? temp === 'hot' ? 'bg-red-500 text-white scale-110 shadow-lg' :
-                                    temp === 'warm' ? 'bg-yellow-500 text-white scale-110 shadow-lg' :
-                                    'bg-blue-500 text-white scale-110 shadow-lg'
-                                  : temp === 'hot' ? 'bg-red-500/20 text-red-400 border border-red-400/30 hover:bg-red-500/40' :
-                                    temp === 'warm' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 hover:bg-yellow-500/40' :
-                                    'bg-blue-500/20 text-blue-400 border border-blue-400/30 hover:bg-blue-500/40'
-                              }`}
-                            >
-                              {number.toString().padStart(2, '0')}
-                            </button>
-                          );
-                        })}
+                            return (
+                              <button
+                                key={number}
+                                type="button"
+                                onClick={() => toggleNumber(number)}
+                                className={`
+                                  w-full aspect-square rounded-xl text-sm font-bold 
+                                  transition-all duration-200 border-2
+                                  ${isSelected
+                                    ? temp === 'hot' 
+                                      ? 'bg-red-500 border-red-400 text-white shadow-lg shadow-red-500/50 scale-105' 
+                                      : temp === 'warm' 
+                                      ? 'bg-yellow-500 border-yellow-400 text-white shadow-lg shadow-yellow-500/50 scale-105' 
+                                      : 'bg-blue-500 border-blue-400 text-white shadow-lg shadow-blue-500/50 scale-105'
+                                    : 'bg-white/5 border-white/20 text-white/80 hover:bg-white/10 hover:border-white/40 hover:scale-105'
+                                  }
+                                `}
+                              >
+                                {number.toString().padStart(2, '0')}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
 
                       {/* Números selecionados */}
                       {selectedNumbers.length > 0 && (
                         <div className="space-y-3 border-t border-border/20 pt-3">
-                          <div className="flex flex-wrap gap-2">
-                            {selectedNumbers.map((num) => {
-                              const freq = getNumberFrequency(num);
-                              const temp = freq?.temperature || 'cold';
-                              return (
-                                <Badge
-                                  key={num}
-                                  className={`${
-                                    temp === 'hot' ? 'bg-red-500' :
-                                    temp === 'warm' ? 'bg-yellow-500' :
-                                    'bg-blue-500'
-                                  } text-white`}
-                                >
-                                  {num.toString().padStart(2, '0')}
-                                </Badge>
-                              );
-                            })}
+                          <div className="bg-black/30 rounded-xl p-3">
+                            <p className="text-xs text-muted-foreground mb-2">Seus números:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {selectedNumbers.map((num) => {
+                                const freq = getNumberFrequency(num);
+                                const temp = freq?.temperature || 'cold';
+                                return (
+                                  <Badge
+                                    key={num}
+                                    className={`text-sm font-bold ${
+                                      temp === 'hot' ? 'bg-red-500 text-white' :
+                                      temp === 'warm' ? 'bg-yellow-500 text-white' :
+                                      'bg-blue-500 text-white'
+                                    }`}
+                                  >
+                                    {num.toString().padStart(2, '0')}
+                                  </Badge>
+                                );
+                              })}
+                            </div>
                           </div>
                           <Button
                             type="button"
@@ -580,15 +588,15 @@ export default function Generator() {
                       {/* Legenda */}
                       <div className="flex justify-center gap-4 text-xs mt-3 pt-3 border-t border-border/20">
                         <div className="flex items-center gap-1">
-                          <Flame className="h-3 w-3 text-red-500" />
+                          <div className="w-3 h-3 rounded bg-red-500"></div>
                           <span>Quentes</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Sun className="h-3 w-3 text-yellow-500" />
+                          <div className="w-3 h-3 rounded bg-yellow-500"></div>
                           <span>Mornos</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Snowflake className="h-3 w-3 text-blue-500" />
+                          <div className="w-3 h-3 rounded bg-blue-500"></div>
                           <span>Frios</span>
                         </div>
                       </div>
