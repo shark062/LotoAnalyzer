@@ -63,15 +63,15 @@ export default function Generator() {
   const preselectedLottery = urlParams.get('lottery');
   const preselectedNumber = urlParams.get('number');
 
+  // Estado para selectedLotteryId - deve ser declarado ANTES de usar
+  const [selectedLotteryId, setSelectedLotteryId] = useState<string>('');
+
   // Data queries
   const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
   const { data: frequencies } = useQuery({
     queryKey: [`/api/lotteries/${selectedLotteryId}/frequency`],
     enabled: !!selectedLotteryId,
   });
-
-  // Estado para selectedLotteryId, inicializado vazio
-  const [selectedLotteryId, setSelectedLotteryId] = useState<string>('');
 
   // Form setup
   const form = useForm<GenerateGameForm>({
