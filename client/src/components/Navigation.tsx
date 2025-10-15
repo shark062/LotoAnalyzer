@@ -88,13 +88,6 @@ export default function Navigation() {
       icon: Info,
       emoji: "📚",
       description: "Guia completo das modalidades"
-    },
-    {
-      href: "/manual-picker",
-      label: "Escolher Dezenas",
-      icon: Target,
-      emoji: "🎯",
-      description: "Selecione suas dezenas manualmente"
     }
   ];
 

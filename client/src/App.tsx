@@ -12,9 +12,6 @@ import AIAnalysis from "@/pages/AIAnalysis";
 import AIMetrics from "@/pages/AIMetrics";
 import Information from "@/pages/Information";
 import AdvancedDashboard from "@/components/AdvancedDashboard";
-import ManualPicker from "@/pages/ManualPicker"; // Import the new page
-
-
 function Router() {
   return (
     <Switch>
@@ -26,7 +23,6 @@ function Router() {
       <Route path="/ai-metrics" component={AIMetrics} />
       <Route path="/information" component={Information} />
       <Route path="/advanced-dashboard" component={AdvancedDashboard} />
-      <Route path="/manual-picker" component={ManualPicker} /> {/* Add the new route */}
       <Route component={NotFound} />
     </Switch>
   );

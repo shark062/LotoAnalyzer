@@ -27,7 +27,9 @@ import {
   Share,
   RefreshCw,
   Target,
-  Settings
+  Settings,
+  CheckCircle2,
+  Trash2
 } from "lucide-react";
 import type { UserGame, LotteryType } from "@/types/lottery";
 import BettingPlatformIntegration from "@/components/BettingPlatformIntegration";
@@ -36,7 +38,7 @@ const generateGameSchema = z.object({
   lotteryId: z.string().min(1, "Selecione uma modalidade"),
   numbersCount: z.number().min(1, "Quantidade de dezenas inválida"),
   gamesCount: z.number().min(1, "Quantidade de jogos inválida").max(100, "Máximo 100 jogos"),
-  strategy: z.enum(['hot', 'cold', 'mixed', 'ai']),
+  strategy: z.enum(['hot', 'cold', 'mixed', 'ai', 'manual']),
 });
 
 type GenerateGameForm = z.infer<typeof generateGameSchema>;
@@ -52,6 +54,7 @@ export default function Generator() {
   const [location] = useLocation();
   const [generatedGames, setGeneratedGames] = useState<GeneratedGame[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -62,6 +65,10 @@ export default function Generator() {
 
   // Data queries
   const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
+  const { data: frequencies } = useQuery({
+    queryKey: [`/api/lotteries/${selectedLotteryId}/frequency`],
+    enabled: !!selectedLotteryId,
+  });
 
   // Estado para selectedLotteryId, inicializado vazio
   const [selectedLotteryId, setSelectedLotteryId] = useState<string>('');
@@ -133,6 +140,30 @@ export default function Generator() {
   });
 
   const onSubmit = async (data: GenerateGameForm) => {
+    // Modo manual: salvar números selecionados
+    if (data.strategy === 'manual') {
+      if (selectedNumbers.length < (selectedLottery?.minNumbers || 0)) {
+        toast({
+          title: "Números insuficientes",
+          description: `Selecione pelo menos ${selectedLottery?.minNumbers} números.`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setGeneratedGames([{
+        numbers: selectedNumbers,
+        strategy: 'manual'
+      }]);
+      
+      toast({
+        title: "Jogo criado!",
+        description: "Seus números foram selecionados com sucesso."
+      });
+      return;
+    }
+
+    // Modo automático: gerar jogos com IA
     setIsGenerating(true);
     try {
       await generateGamesMutation.mutateAsync(data);
@@ -140,6 +171,37 @@ export default function Generator() {
       setIsGenerating(false);
     }
   };
+
+  const getNumberFrequency = (number: number) => {
+    return frequencies?.find((f: any) => f.number === number);
+  };
+
+  const toggleNumber = (number: number) => {
+    if (!selectedLottery) return;
+
+    if (selectedNumbers.includes(number)) {
+      setSelectedNumbers(selectedNumbers.filter(n => n !== number));
+    } else {
+      if (selectedNumbers.length >= selectedLottery.maxNumbers) {
+        toast({
+          title: "Limite atingido",
+          description: `Você pode selecionar no máximo ${selectedLottery.maxNumbers} números.`,
+          variant: "destructive"
+        });
+        return;
+      }
+      setSelectedNumbers([...selectedNumbers, number].sort((a, b) => a - b));
+    }
+  };
+
+  const clearSelection = () => {
+    setSelectedNumbers([]);
+  };
+
+  // Limpar seleção ao trocar de modalidade
+  useEffect(() => {
+    setSelectedNumbers([]);
+  }, [selectedLotteryId]);
 
   const getStrategyInfo = (strategy: string) => {
     const strategies = {
@@ -170,6 +232,13 @@ export default function Generator() {
         name: 'IA Avançada',
         description: 'Análise inteligente com padrões',
         color: 'text-secondary',
+      },
+      manual: {
+        icon: <Target className="h-4 w-4 text-accent" />,
+        emoji: '🎯',
+        name: 'Escolha Manual',
+        description: 'Selecione seus próprios números',
+        color: 'text-accent',
       },
     };
     return strategies[strategy as keyof typeof strategies] || strategies.mixed;
@@ -379,7 +448,7 @@ export default function Generator() {
                     Estratégia de Números
                   </Label>
                   <div className="space-y-3">
-                    {(['hot', 'cold', 'mixed', 'ai'] as const).map((strategy) => {
+                    {(['hot', 'cold', 'mixed', 'ai', 'manual'] as const).map((strategy) => {
                       const info = getStrategyInfo(strategy);
                       const isSelected = form.watch('strategy') === strategy;
 
@@ -426,8 +495,109 @@ export default function Generator() {
                   </div>
                 </div>
 
+                {/* Manual Number Selection */}
+                {form.watch('strategy') === 'manual' && selectedLottery && (
+                  <Card className="bg-black/20">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <h5 className="font-medium text-accent flex items-center">
+                          <Target className="h-4 w-4 mr-2" />
+                          Selecione seus Números
+                        </h5>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {selectedNumbers.length} / {selectedLottery.minNumbers}-{selectedLottery.maxNumbers}
+                          </Badge>
+                          {selectedNumbers.length >= selectedLottery.minNumbers && (
+                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Grid de números */}
+                      <div className="grid grid-cols-10 gap-1 mb-4">
+                        {Array.from({ length: selectedLottery.totalNumbers }, (_, i) => {
+                          const number = i + 1;
+                          const isSelected = selectedNumbers.includes(number);
+                          const freq = getNumberFrequency(number);
+                          const temp = freq?.temperature || 'cold';
+
+                          return (
+                            <button
+                              key={number}
+                              type="button"
+                              onClick={() => toggleNumber(number)}
+                              className={`w-full aspect-square rounded-lg text-xs font-bold transition-all ${
+                                isSelected
+                                  ? temp === 'hot' ? 'bg-red-500 text-white scale-110 shadow-lg' :
+                                    temp === 'warm' ? 'bg-yellow-500 text-white scale-110 shadow-lg' :
+                                    'bg-blue-500 text-white scale-110 shadow-lg'
+                                  : temp === 'hot' ? 'bg-red-500/20 text-red-400 border border-red-400/30 hover:bg-red-500/40' :
+                                    temp === 'warm' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 hover:bg-yellow-500/40' :
+                                    'bg-blue-500/20 text-blue-400 border border-blue-400/30 hover:bg-blue-500/40'
+                              }`}
+                            >
+                              {number.toString().padStart(2, '0')}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Números selecionados */}
+                      {selectedNumbers.length > 0 && (
+                        <div className="space-y-3 border-t border-border/20 pt-3">
+                          <div className="flex flex-wrap gap-2">
+                            {selectedNumbers.map((num) => {
+                              const freq = getNumberFrequency(num);
+                              const temp = freq?.temperature || 'cold';
+                              return (
+                                <Badge
+                                  key={num}
+                                  className={`${
+                                    temp === 'hot' ? 'bg-red-500' :
+                                    temp === 'warm' ? 'bg-yellow-500' :
+                                    'bg-blue-500'
+                                  } text-white`}
+                                >
+                                  {num.toString().padStart(2, '0')}
+                                </Badge>
+                              );
+                            })}
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={clearSelection}
+                            className="w-full"
+                          >
+                            <Trash2 className="h-3 w-3 mr-2" />
+                            Limpar Seleção
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Legenda */}
+                      <div className="flex justify-center gap-4 text-xs mt-3 pt-3 border-t border-border/20">
+                        <div className="flex items-center gap-1">
+                          <Flame className="h-3 w-3 text-red-500" />
+                          <span>Quentes</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Sun className="h-3 w-3 text-yellow-500" />
+                          <span>Mornos</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Snowflake className="h-3 w-3 text-blue-500" />
+                          <span>Frios</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 {/* Strategy Details */}
-                {form.watch('strategy') && (
+                {form.watch('strategy') && form.watch('strategy') !== 'manual' && (
                   <Card className="bg-black/20">
                     <CardContent className="p-4">
                       <h5 className="font-medium text-accent mb-3 flex items-center">
