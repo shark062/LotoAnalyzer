@@ -62,7 +62,7 @@ export default function CelebrationAnimation({
       setConfetti([]); // Clear confetti when not visible
       setShow(false); // Ensure show is false when not visible
     }
-  }, [isVisible, onComplete]); // Dependency array includes isVisible and onComplete
+  }, [isVisible]); // Only isVisible as dependency to prevent infinite loop
 
   return (
     <AnimatePresence>
@@ -151,8 +151,7 @@ export default function CelebrationAnimation({
                 className="text-lg text-primary mb-6"
               >
                 Continue jogando com Shark Loterias!
-              </motion.d
-              >
+              </motion.p>
 
               <motion.div
                 initial={{ opacity: 0, scale: 0 }}
