@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ interface LotteryCardProps {
 }
 
 function SingleLotteryCard({ lottery }: LotteryCardProps) {
+  const [, setLocation] = useLocation();
   const { data: nextDraw, isLoading } = useNextDrawInfo(lottery.id);
 
   const getEmojiForLottery = (id: string) => {
@@ -128,7 +130,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
             size="sm"
             variant="outline"
             className="flex-1 text-xs hover:bg-transparent"
-            onClick={() => window.location.href = `/generator?lottery=${lottery.id}`}
+            onClick={() => setLocation(`/generator?lottery=${lottery.id}`)}
             data-testid={`quick-generate-${lottery.id}`}
           >
             <Zap className="h-3 w-3 mr-1" />
@@ -138,7 +140,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
             size="sm"
             variant="outline"
             className="flex-1 text-xs hover:bg-transparent"
-            onClick={() => window.location.href = `/heat-map?lottery=${lottery.id}`}
+            onClick={() => setLocation(`/heat-map?lottery=${lottery.id}`)}
             data-testid={`quick-heatmap-${lottery.id}`}
           >
             <Target className="h-3 w-3 mr-1" />
@@ -148,7 +150,7 @@ function SingleLotteryCard({ lottery }: LotteryCardProps) {
             size="sm"
             variant="outline"
             className="flex-1 text-xs hover:bg-transparent"
-            onClick={() => window.location.href = `/cart?lottery=${lottery.id}`}
+            onClick={() => setLocation(`/cart?lottery=${lottery.id}`)}
             data-testid={`quick-cart-${lottery.id}`}
           >
             <ShoppingCart className="h-3 w-3 mr-1" />
