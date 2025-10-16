@@ -180,7 +180,13 @@ export default function CyberpunkEffects({
 
   const settings = getIntensitySettings(currentIntensity);
 
-  return null;
+  return (
+    <div className={className}>
+      <MatrixRain active={settings.matrixActive} />
+      <ScanLines active={settings.scanActive} />
+      <GlitchOverlay active={settings.glitchActive} />
+    </div>
+  );
 }
 
 // Hook para controlar efeitos cyberpunk
