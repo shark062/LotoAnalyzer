@@ -20,11 +20,12 @@ export function log(message: string, source = "express") {
 }
 
 export async function setupVite(app: Express, server: Server) {
+  const isReplit = process.env.REPL_ID !== undefined;
   const serverOptions = {
     middlewareMode: true,
     hmr: { 
       server,
-      protocol: 'ws',
+      protocol: isReplit ? 'wss' : 'ws',
       host: '0.0.0.0',
     },
     host: '0.0.0.0',

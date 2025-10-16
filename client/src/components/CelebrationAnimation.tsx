@@ -23,13 +23,14 @@ export default function CelebrationAnimation({
   onComplete 
 }: CelebrationAnimationProps) {
   const [confetti, setConfetti] = useState<Confetti[]>([]);
+  const [show, setShow] = useState(false); // Added state for controlling visibility within the component
 
   useEffect(() => {
     if (isVisible) {
       // Generate confetti particles
       const particles: Confetti[] = [];
       const colors = ['#00FFFF', '#8B5CF6', '#10F554', '#FF10F0', '#FFD700'];
-      
+
       for (let i = 0; i < 100; i++) {
         particles.push({
           id: i,
@@ -44,23 +45,28 @@ export default function CelebrationAnimation({
           },
         });
       }
-      
+
       setConfetti(particles);
+      setShow(true); // Set show to true when visible
 
       // Auto-hide after 5 seconds
       const timer = setTimeout(() => {
-        onComplete?.();
+        setShow(false); // Hide the animation
+        if (onComplete) {
+          onComplete(); // Call the onComplete callback
+        }
       }, 5000);
 
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timer); // Cleanup the timer
     } else {
-      setConfetti([]);
+      setConfetti([]); // Clear confetti when not visible
+      setShow(false); // Ensure show is false when not visible
     }
-  }, [isVisible, onComplete]);
+  }, [isVisible, onComplete]); // Dependency array includes isVisible and onComplete
 
   return (
     <AnimatePresence>
-      {isVisible && (
+      {show && ( // Use the local 'show' state to control rendering
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -117,7 +123,7 @@ export default function CelebrationAnimation({
               >
                 🎉
               </motion.div>
-              
+
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -126,7 +132,7 @@ export default function CelebrationAnimation({
               >
                 PARABÉNS!
               </motion.h2>
-              
+
               {prizeAmount && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -137,7 +143,7 @@ export default function CelebrationAnimation({
                   Você ganhou {prizeAmount}!
                 </motion.div>
               )}
-              
+
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -145,8 +151,9 @@ export default function CelebrationAnimation({
                 className="text-lg text-primary mb-6"
               >
                 Continue jogando com Shark Loterias!
-              </motion.p>
-              
+              </motion.d
+              >
+
               <motion.div
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -162,7 +169,7 @@ export default function CelebrationAnimation({
                 >
                   🎰 Gerar Novos Jogos
                 </motion.button>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

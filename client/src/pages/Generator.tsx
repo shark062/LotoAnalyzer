@@ -63,8 +63,8 @@ export default function Generator() {
   const preselectedLottery = urlParams.get('lottery');
   const preselectedNumber = urlParams.get('number');
 
-  // Estado para selectedLotteryId - deve ser declarado ANTES de usar
-  const [selectedLotteryId, setSelectedLotteryId] = useState<string>('');
+  // Estado para selectedLotteryId - inicializa com valor da URL se disponível
+  const [selectedLotteryId, setSelectedLotteryId] = useState<string>(preselectedLottery || '');
 
   // Data queries
   const { data: lotteryTypes, isLoading: lotteriesLoading } = useLotteryTypes();
@@ -77,7 +77,7 @@ export default function Generator() {
   const form = useForm<GenerateGameForm>({
     resolver: zodResolver(generateGameSchema),
     defaultValues: {
-      lotteryId: preselectedLottery || '', // Inicia vazio
+      lotteryId: preselectedLottery || '',
       numbersCount: undefined,
       gamesCount: undefined,
       strategy: undefined,
@@ -87,12 +87,12 @@ export default function Generator() {
   // Atualiza o estado local selectedLotteryId sempre que o valor do formulário mudar
   useEffect(() => {
     const subscription = form.watch((value) => {
-      if (value.lotteryId !== undefined) {
+      if (value.lotteryId !== undefined && value.lotteryId !== selectedLotteryId) {
         setSelectedLotteryId(value.lotteryId);
       }
     });
     return () => subscription.unsubscribe();
-  }, [form.watch]);
+  }, [selectedLotteryId]);
 
 
   // Limpar campo dezenas quando trocar de modalidade
@@ -100,7 +100,7 @@ export default function Generator() {
     if (selectedLotteryId) {
       form.setValue('numbersCount', undefined as any);
     }
-  }, [selectedLotteryId, form]);
+  }, [selectedLotteryId]);
 
   const selectedLottery = lotteryTypes?.find(l => l.id === selectedLotteryId);
 
@@ -110,7 +110,7 @@ export default function Generator() {
       // Remove o preenchimento automático
       // form.setValue('numbersCount', selectedLottery.minNumbers);
     }
-  }, [selectedLottery, form]);
+  }, [selectedLottery]);
 
   // Generate games mutation
   const generateGamesMutation = useMutation({
