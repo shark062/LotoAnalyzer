@@ -514,9 +514,9 @@ export default function Generator() {
                         </div>
                       </div>
 
-                      {/* Grid de números - Cartela organizada */}
-                      <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-2xl p-3 mb-3 border-2 border-white/20 shadow-xl">
-                        <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+                      {/* Grid de números - Cartela estilo mapa de calor */}
+                      <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-3 mb-3 border border-white/20 shadow-lg">
+                        <div className="grid grid-cols-10 gap-1.5">
                           {Array.from({ length: selectedLottery.totalNumbers }, (_, i) => {
                             const number = i + 1;
                             const isSelected = selectedNumbers.includes(number);
@@ -529,19 +529,19 @@ export default function Generator() {
                                 type="button"
                                 onClick={() => toggleNumber(number)}
                                 className={`
-                                  relative w-full aspect-square rounded-2xl text-base font-bold 
-                                  transition-all duration-300 border-2 flex items-center justify-center
+                                  relative aspect-square rounded-lg text-xs font-bold 
+                                  transition-all duration-200 border flex items-center justify-center
                                   ${isSelected
                                     ? temp === 'hot' 
-                                      ? 'bg-red-500 border-red-400 text-white shadow-2xl shadow-red-500/60 scale-110 z-10' 
+                                      ? 'bg-red-500/90 border-red-400 text-white shadow-lg shadow-red-500/50 scale-110 z-10' 
                                       : temp === 'warm' 
-                                      ? 'bg-yellow-500 border-yellow-400 text-white shadow-2xl shadow-yellow-500/60 scale-110 z-10' 
-                                      : 'bg-blue-500 border-blue-400 text-white shadow-2xl shadow-blue-500/60 scale-110 z-10'
-                                    : 'bg-black/40 border-white/30 text-white/70 hover:bg-white/20 hover:border-white/50 hover:text-white hover:scale-105 hover:shadow-lg'
+                                      ? 'bg-yellow-500/90 border-yellow-400 text-white shadow-lg shadow-yellow-500/50 scale-110 z-10' 
+                                      : 'bg-blue-500/90 border-blue-400 text-white shadow-lg shadow-blue-500/50 scale-110 z-10'
+                                    : 'bg-black/40 border-white/20 text-white/70 hover:bg-white/20 hover:border-white/40 hover:text-white hover:scale-105'
                                   }
                                 `}
                               >
-                                <span className={isSelected ? 'animate-pulse' : ''}>
+                                <span className={isSelected ? 'font-extrabold' : ''}>
                                   {number.toString().padStart(2, '0')}
                                 </span>
                               </button>
@@ -552,11 +552,11 @@ export default function Generator() {
 
                       {/* Números selecionados */}
                       {selectedNumbers.length > 0 && (
-                        <div className="space-y-2 border-t-2 border-primary/30 pt-3 mt-3">
-                          <div className="bg-gradient-to-r from-black/50 to-black/30 rounded-2xl p-3 border border-primary/20">
+                        <div className="space-y-2 border-t border-primary/30 pt-2 mt-2">
+                          <div className="bg-gradient-to-r from-black/50 to-black/30 rounded-xl p-2.5 border border-primary/20">
                             <div className="flex items-center justify-between mb-2">
-                              <p className="text-sm font-semibold text-primary flex items-center gap-2">
-                                <CheckCircle2 className="h-4 w-4" />
+                              <p className="text-xs font-semibold text-primary flex items-center gap-1.5">
+                                <CheckCircle2 className="h-3.5 w-3.5" />
                                 Seus números selecionados:
                               </p>
                               <Button
@@ -564,13 +564,13 @@ export default function Generator() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={clearSelection}
-                                className="text-xs text-muted-foreground hover:text-destructive"
+                                className="h-6 text-xs text-muted-foreground hover:text-destructive px-2"
                               >
                                 <Trash2 className="h-3 w-3 mr-1" />
                                 Limpar
                               </Button>
                             </div>
-                            <div className="flex flex-wrap gap-2.5">
+                            <div className="flex flex-wrap gap-1.5">
                               {selectedNumbers.map((num) => {
                                 const freq = getNumberFrequency(num);
                                 const temp = freq?.temperature || 'cold';
@@ -578,10 +578,10 @@ export default function Generator() {
                                   <div
                                     key={num}
                                     className={`
-                                      px-4 py-2 rounded-xl text-base font-bold shadow-lg
-                                      ${temp === 'hot' ? 'bg-red-500 text-white shadow-red-500/50' :
-                                        temp === 'warm' ? 'bg-yellow-500 text-white shadow-yellow-500/50' :
-                                        'bg-blue-500 text-white shadow-blue-500/50'
+                                      px-2.5 py-1 rounded-lg text-sm font-bold shadow-md
+                                      ${temp === 'hot' ? 'bg-red-500 text-white shadow-red-500/40' :
+                                        temp === 'warm' ? 'bg-yellow-500 text-white shadow-yellow-500/40' :
+                                        'bg-blue-500 text-white shadow-blue-500/40'
                                       }
                                     `}
                                   >
@@ -594,22 +594,19 @@ export default function Generator() {
                         </div>
                       )}
 
-                      {/* Legenda com ícones */}
-                      <div className="bg-black/20 rounded-xl p-2 mt-3 border border-white/10">
-                        <p className="text-xs font-semibold text-center mb-1 text-muted-foreground">
-                          Legenda de Frequência:
-                        </p>
-                        <div className="flex justify-center gap-6 text-xs">
-                          <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded-lg bg-red-500 shadow-lg shadow-red-500/50"></div>
+                      {/* Legenda compacta */}
+                      <div className="bg-black/20 rounded-lg p-2 mt-2 border border-white/10">
+                        <div className="flex justify-center gap-4 text-xs">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded bg-red-500 shadow-sm shadow-red-500/50"></div>
                             <span className="font-medium">🔥 Quentes</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded-lg bg-yellow-500 shadow-lg shadow-yellow-500/50"></div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded bg-yellow-500 shadow-sm shadow-yellow-500/50"></div>
                             <span className="font-medium">♨️ Mornos</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded-lg bg-blue-500 shadow-lg shadow-blue-500/50"></div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded bg-blue-500 shadow-sm shadow-blue-500/50"></div>
                             <span className="font-medium">❄️ Frios</span>
                           </div>
                         </div>
