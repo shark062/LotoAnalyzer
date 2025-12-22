@@ -3,9 +3,16 @@ import { db } from "../db";
 import { lotteryDraws, numberFrequency } from "@shared/schema";
 import { eq, desc, and, isNotNull } from "drizzle-orm";
 
+// Inicializar OpenAI com variáveis de ambiente do Replit
 const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || '',
+  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || 'https://api.openai.com/v1',
+});
+
+// Log para debug
+console.log('🤖 IA Service initialized:', {
+  hasApiKey: !!process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+  baseUrl: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || 'default'
 });
 
 export interface PredictionResult {
