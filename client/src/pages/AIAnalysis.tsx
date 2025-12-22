@@ -81,8 +81,10 @@ interface GameResult {
 
 export default function AIAnalysis() {
   const [selectedLottery, setSelectedLottery] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'pattern' | 'prediction' | 'strategy'>('prediction');
+  const [activeTab, setActiveTab] = useState<'pattern' | 'prediction' | 'strategy' | 'real-prediction'>('prediction');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [realPrediction, setRealPrediction] = useState<any>(null);
+  const [isLoadingRealPrediction, setIsLoadingRealPrediction] = useState(false);
   const { toast } = useToast();
 
   // Data queries
@@ -165,6 +167,29 @@ export default function AIAnalysis() {
       await analyzeWithAI.mutateAsync(analysisType);
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const handleLoadRealPrediction = async () => {
+    if (!selectedLottery) return;
+    setIsLoadingRealPrediction(true);
+    try {
+      const response = await fetch(`/api/prediction/generate/${selectedLottery}`);
+      if (!response.ok) throw new Error('Failed to load prediction');
+      const data = await response.json();
+      setRealPrediction(data);
+      toast({
+        title: "Prognóstico Real Carregado",
+        description: `${data.lotteryName} - Confiança: ${data.confidence.toFixed(0)}%`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao Carregar Prognóstico",
+        description: "Tente novamente em alguns momentos.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingRealPrediction(false);
     }
   };
 
@@ -254,18 +279,24 @@ export default function AIAnalysis() {
           </Select>
 
           <div className="flex gap-2 flex-wrap">
-            {(['pattern', 'prediction', 'strategy'] as const).map((tab) => (
+            {(['pattern', 'prediction', 'strategy', 'real-prediction'] as const).map((tab) => (
               <Button
                 key={tab}
                 variant={activeTab === tab ? "default" : "outline"}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => {
+                  setActiveTab(tab);
+                  if (tab === 'real-prediction' && selectedLottery && !realPrediction) {
+                    handleLoadRealPrediction();
+                  }
+                }}
                 className={activeTab === tab ? "neon-border bg-primary/30 text-white border-primary" : "neon-border bg-black/20 text-white hover:bg-primary/20"}
                 data-testid={`tab-${tab}`}
               >
                 {tab === 'pattern' && <Eye className="h-4 w-4 mr-2" />}
                 {tab === 'prediction' && <Brain className="h-4 w-4 mr-2" />}
                 {tab === 'strategy' && <Target className="h-4 w-4 mr-2" />}
-                {tab === 'pattern' ? 'Padrões' : tab === 'prediction' ? 'Predições' : 'Estratégias'}
+                {tab === 'real-prediction' && <Sparkles className="h-4 w-4 mr-2" />}
+                {tab === 'pattern' ? 'Padrões' : tab === 'prediction' ? 'Predições' : tab === 'strategy' ? 'Estratégias' : 'Prognóstico Real'}
               </Button>
             ))}
           </div>
@@ -619,6 +650,90 @@ export default function AIAnalysis() {
                     <Target className="h-16 w-16 mx-auto mb-4 opacity-50" />
                     <p className="text-lg mb-2">Nenhuma estratégia disponível</p>
                     <p className="text-sm mb-6">Clique em "Nova Análise" para gerar recomendações</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Real Prediction */}
+          {activeTab === 'real-prediction' && (
+            <Card className="neon-border bg-black/20">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-primary flex items-center">
+                  <Sparkles className="h-5 w-5 mr-2" />
+                  Prognóstico Real com IA
+                </CardTitle>
+                <Button
+                  onClick={handleLoadRealPrediction}
+                  disabled={isLoadingRealPrediction || !selectedLottery}
+                  variant="outline"
+                  size="sm"
+                  data-testid="load-real-prediction-button"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingRealPrediction ? 'animate-spin' : ''}`} />
+                  {isLoadingRealPrediction ? 'Carregando...' : 'Gerar Prognóstico'}
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {isLoadingRealPrediction ? (
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="p-4 bg-black/20 rounded-lg animate-pulse h-16"></div>
+                    ))}
+                  </div>
+                ) : realPrediction ? (
+                  <div className="space-y-6">
+                    <Card className="bg-primary/10 border-primary/30">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-lg font-semibold text-primary">{realPrediction.lotteryName}</h4>
+                          <Badge className="bg-primary/30 text-primary">
+                            {realPrediction.confidence.toFixed(0)}% confiança
+                          </Badge>
+                        </div>
+                        
+                        <div className="bg-black/30 rounded-lg p-4 mb-4">
+                          <p className="text-xs text-muted-foreground mb-2">Números Prognósticos:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {realPrediction.predictedNumbers.map((num: number) => (
+                              <div
+                                key={num}
+                                className="w-10 h-10 rounded-full bg-primary/30 flex items-center justify-center text-primary font-bold hover-elevate"
+                              >
+                                {num}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <p className="text-sm text-muted-foreground mb-4">{realPrediction.reasoning}</p>
+
+                        {realPrediction.analysis && (
+                          <div className="space-y-2 text-sm">
+                            <p><span className="text-neon-green">Quentes:</span> {realPrediction.analysis.hotNumbers.join(", ")}</p>
+                            <p><span className="text-amber-500">Frios:</span> {realPrediction.analysis.coldNumbers.join(", ")}</p>
+                            <p><span className="text-accent">Atrasados:</span> {realPrediction.analysis.overdueSinceDraws.join(", ")}</p>
+                            <p className="text-muted-foreground text-xs mt-2">Método: {realPrediction.analysis.analysisMethod}</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Button
+                      onClick={() => window.location.href = `/generator?lottery=${selectedLottery}&numbers=${realPrediction.predictedNumbers.join(',')}`}
+                      className="w-full bg-primary/30 hover:bg-primary/40 text-white"
+                      data-testid="use-prediction-button"
+                    >
+                      <Zap className="h-4 w-4 mr-2" />
+                      Usar este Prognóstico
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center text-muted-foreground py-12">
+                    <Sparkles className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg mb-2">Análise com IA em Tempo Real</p>
+                    <p className="text-sm mb-6">Clique em "Gerar Prognóstico" para análise baseada em dados históricos reais</p>
                   </div>
                 )}
               </CardContent>

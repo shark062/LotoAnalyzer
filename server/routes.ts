@@ -1149,5 +1149,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🎯 PROGNÓSTICO REAL com IA - Dados Históricos Reais
+  app.get('/api/prediction/generate/:lotteryId', async (req, res) => {
+    try {
+      const { lotteryId } = req.params;
+      const { generateRealPrediction } = await import('./services/lotteryAnalysis');
+      
+      // Obter configuração da loteria
+      const lotteries = await storage.getLotteryTypes();
+      const lottery = lotteries.find(l => l.id === lotteryId);
+      
+      if (!lottery) {
+        return res.status(404).json({ error: 'Lottery not found' });
+      }
+
+      // Gerar prognóstico baseado em dados REAIS
+      const prediction = await generateRealPrediction(
+        lottery.id,
+        lottery.displayName,
+        lottery.totalNumbers,
+        lottery.maxNumbers
+      );
+
+      res.json(prediction);
+    } catch (error) {
+      console.error('Error generating prediction:', error);
+      res.status(500).json({ error: 'Failed to generate prediction' });
+    }
+  });
+
+  // Gerar prognósticos para todas as loterias
+  app.get('/api/prediction/all', async (req, res) => {
+    try {
+      const { generateMultiplePredictions } = await import('./services/lotteryAnalysis');
+      
+      const lotteries = await storage.getLotteryTypes();
+      const activeLotteries = lotteries.filter(l => l.isActive);
+
+      // Converter para formato esperado
+      const formattedLotteries = activeLotteries.map(l => ({
+        id: l.id,
+        displayName: l.displayName,
+        totalNumbers: l.totalNumbers,
+        maxNumbers: l.maxNumbers
+      }));
+
+      const predictions = await generateMultiplePredictions(formattedLotteries);
+      res.json({
+        timestamp: new Date().toISOString(),
+        predictions,
+        totalLotteries: predictions.length
+      });
+    } catch (error) {
+      console.error('Error generating multiple predictions:', error);
+      res.status(500).json({ error: 'Failed to generate predictions' });
+    }
+  });
+
   return httpServer;
 }
