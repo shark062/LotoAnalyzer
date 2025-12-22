@@ -29,36 +29,10 @@ function Router() {
 }
 
 function App() {
-  // Registrar Service Worker para modo offline
+  // Initialize app (Service Worker registration removed for standalone deployment)
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then((registration) => {
-            console.log('🦈 SW registrado com sucesso:', registration.scope);
-          })
-          .catch((error) => {
-            console.log('🦈 SW falhou ao registrar:', error);
-          });
-      });
-    }
-
-    // Handle online/offline status
-    const handleOnline = () => {
-      console.log('🌐 Aplicação online');
-    };
-
-    const handleOffline = () => {
-      console.log('📴 Aplicação offline - usando cache');
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
+    // App initialization
+    console.log('🦈 Shark Loterias initialized');
   }, []);
 
   return (

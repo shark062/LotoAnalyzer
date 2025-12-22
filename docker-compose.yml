@@ -1,31 +1,28 @@
-
 version: '3.8'
-
 services:
   app:
     build: .
     ports:
       - "5000:5000"
     environment:
-      - NODE_ENV=development
-      - PORT=5000
-      - DATABASE_URL=postgresql://postgres:password@db:5432/shark_loterias
+      NODE_ENV: production
+      DATABASE_URL: postgresql://shark:password@postgres:5432/shark_loterias
+      PORT: 5000
     depends_on:
-      - db
-    volumes:
-      - .:/app
-      - /app/node_modules
+      - postgres
+    restart: unless-stopped
 
-  db:
-    image: postgres:15
+  postgres:
+    image: postgres:15-alpine
     environment:
-      - POSTGRES_DB=shark_loterias
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: shark
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: shark_loterias
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
 
 volumes:
   postgres_data:

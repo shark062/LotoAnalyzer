@@ -37,7 +37,7 @@ import BettingPlatformIntegration from "@/components/BettingPlatformIntegration"
 const generateGameSchema = z.object({
   lotteryId: z.string().min(1, "Selecione uma modalidade"),
   numbersCount: z.number().min(1, "Quantidade de dezenas inválida"),
-  gamesCount: z.number().min(1, "Quantidade de jogos inválida").max(100, "Máximo 100 jogos"),
+  gamesCount: z.number().min(1, "Quantidade de jogos inválida"),
   strategy: z.enum(['hot', 'cold', 'mixed', 'ai', 'manual']),
 });
 

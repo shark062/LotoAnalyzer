@@ -280,21 +280,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Lottery configuration not found' });
       }
 
-      // Validate numbersCount is within allowed range
+      // Validate numbersCount is a valid number (allow any quantity)
       const parsedNumbersCount = parseInt(numbersCount);
-      if (isNaN(parsedNumbersCount)) {
-        return res.status(400).json({ error: 'numbersCount must be a valid number' });
-      }
-      if (parsedNumbersCount < config.minNumbers || parsedNumbersCount > config.maxNumbers) {
-        return res.status(400).json({ 
-          error: `numbersCount must be between ${config.minNumbers} and ${config.maxNumbers}` 
-        });
+      if (isNaN(parsedNumbersCount) || parsedNumbersCount < 1) {
+        return res.status(400).json({ error: 'numbersCount must be a positive number' });
       }
 
-      // Validate gamesCount
+      // Validate gamesCount (allow unlimited quantity)
       const parsedGamesCount = parseInt(gamesCount) || 1;
-      if (parsedGamesCount < 1 || parsedGamesCount > 50) {
-        return res.status(400).json({ error: 'gamesCount must be between 1 and 50' });
+      if (parsedGamesCount < 1) {
+        return res.status(400).json({ error: 'gamesCount must be at least 1' });
       }
 
       // Ensure guest user exists before generating games
