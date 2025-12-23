@@ -142,10 +142,10 @@ export default function Generator() {
   const onSubmit = async (data: GenerateGameForm) => {
     // Modo manual: salvar números selecionados
     if (data.strategy === 'manual') {
-      if (selectedNumbers.length < (selectedLottery?.minNumbers || 0)) {
+      if (selectedNumbers.length === 0) {
         toast({
-          title: "Números insuficientes",
-          description: `Selecione pelo menos ${selectedLottery?.minNumbers} números.`,
+          title: "Selecione números",
+          description: `Selecione pelo menos 1 número.`,
           variant: "destructive"
         });
         return;
@@ -182,14 +182,6 @@ export default function Generator() {
     if (selectedNumbers.includes(number)) {
       setSelectedNumbers(selectedNumbers.filter(n => n !== number));
     } else {
-      if (selectedNumbers.length >= selectedLottery.maxNumbers) {
-        toast({
-          title: "Limite atingido",
-          description: `Você pode selecionar no máximo ${selectedLottery.maxNumbers} números.`,
-          variant: "destructive"
-        });
-        return;
-      }
       setSelectedNumbers([...selectedNumbers, number].sort((a, b) => a - b));
     }
   };
@@ -391,7 +383,7 @@ export default function Generator() {
                     <SelectContent>
                       {lotteryTypes?.map((lottery) => (
                         <SelectItem key={lottery.id} value={lottery.id}>
-                          {lottery.displayName} ({lottery.minNumbers}-{lottery.maxNumbers} números)
+                          {lottery.displayName}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -410,18 +402,11 @@ export default function Generator() {
                     </Label>
                     <Input
                       type="number"
-                      min={selectedLottery?.minNumbers || 1}
-                      max={selectedLottery?.maxNumbers || 60}
                       placeholder=""
                       {...form.register('numbersCount', { valueAsNumber: true })}
                       className="bg-input border-border"
                       data-testid="numbers-count-input"
                     />
-                    {selectedLottery && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Mín: {selectedLottery.minNumbers}, Máx: {selectedLottery.maxNumbers}
-                      </p>
-                    )}
                   </div>
 
                   <div>
@@ -431,8 +416,6 @@ export default function Generator() {
                     </Label>
                     <Input
                       type="number"
-                      min={1}
-                      max={100}
                       placeholder=""
                       {...form.register('gamesCount', { valueAsNumber: true })}
                       className="bg-input border-border"
@@ -506,9 +489,9 @@ export default function Generator() {
                         </h5>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="text-xs">
-                            {selectedNumbers.length} / {selectedLottery.minNumbers}-{selectedLottery.maxNumbers}
+                            {selectedNumbers.length} números
                           </Badge>
-                          {selectedNumbers.length >= selectedLottery.minNumbers && (
+                          {selectedNumbers.length > 0 && (
                             <CheckCircle2 className="h-4 w-4 text-green-500" />
                           )}
                         </div>
