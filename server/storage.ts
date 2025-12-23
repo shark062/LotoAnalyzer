@@ -1085,6 +1085,56 @@ class Storage {
       throw new Error('Failed to save model version');
     }
   }
+
+  // ===== AUTH METHODS =====
+  async getUserByEmail(email: string): Promise<any> {
+    try {
+      if (!this.db) return null;
+      const result = await this.db
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.email, email))
+        .limit(1);
+      return result[0] || null;
+    } catch (error) {
+      console.error('Error fetching user by email:', error);
+      return null;
+    }
+  }
+
+  async createUser(user: any): Promise<any> {
+    try {
+      if (!this.db) throw new Error('Database not available');
+      const result = await this.db
+        .insert(schema.users)
+        .values({
+          email: user.email,
+          password: user.password,
+          firstName: user.firstName || user.email.split('@')[0],
+          role: user.role || 'FREE',
+        })
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
+  }
+
+  async updateUser(userId: string, updates: any): Promise<any> {
+    try {
+      if (!this.db) throw new Error('Database not available');
+      const result = await this.db
+        .update(schema.users)
+        .set(updates)
+        .where(eq(schema.users.id, userId))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  }
 }
 
 export const storage = new Storage();

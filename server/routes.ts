@@ -16,6 +16,9 @@ import { correlationAnalysis } from "./services/correlationAnalysis";
 // Import for chatbot
 import { chatbotService } from "./services/chatbotService";
 import { log } from "./utils"; // Assuming a log utility exists
+import { authService } from "./services/authService";
+import { authMiddleware, premiumOnly } from "./middleware/authMiddleware";
+import type { AuthRequest } from "./middleware/authMiddleware";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -36,6 +39,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || 'development'
     });
+  });
+
+  // ===== AUTHENTICATION ROUTES =====
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const { email, password, firstName } = req.body;
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password required' });
+      }
+
+      const { user, token } = await authService.registerUser(email, password, firstName);
+      res.json({ user, token });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Registration failed';
+      res.status(400).json({ message });
+    }
+  });
+
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password required' });
+      }
+
+      const { user, token } = await authService.loginUser(email, password);
+      res.json({ user, token });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Login failed';
+      res.status(401).json({ message });
+    }
+  });
+
+  app.post('/api/auth/upgrade', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: 'Not authenticated' });
+      }
+
+      const { months = 1 } = req.body;
+      const user = await authService.upgradeUserToPremium(req.user.userId, months);
+      res.json({ user });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Upgrade failed';
+      res.status(400).json({ message });
+    }
   });
 
   // Auth routes - Mock user for direct access (no login required)

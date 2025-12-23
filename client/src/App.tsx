@@ -12,10 +12,17 @@ import AIAnalysis from "@/pages/AIAnalysis";
 import AIMetrics from "@/pages/AIMetrics";
 import Information from "@/pages/Information";
 import AdvancedDashboard from "@/components/AdvancedDashboard";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import Premium from "@/pages/Premium";
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
+      <Route path="/premium" component={Premium} />
       <Route path="/heat-map" component={HeatMap} />
       <Route path="/generator" component={Generator} />
       <Route path="/results" component={Results} />
@@ -29,10 +36,20 @@ function Router() {
 }
 
 function App() {
-  // Initialize app (Service Worker registration removed for standalone deployment)
+  // Register Service Worker for PWA support
   useEffect(() => {
-    // App initialization
-    console.log('🦈 Shark Loterias initialized');
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/service-worker.js')
+        .then((registration) => {
+          console.log('✅ Service Worker registered:', registration);
+        })
+        .catch((error) => {
+          console.warn('Service Worker registration failed:', error);
+        });
+    }
+
+    console.log('🦈 Shark Loterias initialized - Premium Edition');
   }, []);
 
   return (

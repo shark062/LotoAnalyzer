@@ -34,6 +34,9 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  password: varchar("password"), // hashed password for JWT auth
+  role: varchar("role").default("FREE"), // "FREE" | "PREMIUM"
+  subscriptionExpires: timestamp("subscription_expires"), // for premium expiry
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
