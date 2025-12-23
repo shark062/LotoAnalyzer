@@ -32,6 +32,10 @@ export default function Results() {
   const [celebrationPrize, setCelebrationPrize] = useState<string>();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedLottery, setSelectedLottery] = useState<string>('');
+  const [filterDate, setFilterDate] = useState<string>('');
+  const [filterMonth, setFilterMonth] = useState<string>('');
+  const [filterYear, setFilterYear] = useState<string>('');
+  const [filterTime, setFilterTime] = useState<string>('');
 
   // Data queries
   const { data: lotteryTypes } = useLotteryTypes();
@@ -65,8 +69,37 @@ export default function Results() {
 
   // Filter games
   const filteredGames = userGames?.filter(game => {
+    // Filter by lottery
     if (filterLottery !== 'all' && game.lotteryId !== filterLottery) return false;
+    
+    // Filter by contest number
     if (searchContest && !game.contestNumber?.toString().includes(searchContest)) return false;
+    
+    // Filter by specific date (YYYY-MM-DD)
+    if (filterDate) {
+      const gameDate = new Date(game.createdAt).toLocaleDateString('pt-BR');
+      const filterDateBR = new Date(filterDate + 'T00:00:00').toLocaleDateString('pt-BR');
+      if (gameDate !== filterDateBR) return false;
+    }
+    
+    // Filter by month/year (MM/YYYY)
+    if (filterMonth) {
+      const gameMonth = new Date(game.createdAt).toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' });
+      if (gameMonth !== filterMonth) return false;
+    }
+    
+    // Filter by year (YYYY)
+    if (filterYear) {
+      const gameYear = new Date(game.createdAt).getFullYear().toString();
+      if (gameYear !== filterYear) return false;
+    }
+    
+    // Filter by time (HH:MM)
+    if (filterTime) {
+      const gameTime = new Date(game.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      if (gameTime !== filterTime) return false;
+    }
+    
     return true;
   }) || [];
 
@@ -313,39 +346,100 @@ export default function Results() {
         {/* Filters */}
         <Card className="bg-black/20 mb-6">
           <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <div className="flex items-center space-x-2">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 mb-3">
                 <Filter className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Filtros:</span>
               </div>
 
-              <Select value={filterLottery} onValueChange={setFilterLottery}>
-                <SelectTrigger className="w-48" data-testid="lottery-filter">
-                  <SelectValue placeholder="Todas as modalidades" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as modalidades</SelectItem>
-                  {lotteryTypes?.map((lottery) => (
-                    <SelectItem key={lottery.id} value={lottery.id}>
-                      {lottery.displayName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                {/* Lottery filter */}
+                <Select value={filterLottery} onValueChange={setFilterLottery}>
+                  <SelectTrigger data-testid="lottery-filter">
+                    <SelectValue placeholder="Modalidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as modalidades</SelectItem>
+                    {lotteryTypes?.map((lottery) => (
+                      <SelectItem key={lottery.id} value={lottery.id}>
+                        {lottery.displayName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-              <div className="flex items-center space-x-2">
-                <Search className="h-4 w-4 text-muted-foreground" />
+                {/* Contest search */}
+                <div className="flex items-center space-x-2">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Concurso..."
+                    value={searchContest}
+                    onChange={(e) => setSearchContest(e.target.value)}
+                    className="flex-1"
+                    data-testid="contest-search"
+                  />
+                </div>
+
+                {/* Date filter */}
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="date"
+                    value={filterDate}
+                    onChange={(e) => setFilterDate(e.target.value)}
+                    className="flex-1"
+                    placeholder="Dia"
+                    data-testid="date-filter"
+                  />
+                </div>
+
+                {/* Month/Year filter */}
                 <Input
-                  placeholder="Buscar por concurso..."
-                  value={searchContest}
-                  onChange={(e) => setSearchContest(e.target.value)}
-                  className="w-48"
-                  data-testid="contest-search"
+                  type="month"
+                  value={filterMonth ? filterMonth.split('/').reverse().join('-') : ''}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      const [year, month] = e.target.value.split('-');
+                      setFilterMonth(`${month}/${year}`);
+                    } else {
+                      setFilterMonth('');
+                    }
+                  }}
+                  placeholder="Mês/Ano"
+                  data-testid="month-filter"
+                />
+
+                {/* Time filter */}
+                <Input
+                  type="time"
+                  value={filterTime}
+                  onChange={(e) => setFilterTime(e.target.value)}
+                  placeholder="Hora"
+                  data-testid="time-filter"
                 />
               </div>
 
-              <div className="text-sm text-muted-foreground">
-                Mostrando {filteredGames.length} de {userGames?.length || 0} jogos
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Mostrando {filteredGames.length} de {userGames?.length || 0} jogos
+                </div>
+                {(filterDate || filterMonth || filterYear || filterTime || filterLottery !== 'all' || searchContest) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setFilterDate('');
+                      setFilterMonth('');
+                      setFilterYear('');
+                      setFilterTime('');
+                      setFilterLottery('all');
+                      setSearchContest('');
+                    }}
+                    data-testid="clear-filters-button"
+                  >
+                    Limpar filtros
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>
