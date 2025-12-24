@@ -306,7 +306,13 @@ export default function Generator() {
       
       // Aguardar um momento antes de limpar (importante para mobile)
       setTimeout(() => {
-        document.body.removeChild(link);
+        try {
+          if (document.body.contains(link)) {
+            document.body.removeChild(link);
+          }
+        } catch (e) {
+          console.warn('Erro ao remover elemento de download:', e);
+        }
         URL.revokeObjectURL(url);
       }, 100);
 

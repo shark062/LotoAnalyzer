@@ -44,16 +44,25 @@ function TypewriterText({ text, speed = 80, className = "" }: { text: string; sp
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const [previousText, setPreviousText] = useState("");
+  const [skipAnimation] = useState(() => {
+    // Skip animation on slow devices or mobile
+    return (navigator.deviceMemory ?? 8) < 4 || /Mobi|Android/.test(navigator.userAgent);
+  });
 
   // Reset quando o texto mudar
   useEffect(() => {
     if (text && text !== previousText) {
       setPreviousText(text);
-      setDisplayText("");
-      setCurrentIndex(0);
-      setIsTyping(true);
+      if (skipAnimation) {
+        setDisplayText(text);
+        setIsTyping(false);
+      } else {
+        setDisplayText("");
+        setCurrentIndex(0);
+        setIsTyping(true);
+      }
     }
-  }, [text, previousText]);
+  }, [text, previousText, skipAnimation]);
 
   // Efeito de digitação
   useEffect(() => {
@@ -225,9 +234,11 @@ export default function Home() {
     { id: 'loteca', name: 'Loteca', icon: '⚽', color: 'from-neon-green to-primary' },
   ];
 
+  const shouldUseCyberpunk = !(/Mobi|Android/.test(navigator.userAgent));
+
   return (
     <div className="min-h-screen bg-black text-foreground relative">
-
+      {shouldUseCyberpunk && <CyberpunkEffects />}
 
       <Navigation />
 
